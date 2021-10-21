@@ -1,3 +1,9 @@
+# R script for making the maps displayed here: https://twitter.com/sundellviz/status/1451087831867211783
+# Data on populated places for city labels: https://www.naturalearthdata.com/downloads/10m-cultural-vectors/
+# Municipality shapefiles: https://www.zensus2011.de/EN/Media/Background_material/Background_material_node.html
+# Religion data: https://www.regionalstatistik.de/genesis//online?operation=table&code=12111-06-01-5&bypass=true&levelindex=0&levelid=1634847300251#abreadcrumb
+
+
 rm(list=ls(all=TRUE))
 # Set working directory
 setwd("")
