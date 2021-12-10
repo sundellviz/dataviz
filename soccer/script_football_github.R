@@ -88,6 +88,7 @@ crs(all_p) <- crs.wgs84
 
 
 # Load population data, crop, reproject
+# The raster file has to be unpacked from the zip file in the directory.
 pop <- raster("popcount25.tif")
 crop <- extent(-12.2,47.3,27.6,71.6)
 popcrop <- crop(pop, crop)
