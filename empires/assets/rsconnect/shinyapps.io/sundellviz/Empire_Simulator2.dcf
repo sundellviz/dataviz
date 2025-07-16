@@ -1,0 +1,14 @@
+name: Empire_Simulator2
+title: Empire_Simulator2
+username:
+account: sundellviz
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6743337
+bundleId: 6204261
+url: https://sundellviz.shinyapps.io/Empire_Simulator2/
+when: 1660600282.33763
+lastSyncTime: 1660600282.33764
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app_tabs.R

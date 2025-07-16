@@ -1,0 +1,29 @@
+[general]
+creator=R package 'raster'
+created=2022-08-09 00:34:03
+[georeference]
+nrows=143
+ncols=208
+xmin=-6292835.25018238
+ymin=-2558211.04461234
+xmax=4107164.74981762
+ymax=4591788.95538766
+projection=+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0
+[data]
+datatype=FLT4S
+byteorder=little
+nbands=1
+bandorder=BIL
+categorical=TRUE
+ratnames=ID:scalerank:featurecla:min_zoom
+rattypes=integer:character:character:numeric
+ratvalues=1:0:Ocean:0
+minvalue=1
+maxvalue=1
+nodatavalue=-3.4e+38
+[legend]
+legendtype=
+values=
+color=
+[description]
+layername=layer

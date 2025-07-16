@@ -1,0 +1,13 @@
+name: assets
+title: assets
+username:
+account: sundellviz
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6743340
+bundleId: 6170946
+url: https://sundellviz.shinyapps.io/assets/
+when: 1659699125.69804
+lastSyncTime: 1659699125.69805
+asMultiple: FALSE
+asStatic: FALSE
