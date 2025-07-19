@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Prey-Predator-Plant Simulation with Uncapped Mutation (No Negatives), Turn Radius, Color Inheritance & Graphs</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; background: black; }
+    #toplists {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: rgba(0,0,0,0.8);
+      padding: 5px;
+      font-family: sans-serif;
+      font-size: 14px;
+      line-height: 1.2;
+      color: white;
+    }
+    #graphs {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      padding: 5px;
+      font-family: sans-serif;
+      color: white;
+    }
+    #graphs canvas { border: none; margin: 5px; }
+    .group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .group canvas { border: none; margin-right: 5px; }
+  </style>
+</head>
+<body>
+
+  <div id="infoBox" style="
+    position: absolute;
+    display: none;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 5px;
+    font-family: sans-serif;
+    font-size: 12px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 100;
+"></div>
+
+<button id="pauseBtn" style="
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+    padding: 5px 10px;
+    font-size: 14px;
+">Pause</button>
+
+  <canvas id="canvas"></canvas>
+  <div id="toplists"></div>
+  <div id="graphs">
+    <canvas id="graphPrey" width="300" height="100"></canvas>
+    <canvas id="graphPred" width="300" height="100"></canvas>
+  </div>
+  
+  <script>
+  // 1) Globals
+  let paused = false;
+  let selectedCreature = null;
+  const infoBox = document.getElementById('infoBox');
+
+  // 2) Canvas setup…
+  const canvas = document.getElementById('canvas');
+  const ctx    = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height= window.innerHeight;
+
+  // 3) Graph canvases
+  const graphPrey = document.getElementById("graphPrey");
+  const graphPred = document.getElementById("graphPred");
+  const ctxPrey   = graphPrey.getContext("2d");
+  const ctxPred   = graphPred.getContext("2d");
+
+  // 4) Pause button hookup
+  const pauseBtn = document.getElementById('pauseBtn');
+  pauseBtn.addEventListener('click', () => {
+    paused = !paused;
+    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+  });
+
+  // Utility: random delay between 0 and 2000ms.
+  function randomDelay() {
+    return Math.random() * 2000;
+  }
+
+  // Mutation settings.
+  const mutationProbability = 0.1; // 10% chance
+
+  // Allowed ranges for initial distribution.
+  const allowedRanges = {
+    prey: {
+      speed: [1, 3],
+      avoidanceRange: [50, 200],
+      seekingRange: [50, 200],
+      turning: [0, 1]  // Fraction of π: 1 means up to 180° turn per update.
+    },
+    predator: {
+      speed: [1, 3],
+      sightRange: [100, 300],
+      turning: [0, 1]
+    }
+  };
+
+  // Basic clamp (for math operations).
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  // Generate random color in HSL.
+  function randomColor() {
+    return {
+      h: Math.random() * 360,
+      s: 50 + Math.random() * 50,
+      l: 30 + Math.random() * 40
+    };
+  }
+
+  // Mutate color with a larger potential change.
+  function mutateColor(color) {
+    let newHue = (color.h + (Math.random() * 120 - 60)) % 360;
+    if (newHue < 0) newHue += 360;
+    let newSat = clamp(color.s + (Math.random() * 30 - 15), 0, 100);
+    let newLight = clamp(color.l + (Math.random() * 30 - 15), 0, 100);
+    return { h: newHue, s: newSat, l: newLight };
+  }
+
+  // Mutation function: adjust two numeric traits and mutate the color.
+  function mutateTraits(type, traits) {
+    let newTraits = Object.assign({}, traits);
+    if (Math.random() < mutationProbability) {
+      let keys = type === 'prey'
+        ? ['speed', 'avoidanceRange', 'seekingRange', 'turning']
+        : ['speed', 'sightRange', 'turning'];
+      let idxA = Math.floor(Math.random() * keys.length);
+      let keyA = keys[idxA];
+      let remaining = keys.slice();
+      remaining.splice(idxA, 1);
+      let keyB = remaining[Math.floor(Math.random() * remaining.length)];
+      let rangeA = allowedRanges[type][keyA];
+      let delta = Math.random() * 0.05 * (rangeA[1] - rangeA[0]);
+      if (newTraits[keyB] - delta < 0) delta = newTraits[keyB];
+      newTraits[keyA] += delta;
+      newTraits[keyB] -= delta;
+      if (traits.color) newTraits.color = mutateColor(traits.color);
+    }
+    for (let key in newTraits) {
+      if (typeof newTraits[key] === "number" && newTraits[key] < 0) {
+        newTraits[key] = 0;
+      }
+    }
+    return newTraits;
+  }
+
+  // Helper to rotate a vector by a given angle.
+  function rotateVector(vec, angle) {
+    return {
+      x: vec.x * Math.cos(angle) - vec.y * Math.sin(angle),
+      y: vec.x * Math.sin(angle) + vec.y * Math.cos(angle)
+    };
+  }
+
+  // Plant class.
+  class Plant {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.size = 2;
+    }
+    draw() {
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Animal class.
+  class Animal {
+    constructor(x, y, type, traits) {
+      this.x = x;
+      this.y = y;
+      this.type = type;
+      this.size = 8;
+      if (this.type === 'prey') {
+        if (traits && traits.speed !== undefined) {
+          Object.assign(this, traits);
+        } else {
+          let r = [Math.random(),Math.random(),Math.random(),Math.random()];
+          let sum = r.reduce((a,b)=>a+b,0);
+          this.speed = allowedRanges.prey.speed[0] + (allowedRanges.prey.speed[1]-allowedRanges.prey.speed[0])*(r[0]/sum);
+          this.avoidanceRange = allowedRanges.prey.avoidanceRange[0] + (allowedRanges.prey.avoidanceRange[1]-allowedRanges.prey.avoidanceRange[0])*(r[1]/sum);
+          this.seekingRange = allowedRanges.prey.seekingRange[0] + (allowedRanges.prey.seekingRange[1]-allowedRanges.prey.seekingRange[0])*(r[2]/sum);
+          this.turning = r[3]/sum;
+          this.color = randomColor();
+        }
+      } else {
+        if (traits && traits.speed !== undefined) {
+          Object.assign(this, traits);
+        } else {
+          let r = [Math.random(),Math.random(),Math.random()];
+          let sum = r.reduce((a,b)=>a+b,0);
+          this.speed = allowedRanges.predator.speed[0] + (allowedRanges.predator.speed[1]-allowedRanges.predator.speed[0])*(r[0]/sum);
+          this.sightRange = allowedRanges.predator.sightRange[0] + (allowedRanges.predator.sightRange[1]-allowedRanges.predator.sightRange[0])*(r[1]/sum);
+          this.turning = r[2]/sum;
+          this.color = randomColor();
+        }
+        this.deathChance = 0.2;
+      }
+      let angle = Math.random()*2*Math.PI;
+      this.vx = Math.cos(angle)*this.speed;
+      this.vy = Math.sin(angle)*this.speed;
+    }
+
+    move() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.x < -this.size) this.x = canvas.width + this.size;
+      if (this.x > canvas.width + this.size) this.x = -this.size;
+      if (this.y < -this.size) this.y = canvas.height + this.size;
+      if (this.y > canvas.height + this.size) this.y = -this.size;
+    }
+
+    draw() {
+      ctx.fillStyle = `hsl(${this.color.h.toFixed(0)},${this.color.s.toFixed(0)}%,${this.color.l.toFixed(0)}%)`;
+      if (this.type === 'prey') {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+        ctx.fill();
+        // eyes...
+        let ex = this.size/3, ey = this.size/3, er = this.size/4, pr = er/2;
+        ctx.fillStyle='white';
+        ctx.beginPath(); ctx.arc(this.x-ex,this.y-ey,er,0,2*Math.PI); ctx.fill();
+        ctx.beginPath(); ctx.arc(this.x+ex,this.y-ey,er,0,2*Math.PI); ctx.fill();
+        ctx.fillStyle='black';
+        ctx.beginPath(); ctx.arc(this.x-ex,this.y-ey,pr,0,2*Math.PI); ctx.fill();
+        ctx.beginPath(); ctx.arc(this.x+ex,this.y-ey,pr,0,2*Math.PI); ctx.fill();
+      } else {
+        ctx.save();
+        ctx.translate(this.x,this.y);
+        let ang = Math.atan2(this.vy,this.vx)+Math.PI/2;
+        ctx.rotate(ang);
+        ctx.beginPath();
+        ctx.moveTo(0,-this.size);
+        ctx.lineTo(-this.size,this.size);
+        ctx.lineTo(this.size,this.size);
+        ctx.closePath();
+        ctx.fill();
+        // eyes...
+        let er=this.size/3,pr=er/2,ex=this.size/2,ey=this.size/3;
+        ctx.fillStyle='white';
+        ctx.beginPath(); ctx.arc(-ex,-this.size+ey,er,0,2*Math.PI); ctx.fill();
+        ctx.beginPath(); ctx.arc(ex,-this.size+ey,er,0,2*Math.PI); ctx.fill();
+        ctx.fillStyle='black';
+        ctx.beginPath(); ctx.arc(-ex,-this.size+ey,pr,0,2*Math.PI); ctx.fill();
+        ctx.beginPath(); ctx.arc(ex,-this.size+ey,pr,0,2*Math.PI); ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+
+  // 5) Collections & initial spawn
+  let animals = [];
+  let plants  = [];
+  const initialPreyCount      = 150;
+  const initialPredatorCount  = 40;
+  const initialPlantCount     = 30;
+
+  for (let i=0;i<initialPreyCount;i++)
+    animals.push(new Animal(Math.random()*canvas.width,Math.random()*canvas.height,'prey'));
+  for (let i=0;i<initialPredatorCount;i++)
+    animals.push(new Animal(Math.random()*canvas.width,Math.random()*canvas.height,'predator'));
+  for (let i=0;i<initialPlantCount;i++)
+    plants.push(new Plant(Math.random()*canvas.width,Math.random()*canvas.height));
+
+  // 6) Behavior update
+  function updateBehavior() {
+    animals.forEach(animal => {
+      let oldSpeed = Math.hypot(animal.vx,animal.vy)||1;
+      let oldDir   = {x:animal.vx/oldSpeed,y:animal.vy/oldSpeed};
+
+      if (animal.type==='prey') {
+        let avoid={x:0,y:0},cnt=0;
+        animals.forEach(o=>{
+          if (o.type==='predator') {
+            let dx=animal.x-o.x,dy=animal.y-o.y,d=Math.hypot(dx,dy);
+            if(d<animal.avoidanceRange&&d>0){
+              avoid.x+=dx/d; avoid.y+=dy/d; cnt++;
+            }
+          }
+        });
+        if(cnt){ avoid.x/=cnt; avoid.y/=cnt; }
+        let attract={x:0,y:0},pc=0;
+        plants.forEach(p=>{
+          let dx=p.x-animal.x,dy=p.y-animal.y,d=Math.hypot(dx,dy);
+          if(d<animal.seekingRange&&d>0){
+            attract.x+=dx/d; attract.y+=dy/d; pc++;
+          }
+        });
+        if(pc){ attract.x/=pc; attract.y/=pc; }
+        let acc=0.5;
+        animal.vx+=acc*(avoid.x+attract.x);
+        animal.vy+=acc*(avoid.y+attract.y);
+
+      } else {
+        let target=null,closest=animal.sightRange;
+        animals.forEach(o=>{
+          if(o.type==='prey'){
+            let dx=o.x-animal.x,dy=o.y-animal.y,d=Math.hypot(dx,dy);
+            if(d<closest){closest=d; target=o;}
+          }
+        });
+        if(target){
+          let dx=target.x-animal.x,dy=target.y-animal.y,mag=Math.hypot(dx,dy);
+          if(mag>0){ dx/=mag; dy/=mag; }
+          let acc=0.5;
+          animal.vx+=acc*dx; animal.vy+=acc*dy;
+        }
+      }
+
+      // turning limit
+      let newSpeed = Math.hypot(animal.vx,animal.vy)||1;
+      let desired = {x:animal.vx/newSpeed,y:animal.vy/newSpeed};
+      let dot = clamp(oldDir.x*desired.x+oldDir.y*desired.y,-1,1);
+      let diff= Math.acos(dot);
+      let allow=animal.turning*Math.PI;
+      let final=desired;
+      if(diff>allow){
+        let sign = Math.sign(oldDir.x*desired.y-oldDir.y*desired.x);
+        final = rotateVector(oldDir, allow*sign);
+      }
+      let factor = 0.5 + ((Math.cos(diff)+1)/2)*1.5;
+      animal.vx = final.x*animal.speed*factor;
+      animal.vy = final.y*animal.speed*factor;
+    });
+  }
+
+  // 7) Helpers for stats
+  function getAnimalKey(a){
+    return a.type==='prey'
+      ? `prey:${a.speed.toFixed(1)}_${a.avoidanceRange.toFixed(1)}_${a.seekingRange.toFixed(1)}_${a.turning.toFixed(2)}`
+      : `pred:${a.speed.toFixed(1)}_${a.sightRange.toFixed(1)}_${a.turning.toFixed(2)}`;
+  }
+function drawAnimalMini(animal, miniCanvas){
+    let ctxMini = miniCanvas.getContext("2d");
+    ctxMini.clearRect(0,0,miniCanvas.width,miniCanvas.height);
+    ctxMini.fillStyle = `hsl(${animal.color.h.toFixed(0)}, ${animal.color.s.toFixed(0)}%, ${animal.color.l.toFixed(0)}%)`;
+    let cx = miniCanvas.width/2, cy = miniCanvas.height/2;
+    if(animal.type==='prey'){
+      ctxMini.beginPath(); ctxMini.arc(cx,cy,8,0,2*Math.PI); ctxMini.fill();
+      const ex=3, ey=3, er=2, pr=1;
+      ctxMini.fillStyle='white';
+      ctxMini.beginPath(); ctxMini.arc(cx-ex,cy-ey,er,0,2*Math.PI); ctxMini.fill();
+      ctxMini.beginPath(); ctxMini.arc(cx+ex,cy-ey,er,0,2*Math.PI); ctxMini.fill();
+      ctxMini.fillStyle='black';
+      ctxMini.beginPath(); ctxMini.arc(cx-ex,cy-ey,pr,0,2*Math.PI); ctxMini.fill();
+      ctxMini.beginPath(); ctxMini.arc(cx+ex,cy-ey,pr,0,2*Math.PI); ctxMini.fill();
+    } else {
+      ctxMini.save(); ctxMini.translate(cx,cy);
+      ctxMini.beginPath();
+      ctxMini.moveTo(0,-8); ctxMini.lineTo(-8,8); ctxMini.lineTo(8,8); ctxMini.closePath();
+      ctxMini.fill();
+      const ex=4, ey=3, er=2, pr=1;
+      ctxMini.fillStyle='white';
+      ctxMini.beginPath(); ctxMini.arc(-ex,-8+ey,er,0,2*Math.PI); ctxMini.fill();
+      ctxMini.beginPath(); ctxMini.arc(ex,-8+ey,er,0,2*Math.PI); ctxMini.fill();
+      ctxMini.fillStyle='black';
+      ctxMini.beginPath(); ctxMini.arc(-ex,-8+ey,pr,0,2*Math.PI); ctxMini.fill();
+      ctxMini.beginPath(); ctxMini.arc(ex,-8+ey,pr,0,2*Math.PI); ctxMini.fill();
+      ctxMini.restore();
+    }
+  }
+
+  function drawGraph(ctxG,history,label){
+    ctxG.clearRect(0,0,ctxG.canvas.width,ctxG.canvas.height);
+    ctxG.strokeStyle='purple';ctxG.lineWidth=2;
+    ctxG.strokeRect(0,0,ctxG.canvas.width,ctxG.canvas.height);
+    ctxG.strokeStyle='white';ctxG.lineWidth=2;
+    ctxG.beginPath();
+    let len=history.length;
+    if(!len)return;
+    let dx=ctxG.canvas.width/(maxHistoryLength-1), maxVal=200;
+    history.forEach((v,i)=>{
+      let x=i*dx, y=ctxG.canvas.height - (v/maxVal*ctxG.canvas.height);
+      i?ctxG.lineTo(x,y):ctxG.moveTo(x,y);
+    });
+    ctxG.stroke();
+    ctxG.fillStyle='white';ctxG.font="14px sans-serif";
+    ctxG.fillText(label+history[len-1],10,20);
+  }
+
+  function updateTopLists(){
+    let pg={},dg={};
+    animals.forEach(a=>{
+      let k=getAnimalKey(a);
+      if(a.type==='prey'){
+        pg[k]=pg[k]||{count:0,example:a};
+        pg[k].count++;
+      } else {
+        dg[k]=dg[k]||{count:0,example:a};
+        dg[k].count++;
+      }
+    });
+    let pa=Object.entries(pg).map(([k,v])=>({key:k,...v}))
+       .sort((a,b)=>b.count-a.count).slice(0,3);
+    let da=Object.entries(dg).map(([k,v])=>({key:k,...v}))
+       .sort((a,b)=>b.count-a.count).slice(0,3);
+    let cont=document.getElementById('toplists'); cont.innerHTML='';
+    let makeGroup=(arr,title)=>{
+      let div=document.createElement('div');
+      div.innerHTML=`<strong>${title}</strong><br>`;
+      arr.forEach(g=>{
+        let gd=document.createElement('div');gd.className='group';
+        let miniC=document.createElement('canvas');miniC.width=50;miniC.height=50;
+        drawAnimalMini(g.example,miniC);
+        let cnt=document.createElement('div');cnt.innerText=g.count;
+        let wrap=document.createElement('div');wrap.style.textAlign='center';
+        wrap.append(miniC,cnt);
+        let td=document.createElement('div');
+        td.innerHTML = g.example.type==='prey'
+          ? `Speed: ${g.example.speed.toFixed(2)}<br>Avoid: ${g.example.avoidanceRange.toFixed(2)}<br>Seek: ${g.example.seekingRange.toFixed(2)}<br>Turn: ${g.example.turning.toFixed(2)}`
+          : `Speed: ${g.example.speed.toFixed(2)}<br>Sight: ${g.example.sightRange.toFixed(2)}<br>Turn: ${g.example.turning.toFixed(2)}`;
+        gd.append(wrap,td);
+        div.appendChild(gd);
+      });
+      cont.appendChild(div);
+    };
+    makeGroup(pa,'Top 3 Prey:'); makeGroup(da,'Top 3 Predators:');
+  }
+
+  // 8) Main update loop
+  let preyHistory = [], predHistory = [], maxHistoryLength = 120;
+  function update() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(!paused) {
+      updateBehavior();
+      animals.forEach(a=>a.move());
+      // pred/prey interactions
+      animals.forEach(pred=>{
+        if(pred.type==='predator'){
+          animals.forEach(o=>{
+            if(o.type==='prey'&&!o.consumed){
+              let dx=pred.x-o.x,dy=pred.y-o.y,d=Math.hypot(dx,dy);
+              if(d<pred.size+o.size){ o.consumed=true;
+                if(Math.random()<0.5){
+                  let nt=mutateTraits('predator',{speed:pred.speed, sightRange:pred.sightRange, turning:pred.turning, color:pred.color});
+                  animals.push(new Animal(o.x,o.y,'predator',nt));
+                }
+              }
+            }
+          });
+        }
+      });
+      animals.forEach(pr=>{
+        if(pr.type==='prey'){
+          for(let i=plants.length-1;i>=0;i--){
+            let pl=plants[i],dx=pr.x-pl.x,dy=pr.y-pl.y,d=Math.hypot(dx,dy);
+            if(d<pr.size+pl.size){
+              plants.splice(i,1);
+              let offX=(Math.random()-0.5)*20,offY=(Math.random()-0.5)*20;
+              let nt=mutateTraits('prey',{speed:pr.speed, avoidanceRange:pr.avoidanceRange, seekingRange:pr.seekingRange, turning:pr.turning, color:pr.color});
+              animals.push(new Animal(pr.x+offX,pr.y+offY,'prey',nt));
+            }
+          }
+        }
+      });
+      animals = animals.filter(a=>!(a.type==='prey'&&a.consumed));
+
+      updateTopLists();
+      drawGraph(ctxPrey,preyHistory,"Prey: ");
+      drawGraph(ctxPred,predHistory,"Predators: ");
+    }
+
+    plants.forEach(p=>p.draw());
+    animals.forEach(a=>a.draw());
+
+    if(selectedCreature){
+      let rect=canvas.getBoundingClientRect();
+      infoBox.style.left = `${rect.left + selectedCreature.x + 10}px`;
+      infoBox.style.top  = `${rect.top  + selectedCreature.y + 10}px`;
+    }
+
+    requestAnimationFrame(update);
+  }
+
+  // 9) Population recorder, spawns, death
+  setInterval(()=>{
+    if(!paused){
+      let pc=animals.filter(a=>a.type==='prey').length;
+      let dc=animals.filter(a=>a.type==='predator').length;
+      preyHistory.push(pc); predHistory.push(dc);
+      if(preyHistory.length>maxHistoryLength) preyHistory.shift();
+      if(predHistory.length>maxHistoryLength) predHistory.shift();
+    }
+  },50);
+
+  function spawnPlants(){
+    if(!paused){
+      for(let i=0;i<20;i++){
+        plants.push(new Plant(Math.random()*canvas.width,Math.random()*canvas.height));
+      }
+    }
+    setTimeout(spawnPlants,randomDelay());
+  }
+
+  function checkPredatorDeath(){
+    if(!paused){
+      animals.forEach(a=>{
+        if(a.type==='predator'&&Math.random()<a.deathChance) a.toRemove=true;
+      });
+      animals=animals.filter(a=>!a.toRemove);
+    }
+    setTimeout(checkPredatorDeath,randomDelay());
+  }
+
+  setInterval(updateTopLists,500);
+  spawnPlants();
+  checkPredatorDeath();
+  update();
+
+  // 10) Click-to-select tooltip logic
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx   = e.clientX - rect.left;
+    const my   = e.clientY - rect.top;
+    selectedCreature = null;
+    for (let i = animals.length - 1; i >= 0; i--) {
+      const a = animals[i];
+      if (Math.hypot(a.x - mx, a.y - my) < a.size) {
+        selectedCreature = a;
+        break;
+      }
+    }
+    if (selectedCreature) {
+      let html = `<strong>${selectedCreature.type.toUpperCase()}</strong><br>
+                  Speed: ${selectedCreature.speed.toFixed(2)}<br>` +
+                 (selectedCreature.type==='prey'
+                   ? `Avoid: ${selectedCreature.avoidanceRange.toFixed(1)}<br>
+                      Seek:  ${selectedCreature.seekingRange.toFixed(1)}<br>`
+                   : `Sight: ${selectedCreature.sightRange.toFixed(1)}<br>`) +
+                 `Turn:  ${selectedCreature.turning.toFixed(2)}`;
+      infoBox.innerHTML = html;
+      infoBox.style.display = 'block';
+    } else {
+      infoBox.style.display = 'none';
+    }
+  });
+</script>
+
+</body>
+</html>
