@@ -376,7 +376,7 @@ function main() {
 
     // === NEW: create a vertical gradient from lighter blue (top) to darker blue (bottom)
   const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  bgGradient.addColorStop(0, '#003366'); // top – slightly lighter blue
+  bgGradient.addColorStop(0, '#0475c2'); // top – slightly lighter blue
   bgGradient.addColorStop(1, '#000022'); // bottom – deep, dark blue
 
   const creatures = createCreatures(setnumber, canvas.width, canvas.height);
