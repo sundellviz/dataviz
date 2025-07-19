@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolution Simulation</title>
+    <style>
+        canvas {
+            display: block;
+            background-color: black;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <b>Creature natural selection simulation | <a href=https://youtube.com/sundellviz>youtube.com/sundellviz</a></b><br>
+        <br>
+        Red: Heart. Blue: Claw. Green: Shell. White:Limb. If a claw touches a heart, the touched creature turns into a copy of the touching creature. If a claw touches a limb, it is cut off.
+                <div id="controls">
+            <button id="speedUpButton">Speed Up</button>
+            <button id="slowDownButton">Slow Down</button>
+
+            <label for="partsSlider">
+  Parts per creature: <span id="partsDisplay">10</span>
+</label>
+<input
+  type="range"
+  id="partsSlider"
+  min="1"
+  max="20"
+  step="1"
+  value="10"
+/>
+
+  <!-- … your slider and speed buttons … -->
+  <button id="resetButton">Reset Simulation</button>
+        </div>
+
+        <br>
+
+<canvas id="gameCanvas"></canvas>
+
+    </center>
+
+    <script src="main4.js"></script>
+</body>
+</html>
