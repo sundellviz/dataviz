@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Neural Network Agent Simulation with Fully Evolving Sensors</title>
+  <style>
+    canvas {
+      border: 1px solid #333;
+      display: block;
+      margin: auto;
+      background: #fafafa;
+    }
+    .button-container {
+      text-align: center;
+      margin: 10px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+
+      /* ➤ HUD styling */
+  #hud {
+    text-align: center;
+    margin-top: 8px;
+    font-family: sans-serif;
+    font-size: 18px;
+    color: #333;
+  }
+
+    /* ➤ Best‐of portraits styling */
+  #bestDisplay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+    margin-top: 8px;
+  }
+  #bestDisplay canvas {
+    border: 1px solid #333;
+    background: #fafafa;
+  }
+
+    /* ➤ Stats chart styling */
+  #statsCanvas {
+    border: 1px solid #333;
+    background: #fff;
+  }
+
+  </style>
+</head>
+<body>
+  <div class="button-container">
+  <button id="toggleSensorsButton">Hide Sensor Lines</button>
+  <button id="toggleAnimalsSpawnButton">Stop Spawning Animals</button>
+  <button id="togglePredatorsSpawnButton">Stop Spawning Predators</button>
+
+  <!-- ★ Starvation sliders ★ -->
+  <div style="margin-top:10px;">
+    <label>
+      Animal starvation:
+      <input type="range" id="animStarveSlider" min="1" max="30" value="10">
+      <span id="animStarveVal">10</span>s
+    </label>
+    &nbsp;&nbsp;
+    <label>
+      Predator starvation:
+      <input type="range" id="predStarveSlider" min="1" max="30" value="10">
+      <span id="predStarveVal">10</span>s
+    </label>
+
+    &nbsp;&nbsp;&nbsp;
+    <label>
+      Animal max-speed:
+      <input type="range" id="animSpeedSlider" min="0.1" max="10" step="0.1" value="2.2">
+      <span id="animSpeedVal">2.2</span>
+    </label>
+    &nbsp;&nbsp;
+    <label>
+      Predator max-speed:
+      <input type="range" id="predSpeedSlider" min="0.1" max="10" step="0.1" value="2.2">
+      <span id="predSpeedVal">2.2</span>
+    </label>
+
+  </div>
+</div>
+
+  <canvas id="canvas" width="1600" height="1200"></canvas>
+
+    <!-- ➤ HUD for live counts -->
+  <div id="hud"></div>
+
+  <!-- ➤ Best‐of portraits -->
+  <div id="bestDisplay">
+    <canvas id="bestCanvasAnimal" width="300" height="300"></canvas>
+
+    <!-- ➤ Stats chart -->
+    <canvas id="statsCanvas"        width="600" height="300"></canvas>
+
+    <canvas id="bestCanvasPredator" width="300" height="300"></canvas>
+  </div>
+
+
+<script>
+// Global toggles.
+let displaySensors = true;
+let spawnAnimals = true;
+let spawnPredators = true;
+
+// Global best agents to allow reproduction even if the current population is empty.
+let previousBestAnimal = null;
+let previousBestPredator = null;
+
+// ★ starvation timeouts (ms), adjustable via sliders
+let starvationTimeAnimal   = 10_000;
+let starvationTimePredator = 10_000;
+
+// ★ max-speed multipliers
+let maxSpeedAnimal   = 2.2;
+let maxSpeedPredator = 2.2;
+
+// Constants shared by both animals and predators.
+const SENSOR_BUDGET = 2800;      // Total length of all sensor lines.
+const SENSOR_FOV = Math.PI;      // 180° field-of-view.
+const ALLOWED_TARGETS = ["animals", "predators", "plants"]; // Sensors can react to all three.
+
+// ➤ Stats chart setup
+const statsCanvas = document.getElementById('statsCanvas');
+const statsCtx    = statsCanvas.getContext('2d');
+const statsHistory = [];
+const STATS_WINDOW = 60_000; // ms (60 s)
+
+// Helper functions.
+function normalizeAngle(angle) {
+  while (angle > Math.PI) angle -= 2 * Math.PI;
+  while (angle < -Math.PI) angle += 2 * Math.PI;
+  return angle;
+}
+function randomInRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
+function getRandomChoice(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// Neural Network class.
+class NeuralNetwork {
+  constructor(inputSize, hiddenSize, outputSize) {
+    this.inputSize = inputSize;
+    this.hiddenSize = hiddenSize;
+    this.outputSize = outputSize;
+    this.weightsIH = [];
+    for (let i = 0; i < inputSize; i++) {
+      this.weightsIH[i] = [];
+      for (let j = 0; j < hiddenSize; j++) {
+        this.weightsIH[i][j] = randomInRange(-1, 1);
+      }
+    }
+    this.weightsHO = [];
+    for (let i = 0; i < hiddenSize; i++) {
+      this.weightsHO[i] = [];
+      for (let j = 0; j < outputSize; j++) {
+        this.weightsHO[i][j] = randomInRange(-1, 1);
+      }
+    }
+    this.biasH = [];
+    for (let i = 0; i < hiddenSize; i++) {
+      this.biasH[i] = randomInRange(-1, 1);
+    }
+    this.biasO = [];
+    for (let i = 0; i < outputSize; i++) {
+      this.biasO[i] = randomInRange(-1, 1);
+    }
+  }
+  
+  sigmoid(x) {
+    return 1 / (1 + Math.exp(-x));
+  }
+  
+  tanh(x) {
+    return Math.tanh(x);
+  }
+  
+  activate(input) {
+    let hidden = [];
+    for (let i = 0; i < this.hiddenSize; i++) {
+      let sum = 0;
+      for (let j = 0; j < this.inputSize; j++) {
+        sum += input[j] * this.weightsIH[j][i];
+      }
+      sum += this.biasH[i];
+      hidden[i] = this.sigmoid(sum);
+    }
+    
+    let output = [];
+    for (let i = 0; i < this.outputSize; i++) {
+      let sum = 0;
+      for (let j = 0; j < this.hiddenSize; j++) {
+        sum += hidden[j] * this.weightsHO[j][i];
+      }
+      sum += this.biasO[i];
+      output[i] = this.tanh(sum);
+    }
+    return output;
+  }
+  
+  copy() {
+    let nn = new NeuralNetwork(this.inputSize, this.hiddenSize, this.outputSize);
+    for (let i = 0; i < this.inputSize; i++) {
+      for (let j = 0; j < this.hiddenSize; j++) {
+        nn.weightsIH[i][j] = this.weightsIH[i][j];
+      }
+    }
+    for (let i = 0; i < this.hiddenSize; i++) {
+      for (let j = 0; j < this.outputSize; j++) {
+        nn.weightsHO[i][j] = this.weightsHO[i][j];
+      }
+    }
+    nn.biasH = this.biasH.slice();
+    nn.biasO = this.biasO.slice();
+    return nn;
+  }
+  
+mutate(rate) {
+    // 10% chance of a large‐scale mutation
+    const isBig = Math.random() < 0.1;
+    // choose how big our step is
+    const mag = isBig ? 0.5 : 0.1;
+
+    function mutateVal(val) {
+      if (Math.random() < rate) {
+        // small vs. large random step
+        return val + randomInRange(-mag, mag);
+      }
+      return val;
+    }
+
+    // mutate input→hidden weights
+    for (let i = 0; i < this.inputSize; i++) {
+      for (let j = 0; j < this.hiddenSize; j++) {
+        this.weightsIH[i][j] = mutateVal(this.weightsIH[i][j]);
+      }
+    }
+    // mutate hidden→output weights
+    for (let i = 0; i < this.hiddenSize; i++) {
+      for (let j = 0; j < this.outputSize; j++) {
+        this.weightsHO[i][j] = mutateVal(this.weightsHO[i][j]);
+      }
+    }
+    // mutate biases
+    for (let i = 0; i < this.biasH.length; i++) {
+      this.biasH[i] = mutateVal(this.biasH[i]);
+    }
+    for (let i = 0; i < this.biasO.length; i++) {
+      this.biasO[i] = mutateVal(this.biasO[i]);
+    }
+  }
+  
+  toJSON() {
+    return {
+      inputSize: this.inputSize,
+      hiddenSize: this.hiddenSize,
+      outputSize: this.outputSize,
+      weightsIH: this.weightsIH,
+      weightsHO: this.weightsHO,
+      biasH: this.biasH,
+      biasO: this.biasO
+    };
+  }
+  
+  static fromJSON(data) {
+    let nn = new NeuralNetwork(data.inputSize, data.hiddenSize, data.outputSize);
+    nn.weightsIH = data.weightsIH;
+    nn.weightsHO = data.weightsHO;
+    nn.biasH = data.biasH;
+    nn.biasO = data.biasO;
+    return nn;
+  }
+}
+
+// When the number of sensors (and therefore inputs) changes, we adapt the brain.
+function adaptBrainToSensorCount(oldBrain, newInputSize) {
+  let newBrain = new NeuralNetwork(newInputSize, newInputSize, oldBrain.outputSize);
+  let minInput = Math.min(oldBrain.inputSize, newInputSize);
+  let minHidden = Math.min(oldBrain.hiddenSize, newBrain.hiddenSize);
+  for (let i = 0; i < minInput; i++) {
+    for (let j = 0; j < minHidden; j++) {
+      newBrain.weightsIH[i][j] = oldBrain.weightsIH[i][j];
+    }
+  }
+  let minOldHidden = Math.min(oldBrain.hiddenSize, newBrain.hiddenSize);
+  for (let i = 0; i < minOldHidden; i++) {
+    for (let j = 0; j < oldBrain.outputSize; j++) {
+      newBrain.weightsHO[i][j] = oldBrain.weightsHO[i][j];
+    }
+  }
+  for (let i = 0; i < minHidden; i++) {
+    newBrain.biasH[i] = oldBrain.biasH[i];
+  }
+  for (let i = 0; i < oldBrain.outputSize; i++) {
+    newBrain.biasO[i] = oldBrain.biasO[i];
+  }
+  return newBrain;
+}
+
+// Mutate sensor configuration while keeping the total sensor length constant.
+function mutateSensors(sensors, sensorBudget, sensorFOV, allowedTargets) {
+  // 10% chance to do a “big” sensor reconfiguration
+  const isBig     = Math.random() < 0.1;
+  const angleProb = isBig ? 0.5 : 0.1;
+  const targetProb= isBig ? 0.5 : 0.1;
+  const lengthProb= isBig ? 0.5 : 0.1;
+  const lengthMag = isBig ? sensorBudget * 0.5 : 20;
+
+  // copy sensors
+  let newSensors = sensors.map(s => ({
+    angleOffset: s.angleOffset,
+    length:       s.length,
+    target:       s.target
+  }));
+
+  // mutate each one
+  newSensors.forEach(sensor => {
+    // angle jitter
+    if (Math.random() < angleProb) {
+      sensor.angleOffset += randomInRange(-sensorFOV/2, sensorFOV/2);
+      sensor.angleOffset = Math.max(-sensorFOV/2,
+                            Math.min(sensorFOV/2, sensor.angleOffset));
+    }
+    // retarget
+    if (Math.random() < targetProb) {
+      sensor.target = getRandomChoice(allowedTargets);
+    }
+    // length change
+    if (Math.random() < lengthProb) {
+      sensor.length += randomInRange(-lengthMag, lengthMag);
+      sensor.length = Math.max(10, sensor.length);
+    }
+  });
+
+  // small chance to remove or add one (bigger if isBig)
+  if (newSensors.length > 1 && Math.random() < (isBig ? 0.2 : 0.05)) {
+    newSensors.splice(Math.floor(Math.random() * newSensors.length), 1);
+  }
+  if (Math.random() < (isBig ? 0.2 : 0.05)) {
+    newSensors.push({
+      angleOffset: randomInRange(-sensorFOV/2, sensorFOV/2),
+      length:       sensorBudget / (newSensors.length + 1),
+      target:       getRandomChoice(allowedTargets)
+    });
+  }
+
+  // normalize lengths back to budget
+  let total = newSensors.reduce((sum, s) => sum + s.length, 0);
+  newSensors.forEach(sensor => {
+    sensor.length = sensor.length / total * sensorBudget;
+  });
+
+  return newSensors;
+}
+
+// Partial copy mutation for neural networks.
+function partialCopyBrain(bestBrain) {
+  let copyRate = 0.10;
+  let newBrain = bestBrain.copy();
+  for (let i = 0; i < newBrain.inputSize; i++) {
+    for (let j = 0; j < newBrain.hiddenSize; j++) {
+      if (Math.random() < copyRate) {
+        newBrain.weightsIH[i][j] = randomInRange(-1, 1);
+      }
+    }
+  }
+  for (let i = 0; i < newBrain.hiddenSize; i++) {
+    for (let j = 0; j < newBrain.outputSize; j++) {
+      if (Math.random() < copyRate) {
+        newBrain.weightsHO[i][j] = randomInRange(-1, 1);
+      }
+    }
+  }
+  for (let i = 0; i < newBrain.biasH.length; i++) {
+    if (Math.random() < copyRate) {
+      newBrain.biasH[i] = randomInRange(-1, 1);
+    }
+  }
+  for (let i = 0; i < newBrain.biasO.length; i++) {
+    if (Math.random() < copyRate) {
+      newBrain.biasO[i] = randomInRange(-1, 1);
+    }
+  }
+  return newBrain;
+}
+
+// Base Agent class. Both Animal and Predator extend this.
+class Agent {
+  constructor(x, y, brain, generation, sensors) {
+    this.x = x;
+    this.y = y;
+    this.angle = randomInRange(0, Math.PI * 2);
+    this.generation = generation || 0;
+    this.sensorBudget = SENSOR_BUDGET;
+    this.sensorFOV = SENSOR_FOV;
+    this.allowedTargets = ALLOWED_TARGETS.slice();
+    // If sensors are provided, use them; otherwise generate a random configuration.
+    if (sensors) {
+      this.sensors = sensors;
+    } else {
+      // Random number of sensors between 5 and 15.
+      let count = Math.floor(randomInRange(5, 15));
+      let randomLengths = [];
+      for (let i = 0; i < count; i++) {
+        randomLengths.push(Math.random());
+      }
+      let sum = randomLengths.reduce((a, b) => a + b, 0);
+      this.sensors = [];
+      for (let i = 0; i < count; i++) {
+        let angleOffset = randomInRange(-this.sensorFOV/2, this.sensorFOV/2);
+        let target = getRandomChoice(this.allowedTargets);
+        let length = (randomLengths[i] / sum) * this.sensorBudget;
+        this.sensors.push({angleOffset, length, target});
+      }
+    }
+    // Build or adapt the neural network to match the number of sensors.
+    if (brain) {
+      if (brain.inputSize !== this.sensors.length) {
+        brain = adaptBrainToSensorCount(brain, this.sensors.length);
+      }
+      this.brain = brain;
+    } else {
+      this.brain = new NeuralNetwork(this.sensors.length, this.sensors.length, 2);
+    }
+  }
+  
+  update(animals, predators, plants) {
+    let sensorInputs = [];
+    // For each sensor, pick the target list based on sensor.target.
+    for (let sensor of this.sensors) {
+      let sensorAngle = this.angle + sensor.angleOffset;
+      let reading = 0;
+      let targets = [];
+      if (sensor.target === "animals") {
+        targets = animals;
+      } else if (sensor.target === "predators") {
+        targets = predators;
+      } else if (sensor.target === "plants") {
+        targets = plants;
+      }
+      for (let obj of targets) {
+        let dx = obj.x - this.x;
+        let dy = obj.y - this.y;
+        let distance = Math.hypot(dx, dy);
+        if (distance > sensor.length) continue;
+        let angleToObj = Math.atan2(dy, dx);
+        let diff = Math.abs(normalizeAngle(sensorAngle - angleToObj));
+        if (diff < 0.26) {
+          let value = 1 - (distance / sensor.length);
+          if (value > reading) reading = value;
+        }
+      }
+      sensorInputs.push(reading);
+
+  // ➊ store last readings
+  this.lastSensorReadings = sensorInputs.slice();
+
+    }
+    let outputs = this.brain.activate(sensorInputs);
+
+      // ➋ store last outputs
+  this.lastOutputs = outputs.slice();
+
+  
+    let turn = outputs[0];
+    let move = outputs[1];
+    this.angle += turn * 0.2;
+    
+
+    // choose species-specific max speed
+ const maxSp = (this instanceof Animal)
+                  ? maxSpeedAnimal
+                  : maxSpeedPredator;
+    this.speed = move * maxSp;
+
+
+
+    this.x += Math.cos(this.angle) * this.speed;
+    this.y += Math.sin(this.angle) * this.speed;
+    this.x = (this.x + canvas.width) % canvas.width;
+    this.y = (this.y + canvas.height) % canvas.height;
+  }
+  
+  drawSensors(ctx) {
+    // Draw sensor lines with color based on sensor target:
+    // "animals" => blue, "plants" => green, "predators" => red.
+    for (let sensor of this.sensors) {
+      let sensorAngle = this.angle + sensor.angleOffset;
+      let color;
+      if (sensor.target === "animals") color = 'blue';
+      else if (sensor.target === "plants") color = 'green';
+      else if (sensor.target === "predators") color = 'red';
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y);
+      ctx.lineTo(this.x + Math.cos(sensorAngle) * sensor.length, this.y + Math.sin(sensorAngle) * sensor.length);
+      ctx.stroke();
+    }
+  }
+}
+
+// ——— Replace your Animal class with this ———
+class Animal extends Agent {
+  constructor(x, y, brain, generation) {
+    super(x, y, brain, generation);
+
+    this.size         = 5;
+    this.lastMealTime = Date.now();
+
+    // ➤ FIXED SENSORS: 15 evenly-spaced, alternating plants/predators
+    const COUNT = 15;
+    const LEN   = this.sensorBudget / COUNT;
+    this.sensors = [];
+    for (let i = 0; i < COUNT; i++) {
+      const angleOffset = -this.sensorFOV/2 + i * (this.sensorFOV / (COUNT - 1));
+      // even index → predator, odd → plant
+      const target = (i % 2 === 0) ? "predators" : "plants";
+      this.sensors.push({ angleOffset, length: LEN, target });
+    }
+    // adapt brain to new sensor count
+    this.brain = adaptBrainToSensorCount(this.brain, this.sensors.length);
+  }
+
+  update(animals, predators, plants) { super.update(animals, predators, plants); }
+
+  draw(ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.beginPath();
+    ctx.moveTo(10, 0);
+    ctx.lineTo(-5, 5);
+    ctx.lineTo(-5, -5);
+    ctx.closePath();
+    ctx.fillStyle = 'blue';
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = 'black';
+    ctx.font = "10px sans-serif";
+    ctx.fillText(this.generation, this.x - 10, this.y - 10);
+
+    if (displaySensors) {
+      this.drawSensors(ctx);
+    }
+  }
+}
+
+// ——— And replace your Predator class with this ———
+class Predator extends Agent {
+  constructor(x, y, brain, generation) {
+    super(x, y, brain, generation);
+
+    this.size         = 6;
+    this.lastMealTime = Date.now();
+
+    // ➤ FIXED SENSORS: 15 evenly-spaced, all targeting animals
+    const COUNT = 15;
+    const LEN   = this.sensorBudget / COUNT;
+    this.sensors = [];
+    for (let i = 0; i < COUNT; i++) {
+      const angleOffset = -this.sensorFOV/2 + i * (this.sensorFOV / (COUNT - 1));
+      this.sensors.push({ angleOffset, length: LEN, target: "animals" });
+    }
+    // adapt brain to new sensor count
+    this.brain = adaptBrainToSensorCount(this.brain, this.sensors.length);
+  }
+
+  update(animals, predators, plants) { super.update(animals, predators, plants); }
+
+  draw(ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.beginPath();
+    ctx.moveTo(10, 0);
+    ctx.lineTo(-5, 5);
+    ctx.lineTo(-5, -5);
+    ctx.closePath();
+    ctx.fillStyle = 'red';
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = 'black';
+    ctx.font = "10px sans-serif";
+    ctx.fillText(this.generation, this.x - 10, this.y - 10);
+
+    if (displaySensors) {
+      this.drawSensors(ctx);
+    }
+  }
+}
+
+// Plant class.
+class Plant {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.size = 3;
+  }
+  
+  draw(ctx) {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = 'green';
+    ctx.fill();
+  }
+}
+
+// Setup canvas and simulation arrays.
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// ➤ New: best‐of canvases
+const bestAnimalCanvas   = document.getElementById('bestCanvasAnimal');
+const bestAnimalCtx      = bestAnimalCanvas.getContext('2d');
+const bestPredatorCanvas = document.getElementById('bestCanvasPredator');
+const bestPredatorCtx    = bestPredatorCanvas.getContext('2d');
+
+// sliders
+const animStarveSlider = document.getElementById('animStarveSlider');
+const animStarveVal    = document.getElementById('animStarveVal');
+const predStarveSlider = document.getElementById('predStarveSlider');
+const predStarveVal    = document.getElementById('predStarveVal');
+
+animStarveSlider.addEventListener('input', () => {
+  const sec = +animStarveSlider.value;
+  starvationTimeAnimal = sec * 1000;
+  animStarveVal.textContent = sec;
+});
+predStarveSlider.addEventListener('input', () => {
+  const sec = +predStarveSlider.value;
+  starvationTimePredator = sec * 1000;
+  predStarveVal.textContent = sec;
+});
+
+// ★ speed sliders ★
+const animSpeedSlider = document.getElementById('animSpeedSlider');
+const animSpeedVal    = document.getElementById('animSpeedVal');
+const predSpeedSlider = document.getElementById('predSpeedSlider');
+const predSpeedVal    = document.getElementById('predSpeedVal');
+
+animSpeedSlider.addEventListener('input', () => {
+  maxSpeedAnimal = parseFloat(animSpeedSlider.value);
+  animSpeedVal.textContent = maxSpeedAnimal.toFixed(1);
+});
+predSpeedSlider.addEventListener('input', () => {
+  maxSpeedPredator = parseFloat(predSpeedSlider.value);
+  predSpeedVal.textContent = maxSpeedPredator.toFixed(1);
+});
+
+let animals = [];
+let predators = [];
+let plants = [];
+
+// Initial populations.
+for (let i = 0; i < 5; i++) {
+  animals.push(new Animal(randomInRange(0, canvas.width), randomInRange(0, canvas.height)));
+}
+for (let i = 0; i < 3; i++) {
+  predators.push(new Predator(randomInRange(0, canvas.width), randomInRange(0, canvas.height)));
+}
+for (let i = 0; i < 50; i++) {
+  plants.push(new Plant(randomInRange(0, canvas.width), randomInRange(0, canvas.height)));
+}
+
+// Spawn totally random animals every 3 seconds if enabled.
+setInterval(() => {
+  if (spawnAnimals) {
+    animals.push(new Animal(
+      randomInRange(0, canvas.width),
+      randomInRange(0, canvas.height)
+    ));
+  }
+}, 3000);
+
+// Spawn totally random predators every 3 seconds if enabled.
+setInterval(() => {
+  if (spawnPredators) {
+    predators.push(new Predator(
+      randomInRange(0, canvas.width),
+      randomInRange(0, canvas.height)
+    ));
+  }
+}, 3000);
+
+// Spawn plants every 1/5 second.
+setInterval(() => {
+  plants.push(new Plant(randomInRange(0, canvas.width), randomInRange(0, canvas.height)));
+}, 200);
+
+// Main simulation loop.
+function update() {
+  // Update animals.
+  for (let animal of animals) {
+    animal.update(animals, predators, plants);
+    // Collision with plants: animal replicates.
+    for (let i = plants.length - 1; i >= 0; i--) {
+      let plant = plants[i];
+      let dx = plant.x - animal.x;
+      let dy = plant.y - animal.y;
+  if (Math.hypot(dx, dy) < animal.size + plant.size) {
+    // this animal eats one more plant
+    animal.generation++;
+
+    // create offspring with eat-count = 0
+    let childBrain = animal.brain.copy();
+    childBrain.mutate(0.1);
+    let childSensors = mutateSensors(animal.sensors, animal.sensorBudget, animal.sensorFOV, animal.allowedTargets);
+    childBrain = adaptBrainToSensorCount(childBrain, childSensors.length);
+    plants.splice(i, 1);
+    animal.lastMealTime = Date.now();
+    animals.push(new Animal(animal.x, animal.y, childBrain, 0, childSensors));
+
+      }
+    }
+  }
+  
+  // Update predators.
+  for (let predator of predators) {
+    predator.update(animals, predators, plants);
+    // Collision with animals: predator replicates and removes animal.
+    for (let i = animals.length - 1; i >= 0; i--) {
+      let prey = animals[i];
+      let dx = prey.x - predator.x;
+      let dy = prey.y - predator.y;
+      if (Math.hypot(dx, dy) < predator.size + prey.size) {
+    // this predator eats one more animal
+    predator.generation++;
+
+    // create offspring with eat-count = 0
+    let childBrain = predator.brain.copy();
+    childBrain.mutate(0.1);
+    let childSensors = mutateSensors(predator.sensors, predator.sensorBudget, predator.sensorFOV, predator.allowedTargets);
+    childBrain = adaptBrainToSensorCount(childBrain, childSensors.length);
+    predator.lastMealTime = Date.now();
+    animals.splice(i, 1);
+    predators.push(new Predator(predator.x, predator.y, childBrain, 0, childSensors));
+
+      }
+    }
+  }
+  
+// predators starve after adjustable timeout
+predators = predators.filter(p =>
+  (Date.now() - p.lastMealTime) < starvationTimePredator
+);
+// animals starve after adjustable timeout
+animals   = animals.filter(a =>
+  (Date.now() - a.lastMealTime) < starvationTimeAnimal
+);
+}
+
+
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let plant of plants) {
+    plant.draw(ctx);
+  }
+  for (let animal of animals) {
+    animal.draw(ctx);
+  }
+  for (let predator of predators) {
+    predator.draw(ctx);
+  }
+
+// ➤ Draw black circles around the current leaders
+  ctx.save();
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 3;
+  
+  // Leader Animal
+  if (animals.length > 0) {
+    let leaderA = animals.reduce((p, c) => c.generation > p.generation ? c : p);
+    ctx.beginPath();
+    ctx.arc(
+      leaderA.x,
+      leaderA.y,
+      leaderA.size + 6,    // a bit bigger than the animal
+      0,
+      Math.PI * 2
+    );
+    ctx.stroke();
+  }
+
+  // Leader Predator
+  if (predators.length > 0) {
+    let leaderP = predators.reduce((p, c) => c.generation > p.generation ? c : p);
+    ctx.beginPath();
+    ctx.arc(
+      leaderP.x,
+      leaderP.y,
+      leaderP.size + 6,    // a bit bigger than the predator
+      0,
+      Math.PI * 2
+    );
+    ctx.stroke();
+  }
+
+  ctx.restore();
+
+// ➤ update HUD counts
+  document.getElementById('hud').textContent =
+    `Plants: ${plants.length}   |   ` +
+    `Animals: ${animals.length}   |   ` +
+    `Predators: ${predators.length}`;
+
+// ➤ record & prune stats history
+  const now = Date.now();
+  statsHistory.push({
+    t:        now,
+    plants:   plants.length,
+    animals:  animals.length,
+    predators:predators.length
+  });
+  // drop anything older than STATS_WINDOW
+  while (statsHistory.length && statsHistory[0].t < now - STATS_WINDOW) {
+    statsHistory.shift();
+  }
+
+  // ➤ draw the live chart
+  drawStats();
+
+// update the two “best‐of” portraits
+updateBestDisplay();
+
+}
+
+function updateBestDisplay() {
+  function drawPortrait(ctx, canvas, agent, facingLeft) {
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    if (!agent) return;
+
+    const cx = facingLeft ? 50 : w - 50;
+    const cy = h / 2;
+    const baseAngle = facingLeft ? 0 : Math.PI;
+
+    // ➌ draw sensors, alpha ∝ lastSensorReadings[i]
+    for (let i = 0; i < agent.sensors.length; i++) {
+      const s = agent.sensors[i];
+      const read = agent.lastSensorReadings?.[i] ?? 0;
+      const a = baseAngle + s.angleOffset;
+
+      // color by target
+      let color = s.target === "plants"    ? 'green'
+                : s.target === "predators" ? 'red'
+                : 'blue';
+
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.2 + 0.8 * read;  // faint to full
+      ctx.lineWidth   = 2;
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(a) * s.length,
+                 cy + Math.sin(a) * s.length);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // ➍ draw body
+    ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(baseAngle);
+      ctx.beginPath();
+      ctx.moveTo(10, 0);
+      ctx.lineTo(-5, 5);
+      ctx.lineTo(-5, -5);
+      ctx.closePath();
+      ctx.fillStyle = agent instanceof Animal ? 'blue' : 'red';
+      ctx.fill();
+    ctx.restore();
+
+    // ➎ draw outputs beneath: turn & move
+    const [turn, move] = agent.lastOutputs || [0, 0];
+    ctx.fillStyle = '#000';
+    ctx.font = '14px sans-serif';
+    ctx.fillText(`⟳ ${(turn).toFixed(2)}`, 10, h - 40);
+    ctx.fillText(`⇨ ${(move).toFixed(2)}`, 10, h - 20);
+
+    //  label eat‐count
+    ctx.fillText(`Eat ${agent.generation}`, 10, h - 60);
+  }
+
+  // best animal (left portrait)
+  const bestA = animals.length
+              ? animals.reduce((p,c)=>c.generation>p.generation?c:p)
+              : null;
+  drawPortrait(bestAnimalCtx, bestAnimalCanvas, bestA, true);
+
+  // best predator (right portrait)
+  const bestP = predators.length
+               ? predators.reduce((p,c)=>c.generation>p.generation?c:p)
+               : null;
+  drawPortrait(bestPredatorCtx, bestPredatorCanvas, bestP, false);
+}
+
+function drawStats() {
+  const w = statsCanvas.width;
+  const h = statsCanvas.height;
+  const now = Date.now();
+
+  // clear
+  statsCtx.clearRect(0, 0, w, h);
+
+  // simple background grid (optional)
+  statsCtx.strokeStyle = '#eee';
+  statsCtx.beginPath();
+  for (let y = 0; y <= 250; y += 50) {
+    let yy = h - (y / 250) * h;
+    statsCtx.moveTo(0, yy);
+    statsCtx.lineTo(w, yy);
+  }
+  statsCtx.stroke();
+
+  // plot helper
+  function plot(color, key) {
+    statsCtx.strokeStyle = color;
+    statsCtx.beginPath();
+    statsHistory.forEach((pt, i) => {
+      let x = w * (pt.t - (now - STATS_WINDOW)) / STATS_WINDOW;
+      let y = h - (pt[key] / 250) * h;
+      if (i === 0) statsCtx.moveTo(x, y);
+      else         statsCtx.lineTo(x, y);
+    });
+    statsCtx.stroke();
+  }
+
+  // draw each series
+  plot('green', 'plants');
+  plot('blue',  'animals');
+  plot('red',   'predators');
+}
+
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+loop();
+
+
+
+// Button event listeners.
+document.getElementById("toggleSensorsButton").addEventListener("click", () => {
+  displaySensors = !displaySensors;
+  document.getElementById("toggleSensorsButton").textContent = displaySensors ? "Hide Sensor Lines" : "Show Sensor Lines";
+});
+document.getElementById("toggleAnimalsSpawnButton").addEventListener("click", () => {
+  spawnAnimals = !spawnAnimals;
+  document.getElementById("toggleAnimalsSpawnButton").textContent = spawnAnimals ? "Stop Spawning Animals" : "Start Spawning Animals";
+});
+document.getElementById("togglePredatorsSpawnButton").addEventListener("click", () => {
+  spawnPredators = !spawnPredators;
+  document.getElementById("togglePredatorsSpawnButton").textContent = spawnPredators ? "Stop Spawning Predators" : "Start Spawning Predators";
+});
+</script>
+</body>
+</html>
