@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Neural Stick Figure Simulation – Three Heats Evolution</title>
+  <!-- Matter.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <style>
+    body { margin: 0; position: relative; }
+    canvas { display: block; }
+    #controls {
+      position: absolute; top: 20px; right: 20px;
+      background: rgba(255,255,255,0.9);
+      padding: 10px; border: 1px solid #333;
+      font-family: Arial, sans-serif; font-size: 14px;
+      z-index: 20;
+    }
+    #controls div { margin-bottom: 8px; }
+    #controls label { display: block; margin-bottom: 2px; }
+    #scoreboard {
+      position: absolute; top: 20px; right: 20px;
+      background: rgba(240,240,240,0.9); padding: 10px;
+      border: 2px solid #333; font-family: Arial; font-size: 16px;
+      z-index: 10;
+    }
+    #nnCanvas {
+      position: absolute; top: 120px; right: 20px;
+      border: 1px solid #333; background: #fff; z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+   <!-- Scoreboard -->
+  <div id="scoreboard">Gen: 1, Heat: 1<br>Furthest: 0.0<br>Time Remaining: 30.0s</div>
+
+  <!-- Neural Network Viz -->
+  <canvas id="nnCanvas" width="300" height="200" style="position:absolute; top:120px; right:20px; z-index:10;"></canvas>
+
+  <!-- Sliders (moved below nnCanvas) -->
+  <div id="controls" style="
+      position:absolute;
+      top:340px;    /* 120px + 200px + 20px spacing */
+      right:20px;
+      z-index:20;
+      background:rgba(255,255,255,0.9);
+      padding:10px;
+      border:1px solid #333;
+      font-family:Arial,sans-serif;
+      font-size:14px;
+    ">
+    <div>
+      <label for="heats-slider">Number of Heats: <span id="heats-val">3</span></label>
+      <input id="heats-slider" type="range" min="1" max="10" value="3">
+    </div>
+    <div>
+      <label for="rate-slider">Mutation Rate: <span id="rate-val">0.10</span></label>
+      <input id="rate-slider" type="range" min="0" max="1" step="0.01" value="0.10">
+    </div>
+    <div>
+      <label for="strength-slider">Mutation Strength: <span id="strength-val">0.20</span></label>
+      <input id="strength-slider" type="range" min="0" max="1" step="0.01" value="0.20">
+    </div>
+  </div>
+
+  <script>
+    const { Engine, Render, Runner, Composite, Bodies, Body, Constraint, Events } = Matter;
+
+    // --- Mutable simulation parameters ---
+    let HEATS = 3;
+    let MUTATION_RATE = 0.1;
+    let MUTATION_STRENGTH = 0.2;
+
+    // --- Slider hookup ---
+    const heatsSlider    = document.getElementById('heats-slider');
+    const rateSlider     = document.getElementById('rate-slider');
+    const strengthSlider = document.getElementById('strength-slider');
+    const heatsVal       = document.getElementById('heats-val');
+    const rateVal        = document.getElementById('rate-val');
+    const strengthVal    = document.getElementById('strength-val');
+
+    function updateHeats() {
+      HEATS = parseInt(heatsSlider.value, 10);
+      heatsVal.textContent = HEATS;
+    }
+    function updateRate() {
+      MUTATION_RATE = parseFloat(rateSlider.value);
+      rateVal.textContent = MUTATION_RATE.toFixed(2);
+    }
+    function updateStrength() {
+      MUTATION_STRENGTH = parseFloat(strengthSlider.value);
+      strengthVal.textContent = MUTATION_STRENGTH.toFixed(2);
+    }
+
+    [heatsSlider, rateSlider, strengthSlider].forEach(slider => {
+      slider.addEventListener('input', () => {
+        updateHeats();
+        updateRate();
+        updateStrength();
+      });
+    });
+    // Initialize values
+    updateHeats();
+    updateRate();
+    updateStrength();
+
+    // --- Other constants ---
+    function normalizeAngle(a) {
+      while (a > Math.PI)  a -= 2*Math.PI;
+      while (a < -Math.PI) a += 2*Math.PI;
+      return a;
+    }
+
+    const scale      = 0.5;
+    const W          = 2600, H = 4000;
+    const NUM        = 20, SPACING = 150, BASE_G = 2800;
+    const ROUND_TIME = 30000;
+
+    // --- Simulation state ---
+    let generation    = 1,
+        heat          = 1,
+        lastRound     = Date.now(),
+        fitnessHistory;
+
+    // --- Matter.js setup ---
+    const engine = Engine.create();
+    engine.world.gravity.y = 1;
+    const render = Render.create({
+      element: document.body,
+      engine: engine,
+      canvas: document.getElementById('world'),
+      options: { width: W, height: H, wireframes: false, background: '#fafafa' }
+    });
+    Render.run(render);
+    Runner.run(Runner.create(), engine);
+
+    // --- Ground tracks ---
+    for (let i = 0; i < NUM; i++) {
+      const gy = BASE_G - i*SPACING;
+      Composite.add(engine.world, Bodies.rectangle(
+        W/2, gy, W, 20,
+        { isStatic: true, render:{ fillStyle:'#fff', strokeStyle:'#000', lineWidth:1 } }
+      ));
+    }
+
+    // --- Draw distance markers & eyes ---
+    Events.on(render, 'afterRender', () => {
+      const ctx = render.context;
+      // distance markers
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-over';
+      ctx.strokeStyle = 'black'; ctx.fillStyle = 'black'; ctx.lineWidth = 1;
+      ctx.font = '12px Arial';
+      for (let x = 0; x <= W; x += 100) {
+        for (let i = 0; i < NUM; i++) {
+          const gy = BASE_G - i*SPACING;
+          ctx.beginPath();
+          ctx.moveTo(x, gy-10);
+          ctx.lineTo(x, gy-30);
+          ctx.stroke();
+          ctx.fillText(x, x+2, gy-32);
+        }
+      }
+      ctx.restore();
+
+      // eyes
+      ctx.save();
+      figs.forEach(fig => {
+        const { position, angle } = fig.head;
+        const offs = [{x:-4*scale,y:-2*scale},{x:4*scale,y:-2*scale}];
+        ctx.fillStyle = 'black';
+        if (!fig.disabled) {
+          offs.forEach(o => {
+            const ex = position.x + o.x*Math.cos(angle) - o.y*Math.sin(angle);
+            const ey = position.y + o.x*Math.sin(angle) + o.y*Math.cos(angle);
+            ctx.beginPath();
+            ctx.arc(ex, ey, 2*scale, 0, 2*Math.PI);
+            ctx.fill();
+          });
+        } else {
+          ctx.font = '8px Arial';
+          offs.forEach(o => {
+            const ex = position.x + o.x*Math.cos(angle) - o.y*Math.sin(angle);
+            const ey = position.y + o.x*Math.sin(angle) + o.y*Math.cos(angle);
+            ctx.save();
+            ctx.translate(ex, ey);
+            ctx.rotate(angle);
+            ctx.fillText('X', 0, 0);
+            ctx.restore();
+          });
+        }
+      });
+      ctx.restore();
+    });
+
+    // --- StickFigure class ---
+    let figs = [];
+    class StickFigure {
+      constructor(x,y,net) {
+        this.groundY = y + 55*scale;
+        this.net     = net || new NeuralNetwork(14,14,4);
+        this.disabled = false;
+        this.disabledPos = 0;
+        this.build(x,y);
+      }
+      build(x,y) {
+        const tW=20*scale, tH=40*scale;
+        this.headRadius = 15*scale;
+        this.torso = Bodies.rectangle(x, y-20*scale, tW, tH, { friction:0.5, render:{ fillStyle:'#FF6347' } });
+        this.head = Body.create({ parts:[
+          Bodies.circle(x, y-50*scale, this.headRadius, { friction:0.5, render:{ fillStyle:'#FFD700' } }),
+          Bodies.circle(x-4*scale, y-52*scale, 2*scale, { isSensor:true }),
+          Bodies.circle(x+4*scale, y-52*scale, 2*scale, { isSensor:true })
+        ]});
+        const thighW=10*scale, thighH=30*scale, shinH=30*scale;
+        this.leftThigh  = Bodies.rectangle(x-10*scale, y+10*scale, thighW, thighH, { friction:0.5, render:{ fillStyle:'#4682B4' } });
+        this.leftShin   = Bodies.rectangle(x-10*scale, y+30*scale, thighW, shinH,  { friction:0.5, render:{ fillStyle:'#87CEEB' } });
+        this.rightThigh = Bodies.rectangle(x+10*scale, y+10*scale, thighW, thighH, { friction:0.5, render:{ fillStyle:'#4682B4' } });
+        this.rightShin  = Bodies.rectangle(x+10*scale, y+30*scale, thighW, shinH,  { friction:0.5, render:{ fillStyle:'#87CEEB' } });
+        const mk = (bA,pA,bB,pB) => Constraint.create({
+          bodyA:bA, pointA:pA, bodyB:bB, pointB:pB,
+          length:0, stiffness:1, render:{ visible:false }
+        });
+        this.cons = [
+          mk(this.torso,{x:0,y:-20*scale},  this.head,{x:0,y:0}),
+          mk(this.torso,{x:-10*scale,y:20*scale}, this.leftThigh,{x:0,y:-10*scale}),
+          mk(this.leftThigh,{x:0,y:10*scale}, this.leftShin,{x:0,y:-10*scale}),
+          mk(this.torso,{x:10*scale,y:20*scale}, this.rightThigh,{x:0,y:-10*scale}),
+          mk(this.rightThigh,{x:0,y:10*scale}, this.rightShin,{x:0,y:-10*scale})
+        ];
+        this.bodies = [ this.torso, this.head, this.leftThigh, this.leftShin, this.rightThigh, this.rightShin ];
+        Composite.add(engine.world, this.bodies.concat(this.cons));
+        this.joints = { leftKnee:this.cons[2], rightKnee:this.cons[4] };
+      }
+      getInputs() {
+        const ka = c => normalizeAngle(c.bodyB.angle - c.bodyA.angle)/Math.PI;
+        const lKA = ka(this.joints.leftKnee), rKA = ka(this.joints.rightKnee);
+        const hgt = b => (this.groundY - b.position.y)/(100*scale);
+        const tH = hgt(this.torso), hd = hgt(this.head);
+        const lt = hgt(this.leftThigh), rt = hgt(this.rightThigh);
+        const ls = hgt(this.leftShin), rs = hgt(this.rightShin);
+        const contact = b => (b.position.y + this.headRadius >= this.groundY - 5*scale) ? 1 : 0;
+        const lc = contact(this.leftShin), rc = contact(this.rightShin);
+        const torAng = normalizeAngle(this.torso.angle - Math.PI/2)/Math.PI;
+        const torVel = this.torso.angularVelocity/10;
+        const lkVel  = this.leftShin.angularVelocity/10;
+        const rkVel  = this.rightShin.angularVelocity/10;
+        return [ lKA, rKA, tH, lc, rc, hd, lt, rt, ls, rs, torAng, torVel, lkVel, rkVel ];
+      }
+      update() {
+        if (this.disabled) return;
+        const outs = this.net.forward(this.getInputs());
+        Body.setAngularVelocity(this.leftShin,  outs[0]);
+        Body.setAngularVelocity(this.rightShin, outs[1]);
+        Body.setAngularVelocity(this.leftThigh, outs[2]);
+        Body.setAngularVelocity(this.rightThigh,outs[3]);
+        [this.joints.leftKnee,this.joints.rightKnee].forEach(c=>{
+          const rel = normalizeAngle(c.bodyB.angle - c.bodyA.angle);
+          if (rel < 0.2 && c.bodyB.angularVelocity < 0) Body.setAngularVelocity(c.bodyB, 0);
+          if (rel > 1.2 && c.bodyB.angularVelocity > 0) Body.setAngularVelocity(c.bodyB, 0);
+        });
+        if (this.head.position.y + this.headRadius >= this.groundY - 10) {
+          this.disabled = true;
+          this.disabledPos = this.torso.position.x;
+        }
+      }
+      fitness() {
+        return this.disabled ? this.disabledPos : this.torso.position.x;
+      }
+      reset(x,y) {
+        this.disabled = false;
+        this.disabledPos = 0;
+        this.bodies.concat(this.cons).forEach(o => Composite.remove(engine.world, o));
+        this.build(x,y);
+      }
+    }
+
+    // --- NeuralNetwork class ---
+    class NeuralNetwork {
+      constructor(I,H,O) {
+        this.I=I; this.H=H; this.O=O;
+        this.w1=Array.from({length:H}, ()=>Array.from({length:I}, ()=>Math.random()*2-1));
+        this.b1=Array.from({length:H}, ()=>Math.random()*2-1);
+        this.w2=Array.from({length:O}, ()=>Array.from({length:H}, ()=>Math.random()*2-1));
+        this.b2=Array.from({length:O}, ()=>Math.random()*2-1);
+      }
+      tanh(x){ return Math.tanh(x); }
+      forward(inps){
+        this._lastIn = inps;
+        this._lastH = this.b1.map((b,i) =>
+          this.tanh(b + inps.reduce((s,v,j)=>s + this.w1[i][j]*v,0))
+        );
+        this._lastO = this.b2.map((b,i) =>
+          this.tanh(b + this._lastH.reduce((s,v,j)=>s + this.w2[i][j]*v,0))
+        );
+        return this._lastO;
+      }
+      computeActivations(inps){
+        this.forward(inps);
+        return { input:this._lastIn, hidden:this._lastH, output:this._lastO };
+      }
+      copyAndMutate(mr=0.15,ms=0.05){
+        const c = new NeuralNetwork(this.I,this.H,this.O);
+        for (let i=0;i<this.H;i++){
+          for (let j=0;j<this.I;j++){
+            c.w1[i][j] = this.w1[i][j] + (Math.random()<mr ? (Math.random()*2-1)*ms : 0);
+          }
+          c.b1[i] = this.b1[i] + (Math.random()<mr ? (Math.random()*2-1)*ms : 0);
+        }
+        for (let i=0;i<this.O;i++){
+          for (let j=0;j<this.H;j++){
+            c.w2[i][j] = this.w2[i][j] + (Math.random()<mr ? (Math.random()*2-1)*ms : 0);
+          }
+          c.b2[i] = this.b2[i] + (Math.random()<mr ? (Math.random()*2-1)*ms : 0);
+        }
+        return c;
+      }
+      copy(){ return this.copyAndMutate(0,0); }
+    }
+
+    // --- drawNetwork helper ---
+    // --- drawNetwork with full input/output labels ---
+function drawNetwork(nn, acts, id) {
+  const c   = document.getElementById(id);
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, c.width, c.height);
+
+  // 1) Define labels
+  const inputLabels = [
+    'lKnee Angle',   'rKnee Angle',   'Torso Height',   'lShin Contact',
+    'rShin Contact', 'Head Height',   'lThigh Height',  'rThigh Height',
+    'lShin Height',  'rShin Height',  'Torso Angle',    'Torso Velocity',
+    'lKnee Velocity','rKnee Velocity'
+  ];
+  const outputLabels = [
+    'lShin Vel', 'rShin Vel', 'lThigh Vel', 'rThigh Vel'
+  ];
+
+  // 2) Compute positions for input, hidden, output layers
+  const layers = [ nn.I, nn.H, nn.O ];
+  const pos = layers.map((count, layerIdx) => {
+    return Array.from({ length: count }, (_, i) => ({
+      x: (layerIdx + 1) * (c.width / 4),
+      y: (i + 1) * (c.height / (count + 1))
+    }));
+  });
+
+  // 3) Layer titles
+  ctx.font      = 'bold 12px Arial';
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
+  ctx.fillText('Inputs',  pos[0][0].x, 20);
+  ctx.fillText('Outputs', pos[2][0].x, 20);
+
+  // 4) Draw weights
+  ctx.lineWidth = 2;
+  const wcol = w => {
+    const alpha = Math.min(1, Math.max(0.1, Math.abs(w)));
+    return w >= 0
+      ? `rgba(0,0,255,${alpha})`
+      : `rgba(255,0,0,${alpha})`;
+  };
+  // input→hidden
+  for (let i = 0; i < nn.I; i++) {
+    for (let j = 0; j < nn.H; j++) {
+      ctx.beginPath();
+      ctx.moveTo(pos[0][i].x, pos[0][i].y);
+      ctx.lineTo(pos[1][j].x, pos[1][j].y);
+      ctx.strokeStyle = wcol(nn.w1[j][i]);
+      ctx.stroke();
+    }
+  }
+  // hidden→output
+  for (let i = 0; i < nn.H; i++) {
+    for (let j = 0; j < nn.O; j++) {
+      ctx.beginPath();
+      ctx.moveTo(pos[1][i].x, pos[1][i].y);
+      ctx.lineTo(pos[2][j].x, pos[2][j].y);
+      ctx.strokeStyle = wcol(nn.w2[j][i]);
+      ctx.stroke();
+    }
+  }
+
+  // 5) Draw nodes and their labels
+  ctx.textBaseline = 'middle';
+  for (let layer = 0; layer < 3; layer++) {
+    for (let i = 0; i < layers[layer]; i++) {
+      const { x, y } = pos[layer][i];
+
+      // Node circle
+      ctx.beginPath();
+      ctx.arc(x, y, 10, 0, 2 * Math.PI);
+      if (acts) {
+        const val = layer === 0
+          ? acts.input[i]
+          : layer === 1
+            ? acts.hidden[i]
+            : acts.output[i];
+        const cval = Math.floor((val + 1) * 127.5);
+        ctx.fillStyle = `rgb(${255 - cval}, ${255 - cval}, 255)`;
+      } else {
+        ctx.fillStyle = '#fff';
+      }
+      ctx.fill();
+      ctx.strokeStyle = '#000';
+      ctx.stroke();
+
+      // Text labels
+      ctx.fillStyle = '#000';
+      ctx.font      = '10px Arial';
+      if (layer === 0) {
+        ctx.textAlign = 'right';
+        ctx.fillText(inputLabels[i], x - 15, y);
+      } else if (layer === 2) {
+        ctx.textAlign = 'left';
+        ctx.fillText(outputLabels[i], x + 15, y);
+      }
+    }
+  }
+}
+
+
+    // --- Initialize population ---
+    function initPopulation(){
+      figs = [];
+      fitnessHistory = Array(NUM).fill().map(() => []);
+      for (let i = 0; i < NUM; i++){
+        const gy = BASE_G - i*SPACING,
+              sx = 100,
+              sy = gy - 55*scale;
+        figs.push(new StickFigure(sx, sy));
+      }
+    }
+    initPopulation();
+
+    // --- Main loop ---
+    const scoreEl = document.getElementById('scoreboard');
+    (function loop(){
+      figs.forEach(f => f.update());
+      const now     = Date.now(),
+            elapsed = now - lastRound,
+            remaining = Math.max(0,(ROUND_TIME - elapsed)/1000).toFixed(1);
+
+      const scores = figs.map(f => f.fitness());
+      const best   = Math.max(...scores);
+
+      scoreEl.innerHTML =
+        `Gen: ${generation}, Heat: ${heat}<br>` +
+        `Furthest: ${best.toFixed(1)}<br>` +
+        `Time Remaining: ${remaining}s`;
+
+      const idx  = scores.indexOf(best);
+      const acts = figs[idx].net.computeActivations(figs[idx].getInputs());
+      drawNetwork(figs[idx].net, acts, 'nnCanvas');
+
+      if (figs.every(f => f.disabled) || elapsed > ROUND_TIME) {
+        // record heat fitness
+        figs.forEach((f,i) => fitnessHistory[i].push(f.fitness()));
+
+        if (heat < HEATS) {
+          // next heat
+          heat++;
+          lastRound = Date.now();
+          figs.forEach((f,i) => {
+            const gy = BASE_G - i*SPACING,
+                  sx = 100,
+                  sy = gy - 55*scale;
+            f.reset(sx, sy);
+          });
+        } else {
+          // end of generation: selection & breeding
+          const avgFit = fitnessHistory.map(arr =>
+            arr.reduce((s,v) => s+v,0)/HEATS
+          );
+          const sortedIdx = avgFit.map((v,i) => [v,i])
+                                  .sort((a,b) => b[0]-a[0])
+                                  .map(p => p[1]);
+          const elites = sortedIdx.slice(0,4).map(i => figs[i].net);
+
+          // breed new generation
+          const newNets = [ elites[0].copy() ];
+          const HEAVY_PROB = 0.1,
+                HM_MR      = 2,    // heavy-mut rate multiplier
+                HM_MS      = 2.5;  // heavy-mut strength multiplier
+          for (let j = 1; j < NUM; j++){
+            const parent = elites[Math.floor(Math.random()*elites.length)];
+            if (Math.random() < HEAVY_PROB) {
+              newNets.push(
+                parent.copyAndMutate(
+                  MUTATION_RATE * HM_MR,
+                  MUTATION_STRENGTH * HM_MS
+                )
+              );
+            } else {
+              newNets.push(
+                parent.copyAndMutate(
+                  MUTATION_RATE,
+                  MUTATION_STRENGTH
+                )
+              );
+            }
+          }
+
+          // setup next gen
+          generation++;
+          heat = 1;
+          lastRound = Date.now();
+          fitnessHistory = Array(NUM).fill().map(() => []);
+          figs.forEach((f,i) => {
+            f.net = newNets[i];
+            const gy = BASE_G - i*SPACING,
+                  sx = 100,
+                  sy = gy - 55*scale;
+            f.reset(sx, sy);
+          });
+        }
+      }
+
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>
