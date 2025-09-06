@@ -347,7 +347,7 @@ document
     createEmpirePanel(emp);
     window.currentMode   = 'placeCapital';
     window.currentEmpire = emp;
-    alert(`Click on the map to place the capital for '${emp.name}'`);
+    //alert(`Click on the map to place the capital for '${emp.name}'`);
   });
 
 // Auto-Grow start/stop
