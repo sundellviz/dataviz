@@ -418,7 +418,7 @@ span.style.fontVariantNumeric = 'tabular-nums';
 
     window.currentMode   = 'placeCapital';
     window.currentEmpire = emp;
-    alert(`Click on the map to place the capital for '${emp.name}'`);
+    //alert(`Click on the map to place the capital for '${emp.name}'`);
   });
 
 
@@ -490,7 +490,7 @@ const addBtn = document.createElement('button');
     // 3) switch into capital‐placement mode
     window.currentMode   = 'placeCapital';
     window.currentEmpire = emp;
-    alert(`Click on the map to place the capital for '${emp.name}'`);
+    //alert(`Click on the map to place the capital for '${emp.name}'`);
   });
 
   let placingEmpire = null;
