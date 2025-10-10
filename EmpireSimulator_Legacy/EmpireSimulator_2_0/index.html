@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Empire Simulator</title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <style>
+    :root {
+      --sidebar-w: 340px;
+
+      --bg: #0f172a;            /* slate-900 */
+      --panel: #111c2d;         /* deep blue slate */
+      --panel-2: #0f1a2b;
+      --border: #1e2a3d;
+      --muted: #94a3b8;         /* slate-400 */
+      --text: #e5e7eb;          /* gray-200 */
+      --heading: #f8fafc;       /* gray-50 */
+      --accent: #60a5fa;        /* blue-400 */
+      --accent-2: #a78bfa;      /* violet-400 */
+      --accent-3: #34d399;      /* emerald-400 */
+
+      --btn: #2563eb;           /* blue-600 */
+      --btn-hover: #1d4ed8;
+      --btn-active: #0ea5e9;    /* sky-500 */
+
+      --input-bg: #0b1423;
+      --input-border: #1f2a3c;
+
+      --radius: 10px;
+      --shadow: 0 8px 24px rgba(0,0,0,.25);
+      --gap: 12px;
+      --label-w: 120px;         /* left label column width */
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      display: flex;
+      background: radial-gradient(1200px 800px at 0 -200px, rgba(96,165,250,.06), transparent 60%), var(--bg);
+      color: var(--text);
+      font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    /* Sidebar */
+    #controls {
+      width: var(--sidebar-w);
+      flex: none;
+      padding: 16px;
+      border-right: 1px solid var(--border);
+      background: linear-gradient(180deg, #0e1726 0%, #0c1523 100%);
+      overflow-y: auto;
+    }
+    .sidebar-header {
+      margin-bottom: 16px;
+    }
+    .app-title {
+      margin: 0 0 4px 0;
+      font-size: 18px;
+      letter-spacing: .4px;
+      color: var(--heading);
+    }
+    .app-subtle {
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .white-link { color: var(--text); text-decoration: none; }
+    .white-link:hover { color: var(--accent); }
+
+        .app-text {
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Section cards */
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    /* Controls layout */
+    .control {
+      display: grid;
+      grid-template-columns: var(--label-w) 1fr auto;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+    }
+    .control label { color: var(--text); }
+    .control .value { color: var(--muted); min-width: 36px; text-align: right; }
+    .stack { display: grid; gap: 8px; }
+    .row { display: flex; gap: 8px; }
+    .checkbox {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px; border-radius: 6px;
+      background: var(--panel-2);
+      border: 1px solid var(--input-border);
+    }
+
+    /* Stacked control: label + value on first row, slider full-width below */
+.control.stacked {
+  display: grid;
+  grid-template-columns: 1fr auto;   /* top row: label | value */
+  grid-auto-rows: auto;
+  gap: 6px 8px;
+}
+.control.stacked label { grid-column: 1 / 2; }
+.control.stacked .value { grid-column: 2 / 3; justify-self: end; min-width: 48px; }
+.control.stacked input[type="range"] { grid-column: 1 / -1; }
+
+
+    /* Inputs & buttons */
+    input[type="range"],
+    select,
+    input[type="file"] {
+      width: 100%;
+      background: var(--input-bg);
+      color: var(--text);
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      padding: 6px;
+      outline: none;
+    }
+    button {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--btn);
+      color: white;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: .2px;
+      transition: background .15s ease, transform .02s ease;
+    }
+    button:hover { background: var(--btn-hover); }
+    button:active { background: var(--btn-active); transform: translateY(1px); }
+    .btn-secondary {
+      background: #334155;       /* slate-700 */
+    }
+    .btn-danger {
+      background: #e11d48;       /* rose-600 */
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px dashed var(--border);
+      margin: 10px 0;
+      opacity: .7;
+    }
+
+    /* Collapsibles (keep your existing IDs) */
+    .collapsible-header {
+      cursor: pointer;
+      padding: 8px 10px;
+      background: #143255;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-weight: 700;
+      user-select: none;
+    }
+    .collapsible-content {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: max-height .25s ease, opacity .25s ease, padding .25s ease;
+      max-height: 1000px;
+      opacity: 1;
+      padding: 10px;
+      margin-top: 8px;
+    }
+    .collapsible-content.hidden {
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0; padding-bottom: 0;
+      border-width: 0;
+    }
+
+    /* Canvas */
+    /* Right side: make it a scroller */
+#canvas-container {
+  flex: 1;
+  min-width: 0;         /* critical: allow flex item to be smaller than its content */
+  overflow: auto;       /* gives horizontal (and vertical) scroll when needed */
+  padding: 16px;
+  display: grid;
+  place-items: start;
+}
+    #mapCanvas { display: block; border: 2px solid var(--border); border-radius: 8px; max-width:  none;}
+
+
+    /* Empire panels (generated) */
+    #empire-panels label { display: grid; grid-template-columns: 90px 1fr auto; gap: 8px; align-items: center; margin: 6px 0; }
+    #empire-panels input[type="range"] { width: 100%; }
+    #empire-panels .size-row { display: grid; row-gap: 6px; margin: 6px 0; }
+    #empire-panels .size-label { display: grid; grid-template-columns: 90px auto; align-items: center; }
+    #empire-panels .size-input { justify-self: end; width: 7em; }
+  </style>
+</head>
+<body>
+  <aside id="controls">
+    <div class="sidebar-header">
+      <h1 class="app-title">Empire Simulator 2.0</h1>
+      <h1 class="app-title"><a href="https://www.youtube.com/sundellviz" class="white-link">youtube.com/sundellviz</a></h>
+      <p class="app-text">
+      Empires build their territory by taking the grid cells that are easiest to reach. Adjust travel cost to vary empire shape.
+    </p>
+    </div>
+
+    <!-- MAP -->
+    <section class="section">
+      <div class="section-title">Map</div>
+
+      <div class="control stacked">
+        <label for="canvas-size-slider">Canvas Size</label>
+        <input type="range" id="canvas-size-slider" min="100" max="2000" value="800" />
+        <div class="value"><span id="canvas-size-display">800</span> px</div>
+      </div>
+
+      <div class="row">
+        <button id="toggle-grid-btn" class="btn-secondary">Show Grid Lines</button>
+      </div>
+
+      <div class="row">
+        <label class="checkbox">
+          <input type="checkbox" id="info-mode-checkbox" />
+          <span>Info Mode</span>
+        </label>
+        <label class="checkbox" style="margin-left:auto;">
+          <input type="checkbox" id="hide-names-checkbox" />
+          <span>Hide Empire Names</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- TERRAIN & OVERLAY -->
+    <section class="section">
+      <div class="section-title">Terrain & Overlay</div>
+
+      <div class="stack">
+        <div class="control">
+          <label for="terrain-menu" style="grid-column: 1 / -1; color: var(--muted);">Load Terrain</label>
+          <select id="terrain-menu" style="grid-column: 1 / -1;">
+            <option value="">— choose a map —</option>
+            <option value="world.txt">World</option>
+            <option value="africa.txt">Africa</option>
+            <option value="eastasia.txt">East Asia</option>
+            <option value="europe.txt">Europe</option>
+            <option value="northamerica.txt">North America</option>
+            <option value="oceania.txt">Oceania</option>
+            <option value="southamerica.txt">South America</option>
+            <option value="british_hires.txt">British Isles (hi res)</option>
+            <option value="westmed_hires.txt">Western Mediterranean (hi res)</option>
+            <option value="eastus_hires.txt">Eastern US (hi res)</option>
+            <option value="germany_hires.txt">Germany (hi res)</option>
+            <option value="greece_hires.txt">Greece (hi res)</option>
+            <option value="japan_hires.txt">Korea and Japan (hi res)</option>
+            <option value="india_hires.txt">India (hi res)</option>
+            <option value="middleeast_hires.txt">Middle East (hi res)</option>
+            <option value="scandinavia_hires.txt">Scandinavia (hi res)</option>
+            <option value="middle-earth.txt">Middle-earth</option>
+          </select>
+        </div>
+
+        <div class="control">
+          <label>From file</label>
+          <input type="file" id="import-terrain-input" accept=".txt" />
+          <button id="export-terrain-btn" class="btn-secondary">Export</button>
+        </div>
+
+        <hr>
+
+        <div class="control">
+          <label for="overlay-menu" style="grid-column: 1 / -1; color: var(--muted);">Load Overlay Image</label>
+          <select id="overlay-menu" style="grid-column: 1 / -1;">
+            <option value="">— choose an overlay —</option>
+            <option value="guides/world.png">World</option>
+            <option value="guides/africa.png">Africa</option>
+            <option value="guides/eastasia.png">East Asia</option>
+            <option value="guides/europe.png">Europe</option>
+            <option value="guides/northamerica.png">North America</option>
+            <option value="guides/oceania.png">Oceania</option>
+            <option value="guides/southamerica.png">South America</option>
+            <option value="guides/british.png">British Isles (hi res)</option>
+            <option value="guides/westmed.png">Western Mediterranean (hi res)</option>
+            <option value="guides/eastus.png">Eastern US (hi res)</option>
+            <option value="guides/germany.png">Germany (hi res)</option>
+            <option value="guides/greece.png">Greece (hi res)</option>
+            <option value="guides/japan.png">Korea and Japan (hi res)</option>
+            <option value="guides/india.png">India (hi res)</option>
+            <option value="guides/middleeast.png">Middle East (hi res)</option>
+            <option value="guides/scandinavia.png">Scandinavia (hi res)</option>
+          </select>
+        </div>
+
+        <div class="control">
+          <label for="overlay-input">From file</label>
+          <input type="file" id="overlay-input" accept="image/*" />
+          <div></div>
+        </div>
+
+        <div class="control">
+          <label for="overlay-opacity">Overlay Opacity</label>
+          <input type="range" id="overlay-opacity" min="0" max="100" step="1" value="50" />
+          <div class="value"><span id="overlay-opacity-display">50%</span></div>
+        </div>
+
+        <div class="row">
+          <button id="clear-overlay-btn" class="btn-secondary">Clear Overlay</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- EMPIRES -->
+    <section class="section">
+      <div class="section-title">Empires</div>
+
+      <div class="row" style="gap:8px; margin-bottom:8px;">
+        <button id="recalibrate-btn">Recalibrate Empires</button>
+      </div>
+
+      <div class="stack" id="penalty-controls" style="margin-top:4px;">
+        <div style="font-weight:600; color: var(--muted);">Hostile Territory Penalty</div>
+
+        <div class="control">
+          <label for="penalty-scale">Scale</label>
+          <input id="penalty-scale" type="range" min="0" max="5" step="0.1" value="1.0" />
+          <div class="value"><span id="penalty-scale-val">1.0</span></div>
+        </div>
+
+        <div class="control">
+          <label for="penalty-gamma">Gamma</label>
+          <input id="penalty-gamma" type="range" min="0.2" max="3" step="0.1" value="1.0" />
+          <div class="value"><span id="penalty-gamma-val">1.0</span></div>
+        </div>
+
+        <div class="row">
+          <label class="checkbox">
+            <input type="checkbox" id="include-enemy-heatmap">
+            <span>Include enemy territory in heatmap</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="row" style="gap:8px; margin-top:8px;">
+        <button id="collapse-all-empires-btn" class="btn-secondary">Collapse Empire Panels</button>
+        <button id="add-empire-btn" class="btn-danger">Add Empire</button>
+      </div>
+
+      <hr>
+
+      <div class="stack">
+        <div class="control">
+          <label>Load Empires</label>
+          <input type="file" id="import-empires-input" accept=".json" />
+          <button id="export-empires-btn" class="btn-secondary">Export</button>
+        </div>
+
+
+        <button id="export-ownership-btn" class="btn-secondary">Export Ownership Grid</button>
+
+
+        <div class="row" style="gap:8px;">
+          <button id="auto-grow-btn">Auto-Grow Empires</button>
+        </div>
+
+        <div class="control">
+          <label for="auto-grow-speed">Auto-Grow Amount</label>
+          <input id="auto-grow-speed" type="range" min="1" max="100" step="1" value="5" />
+          <div class="value"><span id="auto-grow-speed-val">5</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TERRAIN TOOLS -->
+    <section class="section">
+      <div class="section-title">Terrain Tools</div>
+
+      <div id="paint-header" class="collapsible-header">Paint terrain ▶</div>
+      <div id="paint-controls" class="collapsible-content hidden">
+        <div class="row" style="margin-bottom:8px;">
+          <button id="paint-mode-btn">Enable Paint Mode</button>
+        </div>
+        <div class="control">
+          <label for="paint-select">Paint Type</label>
+          <select id="paint-select">
+            <option value="PLAIN">Plain</option>
+            <option value="DESERT">Desert</option>
+            <option value="WATER">Water</option>
+            <option value="MOUNTAIN">Mountain</option>
+            <option value="FOREST">Forest</option>
+            <option value="RIVER">River</option>
+            <option value="ICE">Ice</option>
+          </select>
+          <div></div>
+        </div>
+        <div class="control">
+          <label for="brush-size-slider">Brush Size</label>
+          <input id="brush-size-slider" type="range" min="1" max="10" step="1" value="1" />
+          <div class="value"><span id="brush-size-display">1</span></div>
+        </div>
+      </div>
+
+      <div id="randomize-header" class="collapsible-header" style="margin-top:10px;">Randomize terrain ▶</div>
+      <div id="randomize-controls" class="collapsible-content hidden">
+        <div id="sliders"></div>
+        <div class="row" style="margin-top:8px;">
+          <button id="randomize-btn">Randomize Terrain</button>
+        </div>
+
+        <hr>
+
+        <div class="control">
+          <label for="grid-width-slider">Columns</label>
+          <input id="grid-width-slider" type="range" min="10" max="300" value="50" />
+          <div class="value"><span id="grid-width-display">50</span></div>
+        </div>
+
+        <div class="control">
+          <label for="grid-height-slider">Rows</label>
+          <input id="grid-height-slider" type="range" min="10" max="300" value="50" />
+          <div class="value"><span id="grid-height-display">50</span></div>
+        </div>
+      </div>
+    </section>
+  </aside>
+
+  <main id="canvas-container">
+    <canvas id="mapCanvas" width="800" height="800"></canvas>
+  </main>
+
+  <script src="js/grid.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/empires.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
