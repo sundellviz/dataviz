@@ -12,6 +12,7 @@ class Empire {
       WATER:    1.0,
       MOUNTAIN: 6.0,
       FOREST:   3.0,
+      SHRUB:    3.0,
       RIVER:    1.5,
       ICE:      7.0,
     };
@@ -22,19 +23,56 @@ class Empire {
   }
 }
 
+// ── Log slider helpers for Target size ─────────────────────────────
+const SIZE_MIN = 1;
+const SIZE_MAX = 100000;
+
+// slider positions use 0..1000; visually smooth and precise at small sizes
+function sizeToSlider(n) {
+  const a = Math.log(SIZE_MIN), b = Math.log(SIZE_MAX);
+  const t = (Math.log(Math.max(SIZE_MIN, Math.min(SIZE_MAX, n))) - a) / (b - a);
+  return Math.round(t * 1000);
+}
+function sliderToSize(pos) {
+  const a = Math.log(SIZE_MIN), b = Math.log(SIZE_MAX);
+  const t = Math.max(0, Math.min(1, (Number(pos) || 0) / 1000));
+  return Math.round(Math.exp(a + t * (b - a)));
+}
+
+// expose so main.js can sync UI
+window.SIZE_MIN = SIZE_MIN;
+window.SIZE_MAX = SIZE_MAX;
+window.sizeToSlider = sizeToSlider;
+window.sliderToSize = sliderToSize;
+
+
+
 //// NEW SECTION
 
 // Build flat ownerId array from current territories
+// Reuse a single Int32Array buffer to avoid re-allocating each tick
+let _ownerIdBuf = null;
+
+// Build flat ownerId array from current territories (same contents as before)
 function buildOwnerIdFlat(rows, cols, empires) {
   const N = rows * cols;
-  const owner = new Int32Array(N); // 0 = neutral/water
+
+  // (Re)allocate only if size changed; otherwise zero and reuse
+  if (!_ownerIdBuf || _ownerIdBuf.length !== N) {
+    _ownerIdBuf = new Int32Array(N);
+  } else {
+    _ownerIdBuf.fill(0);
+  }
+
+  const owner = _ownerIdBuf; // alias for clarity
+
   for (const e of empires) {
     if (!e.territory) continue;
-    for (const idx of e.territory) owner[idx] = e.id;
+    for (const idx of e.territory) owner[idx] = e.id; // identical assignment logic
   }
-  return owner;
-}
 
+  return owner; // same return shape & values as before
+}
 
 
 // Compute per-cell depth for the owner of each cell (0 at border, higher inward).
@@ -116,6 +154,10 @@ const DEFAULT_EMPIRE_COLORS = [
 
 
 
+
+
+// EMPIRE MANAGER
+
 const EmpireManager = {
   empires: [],
   nextId: 1,
@@ -134,10 +176,31 @@ async updateAllCostMaps(grid) {
     computeCostMapOffload(emp, grid, ownerIdFlat, {
       penaltyScale:  (window.penaltyScale ?? 1.0),
       penaltyGamma:  (window.penaltyGamma ?? 1.0)
-    }).then(({ costMap, parentMap }) => {
-      emp.costMap   = costMap;
-      emp.parentMap = parentMap;
-    })
+}).then((msg) => {
+  // Accept any of the shapes we might get back:
+  // - { dist, parentIdx }     // Float32 (new)
+  // - { dist64, parentIdx }   // Float64 (older)
+  // - { costMap, parentMap }  // legacy 2D arrays (fallback)
+  const { dist, dist64, parentIdx, costMap, parentMap } = msg || {};
+  const flat = dist || dist64;
+
+  if (flat && parentIdx instanceof Int32Array) {
+    // Prefer compact typed arrays
+    // Normalize to Float32 once (saves RAM if worker ever sends Float64)
+    emp.costMapFlat = (flat instanceof Float64Array) ? new Float32Array(flat) : flat;
+    emp.parentIdx   = parentIdx;
+
+    // Free legacy structures so downstream always prefers the flat buffers
+    emp.costMap   = null;
+    emp.parentMap = null;
+  } else {
+    // Legacy path unchanged
+    emp.costMap     = costMap || null;
+    emp.parentMap   = parentMap || null;
+    emp.costMapFlat = null;
+    emp.parentIdx   = null;
+  }
+})
   );
 
   // 3) Wait for all
@@ -189,52 +252,41 @@ function createEmpirePanel(emp) {
 
   // Inline HTML for all controls
   panel.innerHTML = `
-    <summary style="
-        display:flex; align-items:center; justify-content:space-between;
-        padding:4px; background:${emp.color}; border-radius:4px;
-        cursor:pointer;">
-      <span class="empire-name">${emp.name}</span>
-      <input type="color" class="empire-color" value="${emp.color.slice(0,7)}" title="Color"/>
-    </summary>
-          <div class="meta-row" style="margin:6px 0; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-  <div class="capital-display">Capital: (–,–)</div>
-  <div class="size-display">Size: 0</div>
-</div>
+  <summary style="
+      display:flex; align-items:center; justify-content:space-between;
+      padding:6px 8px; background:${emp.color}; border-radius:10px 10px 0 0; cursor:pointer;">
+    <span class="empire-name" style="font-weight:700">${emp.name}</span>
+    <input type="color" class="empire-color" value="${emp.color.slice(0,7)}" title="Color"/>
+  </summary>
 
-
-    <div class="empire-controls" style="padding:6px;">
-      <div class="size-row">
-        <label class="size-label">
-          Target size:
-          <input
-            type="number"
-            class="size-input"
-            min="1"
-            max="30000"
-            value="${emp.size}"
-          />
-        </label>
-        <input
-          type="range"
-          class="size-slider"
-          min="1"
-          max="30000"
-          value="${emp.size}"
-        />
-      </div>
-      <br/>
-
-      Travel costs:
-      <div class="speed-sliders"></div>
-      <div class="panel-actions"
-     style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
-  <button class="place-capital-btn">Place Capital</button>
-  <button class="heatmap-btn">Show Heatmap</button>
-  <button class="route-btn">Find Route</button>
-  <button class="remove-btn" style="background:#e11d48;">Remove Empire</button>
-</div>
+  <div class="empire-controls">
+    <div class="meta-row">
+      <div class="capital-display pill">Capital: (–,–)</div>
+      <div class="size-display pill">Size: 0</div>
+      <div class="value-display pill">Land value: 0</div>
     </div>
-  `;
+
+<div class="size-row">
+  <label class="size-label">
+    Target size:
+    <input type="number" class="size-input" min="1" max="${SIZE_MAX}" value="${emp.size}" />
+  </label>
+  <!-- Log slider: 0..1000 maps to 1..100000 -->
+  <input type="range" class="size-slider" min="0" max="1000" step="1" value="${sizeToSlider(emp.size)}" />
+</div>
+
+    <hr/>
+    <div style="font-weight:600; color: var(--muted); margin-bottom:4px;">Travel costs</div>
+    <div class="speed-sliders"></div>
+
+    <div class="panel-actions">
+      <button class="place-capital-btn">Place Capital</button>
+      <button class="heatmap-btn btn-secondary">Show Heatmap</button>
+      <button class="route-btn btn-secondary">Find Route</button>
+      <button class="remove-btn btn-danger">Remove Empire</button>
+    </div>
+  </div>
+`;
   container.append(panel);
 
 // --- Inline rename in the header (robust: swap span <-> input) ---
@@ -330,36 +382,33 @@ nameSpan.addEventListener('click', (e) => { stopToggle(e); startNameEdit(); });
     window.simulateAndDraw(); window.drawCurrent();
   });
 
-  // — Size Slider + Number Input —
-  const sizeSlider = panel.querySelector('.size-slider');
-  const sizeInput  = panel.querySelector('.size-input');
-  // const sizeValue  = panel.querySelector('.size-value');
-  // keep refs if you need them later
-  emp._sizeSlider = sizeSlider;
-  emp._sizeInput  = sizeInput;
-  // emp._sizeValue  = sizeValue;
+// — Size Slider + Number Input — (logarithmic)
+const sizeSlider = panel.querySelector('.size-slider');
+const sizeInput  = panel.querySelector('.size-input');
+emp._sizeSlider  = sizeSlider;
+emp._sizeInput   = sizeInput;
 
-  // when the slider moves, sync the number box and the empire size
-  sizeSlider.addEventListener('input', () => {
-    const v = Math.round(Number(sizeSlider.value));
-    emp.size          = v;
-    sizeInput.value   = v;
-    // sizeValue.textContent = v;
-    simulateAndDraw(); drawCurrent();
-  });
+function applySize(n) {
+  // clamp and round
+  n = Math.max(SIZE_MIN, Math.min(SIZE_MAX, Math.round(Number(n) || 0)));
+  emp.size = n;
+  // sync UI
+  sizeInput.value  = String(n);
+  sizeSlider.value = String(sizeToSlider(n));
+  // reflect immediately
+  simulateAndDraw(); drawCurrent();
+}
 
-  // when the user types or arrows in the number field, clamp & sync slider
-  sizeInput.addEventListener('change', () => {
-    let v = Number(sizeInput.value);
-    // clamp between min/max
-    v = Math.max(Number(sizeInput.min), Math.min(Number(sizeInput.max), v));
-    v = Math.round(v);
-    emp.size          = v;
-    sizeSlider.value  = v;
-    // sizeValue.textContent = v;
-    sizeInput.value   = v;
-    simulateAndDraw(); drawCurrent();
-  });
+// slider drives size via log map
+sizeSlider.addEventListener('input', () => {
+  const n = sliderToSize(sizeSlider.value);
+  applySize(n);
+});
+
+// number box sets exact size; slider follows
+sizeInput.addEventListener('change', () => {
+  applySize(sizeInput.value);
+});
 
 // — Travel Speed Sliders —
 const speedDiv = panel.querySelector('.speed-sliders');
@@ -368,43 +417,67 @@ speedDiv.style.rowGap  = '2px';
 speedDiv.style.margin  = '2px 0';
 
 emp._speedSliders = {};
-emp._speedValues  = {};
-for (let t in emp.travelSpeeds) {
-  const lbl = document.createElement('label');
-  lbl.textContent = `${t}: `;
+emp._speedValues  = {};   // will hold the number <input> (not a span)
 
-  const inp = document.createElement('input');
-  inp.type = 'range'; inp.min = 0.1; inp.max = 10; inp.step = 0.1;
-  inp.value = emp.travelSpeeds[t];
+const KEYS = (window.TERRAIN_KEYS || Object.keys(TERRAIN));
 
-  const span = document.createElement('span');
-  span.textContent = emp.travelSpeeds[t].toFixed(1);
+// Ensure a speeds object exists
+if (!emp.travelSpeeds) emp.travelSpeeds = {};
 
-  // Compact grid for each speed row
-  lbl.style.display = 'grid';
-  lbl.style.gridTemplateColumns = '90px 1fr 44px'; // label | slider | value
-  lbl.style.alignItems = 'center';
-  lbl.style.columnGap = '8px';
-  lbl.style.margin = '4px 0';
+for (const t of KEYS) {
+  // Backfill if the import didn’t have this terrain yet
+  if (emp.travelSpeeds[t] == null) {
+    const fallback = window.globalTravelSpeeds?.[t] ?? 5.0;  // default cost
+    emp.travelSpeeds[t] = fallback;
+  }
 
-  inp.style.width = '100%';
-  inp.style.margin = '0px';          // remove extra height from default margins
-inp.style.height = '10px';       // optional: thinner track on WebKit/Blink
+  // Row layout: label | slider | number (like Target size)
+  const row = document.createElement('label');
+  row.style.display = 'grid';
+  row.style.gridTemplateColumns = '90px 1fr 56px';
+  row.style.alignItems = 'center';
+  row.style.columnGap  = '8px';
+  row.style.margin     = '4px 0';
 
-  span.style.textAlign = 'right';
-  span.style.minWidth = '40px';
-span.style.fontVariantNumeric = 'tabular-nums';
+  const name = document.createElement('span');
+  name.textContent = t[0] + t.slice(1).toLowerCase();
 
-  inp.addEventListener('input', () => {
-    emp.travelSpeeds[t] = +inp.value;
-    span.textContent = Number(inp.value).toFixed(1);
-    window.simulateAndDraw(); window.drawCurrent();
-  });
+  const slider = document.createElement('input');
+  slider.type  = 'range';
+  slider.min   = '0.1';
+  slider.max   = '10';
+  slider.step  = '0.1';
+  slider.value = String(emp.travelSpeeds[t]);
+  slider.style.width  = '100%';
+  slider.style.margin = '0';
 
-  lbl.append(inp, span);
-  speedDiv.append(lbl);
-  emp._speedSliders[t] = inp;
-  emp._speedValues[t]  = span;
+  const num = document.createElement('input');
+  num.type  = 'number';
+  num.min   = '0.1';
+  num.max   = '10';
+  num.step  = '0.1';
+  num.value = Number(emp.travelSpeeds[t]).toFixed(1);
+  num.style.width = '56px';
+  num.style.textAlign = 'right';
+
+  function apply(v) {
+    let val = Math.max(0.1, Math.min(10, Math.round(parseFloat(v || 0) * 10) / 10));
+    emp.travelSpeeds[t] = val;
+    slider.value = String(val);
+    num.value    = val.toFixed(1);
+    // kick a recompute so the change is visible
+    window.simulateAndDraw?.(); window.drawCurrent?.();
+  }
+
+  slider.addEventListener('input', () => apply(slider.value));
+  num.addEventListener('change',   () => apply(num.value));
+
+  row.append(name, slider, num);
+  speedDiv.appendChild(row);
+
+  // references for programmatic updates (optimizers, import, globals)
+  emp._speedSliders[t] = slider;
+  emp._speedValues[t]  = num;
 }
 
   // — Place Capital —
@@ -418,12 +491,18 @@ span.style.fontVariantNumeric = 'tabular-nums';
 
     window.currentMode   = 'placeCapital';
     window.currentEmpire = emp;
-    //alert(`Click on the map to place the capital for '${emp.name}'`);
+    // alert(`Click on the map to place the capital for '${emp.name}'`);
   });
 
 
   emp._capitalDisplay = panel.querySelector('.capital-display');
   emp._sizeDisplay = panel.querySelector('.size-display');
+
+  emp._valueDisplay = panel.querySelector('.value-display');     // NEW
+if (emp._valueDisplay) {
+  // If main.js has already computed totals, show it immediately; else 0 until next sim pass
+  emp._valueDisplay.textContent = `Land value: ${emp._value ?? 0}`;
+}
 
   // — Heatmap Toggle —
   const heatBtn = panel.querySelector('.heatmap-btn');
@@ -490,7 +569,7 @@ const addBtn = document.createElement('button');
     // 3) switch into capital‐placement mode
     window.currentMode   = 'placeCapital';
     window.currentEmpire = emp;
-    //alert(`Click on the map to place the capital for '${emp.name}'`);
+    // alert(`Click on the map to place the capital for '${emp.name}'`);
   });
 
   let placingEmpire = null;

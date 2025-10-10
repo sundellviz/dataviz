@@ -41,8 +41,143 @@ function lerpColor(a, b, t) {
                 .toString(16).slice(1);
 }
 
-// cache array of same shape as grid.rows×grid.cols for water shading:
-let waterShadeMap = null;
+
+// ───────────────── Mountain depth tint (precomputed) ────────────────
+let MOUNTAIN_DEPTH = null;   // Int16Array (rows*cols) or null
+let MOUNTAIN_MAXD  = 0;
+
+function computeMountainDepth(grid) {
+  const W = grid.cols, H = grid.rows, N = W * H;
+  const idx = (x, y) => y * W + x;
+  const inBounds = (x, y) => (x >= 0 && y >= 0 && x < W && y < H);
+  const isMountain = (x, y) => inBounds(x,y) && grid.cells[y][x].terrain === 'MOUNTAIN';
+
+  const dist = new Int16Array(N); dist.fill(-1);
+  const qx = new Int32Array(N), qy = new Int32Array(N); let qh = 0, qt = 0;
+
+  // seed boundary cells (mountain cells touching any non-mountain or edge)
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (!isMountain(x, y)) continue;
+    const boundary =
+      !isMountain(x-1, y) || !isMountain(x+1, y) ||
+      !isMountain(x, y-1) || !isMountain(x, y+1);
+    if (boundary) { dist[idx(x,y)] = 0; qx[qt] = x; qy[qt] = y; qt++; }
+  }
+
+  // BFS inside mountain regions (4-neighbors)
+  const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+  while (qh < qt) {
+    const x = qx[qh], y = qy[qh]; qh++;
+    const d0 = dist[idx(x,y)];
+    for (const [dx,dy] of dirs) {
+      const nx = x + dx, ny = y + dy;
+      if (!isMountain(nx, ny)) continue;
+      const i = idx(nx, ny);
+      if (dist[i] !== -1) continue;
+      dist[i] = d0 + 1;
+      qx[qt] = nx; qy[qt] = ny; qt++;
+    }
+  }
+
+  MOUNTAIN_DEPTH = dist;
+  MOUNTAIN_MAXD = 0;
+  for (let i = 0; i < N; i++) if (dist[i] > MOUNTAIN_MAXD) MOUNTAIN_MAXD = dist[i];
+}
+
+// ease curve for depth → [0..1]
+function depthFactor(d){
+  const t = Math.min(1, d / 10);         // full effect ~6 cells inward
+  return 1 - Math.pow(1 - t, 2);        // ease-out
+}
+
+// Return tinted mountain color given the base (already variant-blended)
+function mountainTintColor(baseHex, x, y, cols){
+  if (!MOUNTAIN_DEPTH) return baseHex;
+  const i = y * cols + x;
+  const d = MOUNTAIN_DEPTH[i];
+  if (d <= 0) return baseHex;
+
+  const highlight = '#d8dee9';          // subtle “snow” highlight
+  const f = depthFactor(d) * 0.5;       // 0..0.6 strength
+  return lerpColor(baseHex, highlight, f);
+}
+
+
+// ===== Value View support =====
+window.RenderMode = { TERRAIN: 'terrain', VALUE: 'value' };
+window.renderMode = window.RenderMode.TERRAIN; // default
+
+/**
+ * Draws the land-value layer using viridis colors (0..61 -> 0..1).
+ * Optionally overlays the value character when zoomed in.
+ */
+function drawValueGrid(ctx, grid, cellSize, showGrid = false, drawGlyphs = true) {
+  const rows = grid.rows, cols = grid.cols;
+  if (!grid.valueLayer) {
+    // no layer yet → fall back to terrain
+    return drawGrid(ctx, grid, cellSize, showGrid);
+  }
+
+  // Match your crisp rounding in drawGrid()
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+ // Fill water background to avoid seam artifacts in value view too
+ctx.fillStyle = '#2d7efc';
+ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+  if (waterShadeCanvas) {
+  ctx.drawImage(waterShadeCanvas, 0, 0, ctx.canvas.width, ctx.canvas.height);
+}
+
+  const Wpx = cols * cellSize, Hpx = rows * cellSize;
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const v  = grid.valueLayer?.[y]?.[x] ?? 0;
+      const t  = Math.max(0, Math.min(1, v / 61));
+      const x0 = Math.round(x * cellSize);
+      const y0 = Math.round(y * cellSize);
+      const w  = Math.round((x + 1) * cellSize) - x0;
+      const h  = Math.round((y + 1) * cellSize) - y0;
+
+      ctx.fillStyle = viridis(t);
+      ctx.fillRect(x0, y0, w, h);
+
+      // Optional glyph overlay when cells are big enough
+      if (drawGlyphs && cellSize >= 14) {
+        const ch = (typeof valToChar === 'function') ? valToChar(v) : String(v);
+        ctx.fillStyle = 'rgba(0,0,0,0.75)';
+        ctx.font = `${Math.floor(cellSize * 0.7)}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(ch, x0 + w / 2, y0 + h / 2);
+      }
+    }
+  }
+
+  if (showGrid) {
+    ctx.strokeStyle = '#aaa';
+    ctx.beginPath();
+    for (let i = 0; i <= cols; i++) {
+      const px = i * cellSize + 0.5;
+      ctx.moveTo(px, 0);  ctx.lineTo(px, Hpx);
+    }
+    for (let j = 0; j <= rows; j++) {
+      const py = j * cellSize + 0.5;
+      ctx.moveTo(0, py);  ctx.lineTo(Wpx, py);
+    }
+    ctx.stroke();
+  }
+}
+
+// expose for main.js
+window.drawValueGrid = drawValueGrid;
+
+
+
+// Cached raster for water shading (same look, less memory)
+let waterShadeCanvas = null;
 
 
 // Draw crisp, readable labels (white fill with black outline), size-adaptive
@@ -70,15 +205,14 @@ window.drawOutlinedLabel = drawOutlinedLabel;
 
 
 /**
- * Compute per‑blob water shading so that cells at the
- * very edge of a water‑blob stay the base deep blue,
- * and ones further inland get subtly lighter.
+ * Build a raster (canvas) of the water shading at the desired pixel size.
+ * Visuals are identical to the old array-of-strings method.
  */
-function computeWaterShading(grid) {
+function computeWaterShadingCanvas(grid, targetW, targetH) {
   const H = grid.rows, W = grid.cols;
   const baseColor  = '#2d7efc';
   const lightColor = '#154ca3';
-  
+
   // 1) Distance grid + queue of land cells
   const dist  = Array.from({ length: H }, () => Array(W).fill(Infinity));
   const queue = [];
@@ -90,64 +224,98 @@ function computeWaterShading(grid) {
       }
     }
   }
-  
-  // 2) Multi-source BFS
+
+  // 2) Multi-source BFS (8-neighbor, identical to your previous version)
   const dirs = [[ 1,  0], [-1,  0], [ 0,  1], [ 0, -1],
-      [ 1,  1], [ 1, -1], [-1,  1], [-1, -1]];
+                [ 1,  1], [ 1, -1], [-1,  1], [-1, -1]];
   let head = 0;
   while (head < queue.length) {
     const [y, x] = queue[head++];
-for (const [dy, dx] of dirs) {
-  const ny = y + dy, nx = x + dx;
-  const stepCost = (dy !== 0 && dx !== 0) ? Math.SQRT2 : 1;
-  if (
-    ny >= 0 && ny < H && nx >= 0 && nx < W &&
-    grid.cells[ny][nx].terrain === 'WATER' &&
-    dist[ny][nx] > dist[y][x] + stepCost
-  ) {
-    dist[ny][nx] = dist[y][x] + stepCost;
-    queue.push([ny, nx]);
-  }
-}
-  }
-  
-  // 3) Find the “deepest” distance
-  let actualMax = 0;
-  for (let y = 0; y < H; y++)
-    for (let x = 0; x < W; x++)
-      if (grid.cells[y][x].terrain === 'WATER')
-        actualMax = Math.max(actualMax, dist[y][x]);
-  
-  // Optionally clamp to some sensible max so super-wide lakes don’t all go white
-  const clampMax = 100;
-  const maxDist = Math.min(actualMax, clampMax);
-  
-  // 4) Shade
-  const shade = Array.from({ length: H }, () => Array(W).fill(baseColor));
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      if (grid.cells[y][x].terrain === 'WATER') {
-        // normalized [0..1], maybe bias to keep coast darker
-        let t = dist[y][x] / maxDist;
-        t = Math.min(1, Math.max(0, Math.pow(t, 0.6)));
-        shade[y][x] = lerpColor(baseColor, lightColor, t);
+    for (const [dy, dx] of dirs) {
+      const ny = y + dy, nx = x + dx;
+      const step = (dy && dx) ? Math.SQRT2 : 1;
+      if (
+        ny >= 0 && ny < H && nx >= 0 && nx < W &&
+        grid.cells[ny][nx].terrain === 'WATER' &&
+        dist[ny][nx] > dist[y][x] + step
+      ) {
+        const nd = dist[y][x] + step;
+        // early-exit at the visual clamp (matches the old suggestion)
+        if (nd > 100) continue;
+        dist[ny][nx] = nd;
+        queue.push([ny, nx]);
       }
     }
   }
-  
-  return shade;
+
+  // 3) Find actual max (over WATER only), then clamp
+  let actualMax = 0;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      if (grid.cells[y][x].terrain === 'WATER') {
+        actualMax = Math.max(actualMax, dist[y][x]);
+      }
+    }
+  }
+  const clampMax = 100;
+  const maxDist = Math.min(actualMax, clampMax) || 1;
+
+  // 4) Rasterize into a canvas
+  const c = document.createElement('canvas');
+  c.width  = Math.max(1, Math.round(targetW));
+  c.height = Math.max(1, Math.round(targetH));
+  const ctx = c.getContext('2d', { willReadFrequently: false });
+  ctx.imageSmoothingEnabled = false;
+
+    // NEW: integer pixel edges so every cell lines up perfectly
+  const xEdge = new Int32Array(W + 1);
+  const yEdge = new Int32Array(H + 1);
+  for (let i = 0; i <= W; i++) xEdge[i] = Math.round((i * c.width)  / W);
+  for (let j = 0; j <= H; j++) yEdge[j] = Math.round((j * c.height) / H);
+
+  const cellW = c.width  / W;
+  const cellH = c.height / H;
+
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      if (grid.cells[y][x].terrain !== 'WATER') continue;
+
+      // normalized [0..1], biased a touch like before
+      let t = dist[y][x] / maxDist;
+      t = Math.min(1, Math.max(0, Math.pow(t, 0.6)));
+
+      const col = lerpColor(baseColor, lightColor, t);
+
+      const x0 = xEdge[x],     x1 = xEdge[x + 1];
+      const y0 = yEdge[y],     y1 = yEdge[y + 1];
+      const w  = x1 - x0,      h  = y1 - y0;
+
+      if (w > 0 && h > 0) {
+        ctx.fillStyle = col;
+        ctx.fillRect(x0, y0, w, h);
+      }
+    }
+  }
+
+  return c;
 }
 
 /**
  * Precompute water blob shading for the current grid.
  * Call this once whenever grid.cells changes (randomize, import, resize).
  */
-function precomputeWaterShading(grid) {
-  waterShadeMap = computeWaterShading(grid);
+function precomputeWaterShading(grid, pixelW, pixelH) {
+  // Build at the requested size; callers will pass canvas.width/height.
+  waterShadeCanvas = computeWaterShadingCanvas(
+    grid,
+    pixelW ?? (window.canvas?.width  ?? grid.cols),
+    pixelH ?? (window.canvas?.height ?? grid.rows)
+  );
 }
-
-// expose it so main.js can call it:
 window.precomputeWaterShading = precomputeWaterShading;
+
+// Optional: manual memory release hook
+window.freeWaterShading = function () { waterShadeCanvas = null; };
 
 /**
  * Draw the grid; grid lines off by default.
@@ -160,6 +328,23 @@ function drawGrid(ctx, grid, cellSize, showGrid = false) {
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
+  // Fill water background so any micro gaps show water (not black)
+ctx.fillStyle = '#2d7efc';   // same baseColor used in water shading
+ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+
+    // Snap to the exact same integer edges used by the water raster
+  const cols = grid.cols, rows = grid.rows;
+  const xEdge = new Int32Array(cols + 1);
+  const yEdge = new Int32Array(rows + 1);
+  for (let i = 0; i <= cols; i++) xEdge[i] = Math.round((i * ctx.canvas.width)  / cols);
+  for (let j = 0; j <= rows; j++) yEdge[j] = Math.round((j * ctx.canvas.height) / rows);
+
+  // Draw cached water shading first (scaled to the target surface)
+if (waterShadeCanvas) {
+  ctx.drawImage(waterShadeCanvas, 0, 0, ctx.canvas.width, ctx.canvas.height);
+}
+
   const VARIANT_BLEND = 0.1;  // subtle mix for other terrains
 
   for (let y = 0; y < grid.rows; y++) {
@@ -167,26 +352,35 @@ function drawGrid(ctx, grid, cellSize, showGrid = false) {
       const cell = grid.cells[y][x];
       let color;
 
-      if (cell.terrain === 'WATER' && waterShadeMap) {
-        // continuous water shading
-        color = waterShadeMap[y][x];
-      } else {
-        // all other terrains: base color blended with its variant
-        const base = TERRAIN[cell.terrain].color;
-        const variants = TERRAIN_VARIANTS[cell.terrain] || [ base ];
-        const idx = window.variantGrid?.[y]?.[x] ?? 0;
-        const varCol = variants[idx % variants.length];
-        color = lerpColor(base, varCol, VARIANT_BLEND);
+if (cell.terrain === 'WATER') {
+  if (waterShadeCanvas) {
+    // Already drawn from the cached bitmap
+    continue;
+  } else {
+    // Fallback if cache not built yet
+    color = TERRAIN.WATER.color;
+  }
+} else {
+  // all other terrains: base color blended with its variant
+  const base = TERRAIN[cell.terrain].color;
+  const variants = TERRAIN_VARIANTS[cell.terrain] || [ base ];
+  const idx = window.variantGrid?.[y]?.[x] ?? 0;
+  const varCol = variants[idx % variants.length];
+  color = lerpColor(base, varCol, VARIANT_BLEND);
+        // Extra tint for mountains: deeper inside looks “higher”
+if (cell.terrain === 'MOUNTAIN' && MOUNTAIN_DEPTH) {
+  color = mountainTintColor(color, x, y, grid.cols);
+}
       }
 
-      // draw the cell
-      const x0 = Math.round(x * cellSize),
-            y0 = Math.round(y * cellSize),
-            w  = Math.round((x + 1) * cellSize) - x0,
-            h  = Math.round((y + 1) * cellSize) - y0;
+      const x0 = xEdge[x],     x1 = xEdge[x + 1];
+      const y0 = yEdge[y],     y1 = yEdge[y + 1];
+      const w  = x1 - x0,      h  = y1 - y0;
 
-      ctx.fillStyle = color;
-      ctx.fillRect(x0, y0, w, h);
+      if (w > 0 && h > 0) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x0, y0, w, h);
+      }
     }
   }
 
@@ -204,6 +398,16 @@ function drawGrid(ctx, grid, cellSize, showGrid = false) {
     }
     ctx.stroke();
   }
+}
+
+// --- Value layer rendering (0..61 mapped to a color scale) ---
+function valueColor(t) {
+  // t ∈ [0,1] => simple purple→green→yellow ramp
+  t = Math.max(0, Math.min(1, t));
+  const h = 270 - 210 * t;   // 270 (purple) → 60 (yellow)
+  const s = 95;
+  const l = 40 + 15 * t;
+  return `hsl(${h} ${s}% ${l}%)`;
 }
 
 /**
