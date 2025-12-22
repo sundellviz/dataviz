@@ -1,0 +1,2330 @@
+[
+  {
+    "name": "Gifu",
+    "size": 50,
+    "capital": {
+      "x": 302,
+      "y": 59
+    }
+  },
+  {
+    "name": "Matsuyama",
+    "size": 50,
+    "capital": {
+      "x": 286,
+      "y": 66
+    }
+  },
+  {
+    "name": "Agana",
+    "size": 50,
+    "capital": {
+      "x": 334,
+      "y": 147
+    }
+  },
+  {
+    "name": "Melekeok",
+    "size": 50,
+    "capital": {
+      "x": 293,
+      "y": 171
+    }
+  },
+  {
+    "name": "Macau",
+    "size": 50,
+    "capital": {
+      "x": 209,
+      "y": 112
+    }
+  },
+  {
+    "name": "Gujranwala",
+    "size": 50,
+    "capital": {
+      "x": 52,
+      "y": 72
+    }
+  },
+  {
+    "name": "Incheon",
+    "size": 50,
+    "capital": {
+      "x": 261,
+      "y": 51
+    }
+  },
+  {
+    "name": "Xiamen",
+    "size": 50,
+    "capital": {
+      "x": 227,
+      "y": 103
+    }
+  },
+  {
+    "name": "Nanchong",
+    "size": 50,
+    "capital": {
+      "x": 179,
+      "y": 78
+    }
+  },
+  {
+    "name": "Neijiang",
+    "size": 50,
+    "capital": {
+      "x": 175,
+      "y": 83
+    }
+  },
+  {
+    "name": "Nanyang",
+    "size": 50,
+    "capital": {
+      "x": 205,
+      "y": 69
+    }
+  },
+  {
+    "name": "Jinxi",
+    "size": 50,
+    "capital": {
+      "x": 238,
+      "y": 38
+    }
+  },
+  {
+    "name": "Yantai",
+    "size": 50,
+    "capital": {
+      "x": 240,
+      "y": 51
+    }
+  },
+  {
+    "name": "Zaozhuang",
+    "size": 50,
+    "capital": {
+      "x": 225,
+      "y": 61
+    }
+  },
+  {
+    "name": "Suzhou",
+    "size": 50,
+    "capital": {
+      "x": 237,
+      "y": 76
+    }
+  },
+  {
+    "name": "Xuzhou",
+    "size": 50,
+    "capital": {
+      "x": 224,
+      "y": 64
+    }
+  },
+  {
+    "name": "Wuxi",
+    "size": 50,
+    "capital": {
+      "x": 236,
+      "y": 75
+    }
+  },
+  {
+    "name": "Jilin",
+    "size": 50,
+    "capital": {
+      "x": 261,
+      "y": 26
+    }
+  },
+  {
+    "name": "Chandigarh",
+    "size": 50,
+    "capital": {
+      "x": 62,
+      "y": 78
+    }
+  },
+  {
+    "name": "Jammu",
+    "size": 50,
+    "capital": {
+      "x": 54,
+      "y": 70
+    }
+  },
+  {
+    "name": "Sholapur",
+    "size": 50,
+    "capital": {
+      "x": 58,
+      "y": 130
+    }
+  },
+  {
+    "name": "Aurangabad",
+    "size": 50,
+    "capital": {
+      "x": 56,
+      "y": 122
+    }
+  },
+  {
+    "name": "Nasik",
+    "size": 50,
+    "capital": {
+      "x": 50,
+      "y": 121
+    }
+  },
+  {
+    "name": "Dispur",
+    "size": 50,
+    "capital": {
+      "x": 122,
+      "y": 96
+    }
+  },
+  {
+    "name": "Jullundur",
+    "size": 50,
+    "capital": {
+      "x": 57,
+      "y": 76
+    }
+  },
+  {
+    "name": "Allahabad",
+    "size": 50,
+    "capital": {
+      "x": 82,
+      "y": 99
+    }
+  },
+  {
+    "name": "Moradabad",
+    "size": 50,
+    "capital": {
+      "x": 70,
+      "y": 86
+    }
+  },
+  {
+    "name": "Ghaziabad",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 86
+    }
+  },
+  {
+    "name": "Agra",
+    "size": 50,
+    "capital": {
+      "x": 67,
+      "y": 92
+    }
+  },
+  {
+    "name": "Aligarh",
+    "size": 50,
+    "capital": {
+      "x": 67,
+      "y": 89
+    }
+  },
+  {
+    "name": "Meerut",
+    "size": 50,
+    "capital": {
+      "x": 66,
+      "y": 85
+    }
+  },
+  {
+    "name": "Dhanbad",
+    "size": 50,
+    "capital": {
+      "x": 101,
+      "y": 106
+    }
+  },
+  {
+    "name": "Gwalior",
+    "size": 50,
+    "capital": {
+      "x": 68,
+      "y": 96
+    }
+  },
+  {
+    "name": "Vadodara",
+    "size": 50,
+    "capital": {
+      "x": 48,
+      "y": 112
+    }
+  },
+  {
+    "name": "Rajkot",
+    "size": 50,
+    "capital": {
+      "x": 38,
+      "y": 112
+    }
+  },
+  {
+    "name": "Bukhara",
+    "size": 50,
+    "capital": {
+      "x": 13,
+      "y": 42
+    }
+  },
+  {
+    "name": "Türkmenabat",
+    "size": 50,
+    "capital": {
+      "x": 9,
+      "y": 45
+    }
+  },
+  {
+    "name": "Mary",
+    "size": 50,
+    "capital": {
+      "x": 2,
+      "y": 51
+    }
+  },
+  {
+    "name": "Andijan",
+    "size": 50,
+    "capital": {
+      "x": 44,
+      "y": 38
+    }
+  },
+  {
+    "name": "Haiphong",
+    "size": 50,
+    "capital": {
+      "x": 182,
+      "y": 118
+    }
+  },
+  {
+    "name": "Da Nang",
+    "size": 50,
+    "capital": {
+      "x": 188,
+      "y": 137
+    }
+  },
+  {
+    "name": "Surat Thani",
+    "size": 50,
+    "capital": {
+      "x": 152,
+      "y": 165
+    }
+  },
+  {
+    "name": "Chiang Mai",
+    "size": 50,
+    "capital": {
+      "x": 151,
+      "y": 126
+    }
+  },
+  {
+    "name": "Nakhon Ratchasima",
+    "size": 50,
+    "capital": {
+      "x": 163,
+      "y": 141
+    }
+  },
+  {
+    "name": "Quetta",
+    "size": 50,
+    "capital": {
+      "x": 23,
+      "y": 80
+    }
+  },
+  {
+    "name": "Larkana",
+    "size": 50,
+    "capital": {
+      "x": 28,
+      "y": 91
+    }
+  },
+  {
+    "name": "Novokuznetsk",
+    "size": 50,
+    "capital": {
+      "x": 103,
+      "y": 0
+    }
+  },
+  {
+    "name": "Kemerovo",
+    "size": 50,
+    "capital": {
+      "x": 99,
+      "y": 0
+    }
+  },
+  {
+    "name": "Kandy",
+    "size": 50,
+    "capital": {
+      "x": 78,
+      "y": 172
+    }
+  },
+  {
+    "name": "Sri Jayawardenepura Kotte",
+    "size": 50,
+    "capital": {
+      "x": 75,
+      "y": 174
+    }
+  },
+  {
+    "name": "Daejeon",
+    "size": 50,
+    "capital": {
+      "x": 265,
+      "y": 56
+    }
+  },
+  {
+    "name": "Gwangju",
+    "size": 50,
+    "capital": {
+      "x": 263,
+      "y": 60
+    }
+  },
+  {
+    "name": "Busan",
+    "size": 50,
+    "capital": {
+      "x": 271,
+      "y": 61
+    }
+  },
+  {
+    "name": "Zamboanga",
+    "size": 50,
+    "capital": {
+      "x": 243,
+      "y": 173
+    }
+  },
+  {
+    "name": "Laoag",
+    "size": 50,
+    "capital": {
+      "x": 237,
+      "y": 128
+    }
+  },
+  {
+    "name": "Baguio",
+    "size": 50,
+    "capital": {
+      "x": 237,
+      "y": 135
+    }
+  },
+  {
+    "name": "General Santos",
+    "size": 50,
+    "capital": {
+      "x": 256,
+      "y": 177
+    }
+  },
+  {
+    "name": "Ust-Ilimsk",
+    "size": 50,
+    "capital": {
+      "x": 165,
+      "y": 0
+    }
+  },
+  {
+    "name": "Angarsk",
+    "size": 50,
+    "capital": {
+      "x": 171,
+      "y": 0
+    }
+  },
+  {
+    "name": "Abakan",
+    "size": 50,
+    "capital": {
+      "x": 121,
+      "y": 0
+    }
+  },
+  {
+    "name": "Kyzyl",
+    "size": 50,
+    "capital": {
+      "x": 132,
+      "y": 0
+    }
+  },
+  {
+    "name": "Ulan-Ude",
+    "size": 50,
+    "capital": {
+      "x": 185,
+      "y": 0
+    }
+  },
+  {
+    "name": "Blagoveshchensk",
+    "size": 50,
+    "capital": {
+      "x": 265,
+      "y": 0
+    }
+  },
+  {
+    "name": "Bukachacha",
+    "size": 50,
+    "capital": {
+      "x": 223,
+      "y": 0
+    }
+  },
+  {
+    "name": "Dalnegorsk",
+    "size": 50,
+    "capital": {
+      "x": 297,
+      "y": 23
+    }
+  },
+  {
+    "name": "Khabarovsk",
+    "size": 50,
+    "capital": {
+      "x": 295,
+      "y": 7
+    }
+  },
+  {
+    "name": "Yuzhno Sakhalinsk",
+    "size": 50,
+    "capital": {
+      "x": 326,
+      "y": 13
+    }
+  },
+  {
+    "name": "Dalandzadgad",
+    "size": 50,
+    "capital": {
+      "x": 173,
+      "y": 27
+    }
+  },
+  {
+    "name": "Wonsan",
+    "size": 50,
+    "capital": {
+      "x": 265,
+      "y": 44
+    }
+  },
+  {
+    "name": "Sinuiju",
+    "size": 50,
+    "capital": {
+      "x": 253,
+      "y": 41
+    }
+  },
+  {
+    "name": "Dund-Us",
+    "size": 50,
+    "capital": {
+      "x": 121,
+      "y": 9
+    }
+  },
+  {
+    "name": "Choibalsan",
+    "size": 50,
+    "capital": {
+      "x": 213,
+      "y": 9
+    }
+  },
+  {
+    "name": "Zhangye",
+    "size": 50,
+    "capital": {
+      "x": 157,
+      "y": 45
+    }
+  },
+  {
+    "name": "Wuwei",
+    "size": 50,
+    "capital": {
+      "x": 165,
+      "y": 49
+    }
+  },
+  {
+    "name": "Dunhuang",
+    "size": 50,
+    "capital": {
+      "x": 134,
+      "y": 40
+    }
+  },
+  {
+    "name": "Tianshui",
+    "size": 50,
+    "capital": {
+      "x": 179,
+      "y": 63
+    }
+  },
+  {
+    "name": "Dulan",
+    "size": 50,
+    "capital": {
+      "x": 148,
+      "y": 56
+    }
+  },
+  {
+    "name": "Golmud",
+    "size": 50,
+    "capital": {
+      "x": 134,
+      "y": 55
+    }
+  },
+  {
+    "name": "Yulin",
+    "size": 50,
+    "capital": {
+      "x": 195,
+      "y": 111
+    }
+  },
+  {
+    "name": "Bose",
+    "size": 50,
+    "capital": {
+      "x": 181,
+      "y": 105
+    }
+  },
+  {
+    "name": "Wuzhou",
+    "size": 50,
+    "capital": {
+      "x": 200,
+      "y": 107
+    }
+  },
+  {
+    "name": "Liupanshui",
+    "size": 50,
+    "capital": {
+      "x": 174,
+      "y": 95
+    }
+  },
+  {
+    "name": "Quanzhou",
+    "size": 50,
+    "capital": {
+      "x": 229,
+      "y": 101
+    }
+  },
+  {
+    "name": "Hefei",
+    "size": 50,
+    "capital": {
+      "x": 224,
+      "y": 74
+    }
+  },
+  {
+    "name": "Suzhou",
+    "size": 50,
+    "capital": {
+      "x": 223,
+      "y": 66
+    }
+  },
+  {
+    "name": "Zhanjiang",
+    "size": 50,
+    "capital": {
+      "x": 196,
+      "y": 116
+    }
+  },
+  {
+    "name": "Shaoguan",
+    "size": 50,
+    "capital": {
+      "x": 209,
+      "y": 102
+    }
+  },
+  {
+    "name": "Xigaze",
+    "size": 50,
+    "capital": {
+      "x": 110,
+      "y": 84
+    }
+  },
+  {
+    "name": "Shache",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 47
+    }
+  },
+  {
+    "name": "Yining",
+    "size": 50,
+    "capital": {
+      "x": 80,
+      "y": 25
+    }
+  },
+  {
+    "name": "Altay",
+    "size": 50,
+    "capital": {
+      "x": 107,
+      "y": 9
+    }
+  },
+  {
+    "name": "Shizuishan",
+    "size": 50,
+    "capital": {
+      "x": 182,
+      "y": 44
+    }
+  },
+  {
+    "name": "Yulin",
+    "size": 50,
+    "capital": {
+      "x": 194,
+      "y": 48
+    }
+  },
+  {
+    "name": "Ankang",
+    "size": 50,
+    "capital": {
+      "x": 191,
+      "y": 70
+    }
+  },
+  {
+    "name": "Houma",
+    "size": 50,
+    "capital": {
+      "x": 200,
+      "y": 59
+    }
+  },
+  {
+    "name": "Yueyang",
+    "size": 50,
+    "capital": {
+      "x": 207,
+      "y": 84
+    }
+  },
+  {
+    "name": "Hengyang",
+    "size": 50,
+    "capital": {
+      "x": 205,
+      "y": 94
+    }
+  },
+  {
+    "name": "Mianyang",
+    "size": 50,
+    "capital": {
+      "x": 174,
+      "y": 75
+    }
+  },
+  {
+    "name": "Xichang",
+    "size": 50,
+    "capital": {
+      "x": 164,
+      "y": 90
+    }
+  },
+  {
+    "name": "Baoshan",
+    "size": 50,
+    "capital": {
+      "x": 151,
+      "y": 101
+    }
+  },
+  {
+    "name": "Gejiu",
+    "size": 50,
+    "capital": {
+      "x": 167,
+      "y": 108
+    }
+  },
+  {
+    "name": "Shijiazhuang",
+    "size": 50,
+    "capital": {
+      "x": 213,
+      "y": 49
+    }
+  },
+  {
+    "name": "Handan",
+    "size": 50,
+    "capital": {
+      "x": 213,
+      "y": 55
+    }
+  },
+  {
+    "name": "Anshan",
+    "size": 50,
+    "capital": {
+      "x": 247,
+      "y": 37
+    }
+  },
+  {
+    "name": "Dalian",
+    "size": 50,
+    "capital": {
+      "x": 241,
+      "y": 45
+    }
+  },
+  {
+    "name": "Qingdao",
+    "size": 50,
+    "capital": {
+      "x": 236,
+      "y": 57
+    }
+  },
+  {
+    "name": "Linyi",
+    "size": 50,
+    "capital": {
+      "x": 228,
+      "y": 61
+    }
+  },
+  {
+    "name": "Huaiyin",
+    "size": 50,
+    "capital": {
+      "x": 231,
+      "y": 67
+    }
+  },
+  {
+    "name": "Wenzhou",
+    "size": 50,
+    "capital": {
+      "x": 237,
+      "y": 89
+    }
+  },
+  {
+    "name": "Ningbo",
+    "size": 50,
+    "capital": {
+      "x": 241,
+      "y": 82
+    }
+  },
+  {
+    "name": "Fukuoka",
+    "size": 50,
+    "capital": {
+      "x": 277,
+      "y": 67
+    }
+  },
+  {
+    "name": "Miyazaki",
+    "size": 50,
+    "capital": {
+      "x": 281,
+      "y": 73
+    }
+  },
+  {
+    "name": "Naha",
+    "size": 50,
+    "capital": {
+      "x": 266,
+      "y": 96
+    }
+  },
+  {
+    "name": "Kōchi",
+    "size": 50,
+    "capital": {
+      "x": 289,
+      "y": 67
+    }
+  },
+  {
+    "name": "Tongliao",
+    "size": 50,
+    "capital": {
+      "x": 244,
+      "y": 26
+    }
+  },
+  {
+    "name": "Hohhot",
+    "size": 50,
+    "capital": {
+      "x": 202,
+      "y": 38
+    }
+  },
+  {
+    "name": "Chifeng",
+    "size": 50,
+    "capital": {
+      "x": 231,
+      "y": 32
+    }
+  },
+  {
+    "name": "Ulan Hot",
+    "size": 50,
+    "capital": {
+      "x": 243,
+      "y": 17
+    }
+  },
+  {
+    "name": "Hailar",
+    "size": 50,
+    "capital": {
+      "x": 234,
+      "y": 4
+    }
+  },
+  {
+    "name": "Jiamusi",
+    "size": 50,
+    "capital": {
+      "x": 276,
+      "y": 14
+    }
+  },
+  {
+    "name": "Bei'an",
+    "size": 50,
+    "capital": {
+      "x": 261,
+      "y": 8
+    }
+  },
+  {
+    "name": "Daqing",
+    "size": 50,
+    "capital": {
+      "x": 255,
+      "y": 15
+    }
+  },
+  {
+    "name": "Jixi",
+    "size": 50,
+    "capital": {
+      "x": 279,
+      "y": 20
+    }
+  },
+  {
+    "name": "Nagoya",
+    "size": 50,
+    "capital": {
+      "x": 303,
+      "y": 60
+    }
+  },
+  {
+    "name": "Nagano",
+    "size": 50,
+    "capital": {
+      "x": 308,
+      "y": 54
+    }
+  },
+  {
+    "name": "Kushiro",
+    "size": 50,
+    "capital": {
+      "x": 332,
+      "y": 29
+    }
+  },
+  {
+    "name": "Hakodate",
+    "size": 50,
+    "capital": {
+      "x": 318,
+      "y": 34
+    }
+  },
+  {
+    "name": "Kyoto",
+    "size": 50,
+    "capital": {
+      "x": 298,
+      "y": 61
+    }
+  },
+  {
+    "name": "Sendai",
+    "size": 50,
+    "capital": {
+      "x": 318,
+      "y": 48
+    }
+  },
+  {
+    "name": "Sakata",
+    "size": 50,
+    "capital": {
+      "x": 314,
+      "y": 45
+    }
+  },
+  {
+    "name": "Faridabad",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 87
+    }
+  },
+  {
+    "name": "Srinagar",
+    "size": 50,
+    "capital": {
+      "x": 54,
+      "y": 65
+    }
+  },
+  {
+    "name": "Vijayawada",
+    "size": 50,
+    "capital": {
+      "x": 77,
+      "y": 135
+    }
+  },
+  {
+    "name": "Thiruvananthapuram",
+    "size": 50,
+    "capital": {
+      "x": 63,
+      "y": 167
+    }
+  },
+  {
+    "name": "Kochi",
+    "size": 50,
+    "capital": {
+      "x": 60,
+      "y": 161
+    }
+  },
+  {
+    "name": "Cuttack",
+    "size": 50,
+    "capital": {
+      "x": 98,
+      "y": 119
+    }
+  },
+  {
+    "name": "Hubballi",
+    "size": 50,
+    "capital": {
+      "x": 55,
+      "y": 140
+    }
+  },
+  {
+    "name": "Mangaluru",
+    "size": 50,
+    "capital": {
+      "x": 54,
+      "y": 150
+    }
+  },
+  {
+    "name": "Mysuru",
+    "size": 50,
+    "capital": {
+      "x": 61,
+      "y": 152
+    }
+  },
+  {
+    "name": "Kalaburagi",
+    "size": 50,
+    "capital": {
+      "x": 62,
+      "y": 132
+    }
+  },
+  {
+    "name": "Kolhapur",
+    "size": 50,
+    "capital": {
+      "x": 52,
+      "y": 134
+    }
+  },
+  {
+    "name": "Nanded",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 124
+    }
+  },
+  {
+    "name": "Akola",
+    "size": 50,
+    "capital": {
+      "x": 63,
+      "y": 118
+    }
+  },
+  {
+    "name": "Guwahati",
+    "size": 50,
+    "capital": {
+      "x": 122,
+      "y": 96
+    }
+  },
+  {
+    "name": "Qyzylorda",
+    "size": 50,
+    "capital": {
+      "x": 17,
+      "y": 22
+    }
+  },
+  {
+    "name": "Ekibastuz",
+    "size": 50,
+    "capital": {
+      "x": 56,
+      "y": 0
+    }
+  },
+  {
+    "name": "Pavlodar",
+    "size": 50,
+    "capital": {
+      "x": 63,
+      "y": 0
+    }
+  },
+  {
+    "name": "Semey",
+    "size": 50,
+    "capital": {
+      "x": 76,
+      "y": 0
+    }
+  },
+  {
+    "name": "Oskemen",
+    "size": 50,
+    "capital": {
+      "x": 85,
+      "y": 1
+    }
+  },
+  {
+    "name": "Ludhiana",
+    "size": 50,
+    "capital": {
+      "x": 58,
+      "y": 77
+    }
+  },
+  {
+    "name": "Kota",
+    "size": 50,
+    "capital": {
+      "x": 58,
+      "y": 100
+    }
+  },
+  {
+    "name": "Jodhpur",
+    "size": 50,
+    "capital": {
+      "x": 47,
+      "y": 96
+    }
+  },
+  {
+    "name": "Shymkent",
+    "size": 50,
+    "capital": {
+      "x": 33,
+      "y": 32
+    }
+  },
+  {
+    "name": "Taraz",
+    "size": 50,
+    "capital": {
+      "x": 40,
+      "y": 29
+    }
+  },
+  {
+    "name": "Lucknow",
+    "size": 50,
+    "capital": {
+      "x": 79,
+      "y": 94
+    }
+  },
+  {
+    "name": "Saharanpur",
+    "size": 50,
+    "capital": {
+      "x": 65,
+      "y": 81
+    }
+  },
+  {
+    "name": "Ranchi",
+    "size": 50,
+    "capital": {
+      "x": 96,
+      "y": 108
+    }
+  },
+  {
+    "name": "Bhagalpur",
+    "size": 50,
+    "capital": {
+      "x": 103,
+      "y": 100
+    }
+  },
+  {
+    "name": "Raipur",
+    "size": 50,
+    "capital": {
+      "x": 81,
+      "y": 116
+    }
+  },
+  {
+    "name": "Jabalpur",
+    "size": 50,
+    "capital": {
+      "x": 75,
+      "y": 108
+    }
+  },
+  {
+    "name": "Indore",
+    "size": 50,
+    "capital": {
+      "x": 58,
+      "y": 110
+    }
+  },
+  {
+    "name": "Puducherry",
+    "size": 50,
+    "capital": {
+      "x": 74,
+      "y": 153
+    }
+  },
+  {
+    "name": "Salem",
+    "size": 50,
+    "capital": {
+      "x": 68,
+      "y": 154
+    }
+  },
+  {
+    "name": "Tiruchirappalli",
+    "size": 50,
+    "capital": {
+      "x": 70,
+      "y": 158
+    }
+  },
+  {
+    "name": "Herat",
+    "size": 50,
+    "capital": {
+      "x": 4,
+      "y": 64
+    }
+  },
+  {
+    "name": "Mazar-i-Sharif",
+    "size": 50,
+    "capital": {
+      "x": 23,
+      "y": 54
+    }
+  },
+  {
+    "name": "Battambang",
+    "size": 50,
+    "capital": {
+      "x": 168,
+      "y": 149
+    }
+  },
+  {
+    "name": "Siem Reap",
+    "size": 50,
+    "capital": {
+      "x": 170,
+      "y": 148
+    }
+  },
+  {
+    "name": "Khulna",
+    "size": 50,
+    "capital": {
+      "x": 113,
+      "y": 110
+    }
+  },
+  {
+    "name": "Rajshahi",
+    "size": 50,
+    "capital": {
+      "x": 109,
+      "y": 104
+    }
+  },
+  {
+    "name": "Mandalay",
+    "size": 50,
+    "capital": {
+      "x": 139,
+      "y": 113
+    }
+  },
+  {
+    "name": "Sittwe",
+    "size": 50,
+    "capital": {
+      "x": 126,
+      "y": 121
+    }
+  },
+  {
+    "name": "Taichung",
+    "size": 50,
+    "capital": {
+      "x": 238,
+      "y": 104
+    }
+  },
+  {
+    "name": "Leh",
+    "size": 50,
+    "capital": {
+      "x": 65,
+      "y": 64
+    }
+  },
+  {
+    "name": "Amaravati",
+    "size": 50,
+    "capital": {
+      "x": 77,
+      "y": 135
+    }
+  },
+  {
+    "name": "Kozhikode",
+    "size": 50,
+    "capital": {
+      "x": 58,
+      "y": 156
+    }
+  },
+  {
+    "name": "Bhubaneswar",
+    "size": 50,
+    "capital": {
+      "x": 98,
+      "y": 120
+    }
+  },
+  {
+    "name": "Jamshedpur",
+    "size": 50,
+    "capital": {
+      "x": 100,
+      "y": 110
+    }
+  },
+  {
+    "name": "Samarkand",
+    "size": 50,
+    "capital": {
+      "x": 23,
+      "y": 42
+    }
+  },
+  {
+    "name": "Dushanbe",
+    "size": 50,
+    "capital": {
+      "x": 30,
+      "y": 47
+    }
+  },
+  {
+    "name": "Islamabad",
+    "size": 50,
+    "capital": {
+      "x": 47,
+      "y": 66
+    }
+  },
+  {
+    "name": "Multan",
+    "size": 50,
+    "capital": {
+      "x": 41,
+      "y": 80
+    }
+  },
+  {
+    "name": "Hyderabad",
+    "size": 50,
+    "capital": {
+      "x": 28,
+      "y": 100
+    }
+  },
+  {
+    "name": "Peshawar",
+    "size": 50,
+    "capital": {
+      "x": 41,
+      "y": 65
+    }
+  },
+  {
+    "name": "Kathmandu",
+    "size": 50,
+    "capital": {
+      "x": 96,
+      "y": 90
+    }
+  },
+  {
+    "name": "Tomsk",
+    "size": 50,
+    "capital": {
+      "x": 95,
+      "y": 0
+    }
+  },
+  {
+    "name": "Barnaul",
+    "size": 50,
+    "capital": {
+      "x": 90,
+      "y": 0
+    }
+  },
+  {
+    "name": "Novosibirsk",
+    "size": 50,
+    "capital": {
+      "x": 87,
+      "y": 0
+    }
+  },
+  {
+    "name": "Colombo",
+    "size": 50,
+    "capital": {
+      "x": 74,
+      "y": 173
+    }
+  },
+  {
+    "name": "Cebu",
+    "size": 50,
+    "capital": {
+      "x": 250,
+      "y": 160
+    }
+  },
+  {
+    "name": "Iloilo",
+    "size": 50,
+    "capital": {
+      "x": 245,
+      "y": 158
+    }
+  },
+  {
+    "name": "Davao",
+    "size": 50,
+    "capital": {
+      "x": 257,
+      "y": 173
+    }
+  },
+  {
+    "name": "Bratsk",
+    "size": 50,
+    "capital": {
+      "x": 161,
+      "y": 0
+    }
+  },
+  {
+    "name": "Irkutsk",
+    "size": 50,
+    "capital": {
+      "x": 172,
+      "y": 0
+    }
+  },
+  {
+    "name": "Krasnoyarsk",
+    "size": 50,
+    "capital": {
+      "x": 126,
+      "y": 0
+    }
+  },
+  {
+    "name": "Chita",
+    "size": 50,
+    "capital": {
+      "x": 209,
+      "y": 0
+    }
+  },
+  {
+    "name": "Vladivostok",
+    "size": 50,
+    "capital": {
+      "x": 283,
+      "y": 28
+    }
+  },
+  {
+    "name": "Erdenet",
+    "size": 50,
+    "capital": {
+      "x": 171,
+      "y": 5
+    }
+  },
+  {
+    "name": "Ulaanbaatar",
+    "size": 50,
+    "capital": {
+      "x": 183,
+      "y": 9
+    }
+  },
+  {
+    "name": "Bishkek",
+    "size": 50,
+    "capital": {
+      "x": 53,
+      "y": 29
+    }
+  },
+  {
+    "name": "Jiayuguan",
+    "size": 50,
+    "capital": {
+      "x": 148,
+      "y": 42
+    }
+  },
+  {
+    "name": "Xining",
+    "size": 50,
+    "capital": {
+      "x": 162,
+      "y": 55
+    }
+  },
+  {
+    "name": "Guilin",
+    "size": 50,
+    "capital": {
+      "x": 196,
+      "y": 100
+    }
+  },
+  {
+    "name": "Huainan",
+    "size": 50,
+    "capital": {
+      "x": 223,
+      "y": 70
+    }
+  },
+  {
+    "name": "Shantou",
+    "size": 50,
+    "capital": {
+      "x": 222,
+      "y": 108
+    }
+  },
+  {
+    "name": "Lhasa",
+    "size": 50,
+    "capital": {
+      "x": 119,
+      "y": 82
+    }
+  },
+  {
+    "name": "Hami",
+    "size": 50,
+    "capital": {
+      "x": 129,
+      "y": 30
+    }
+  },
+  {
+    "name": "Hotan",
+    "size": 50,
+    "capital": {
+      "x": 75,
+      "y": 53
+    }
+  },
+  {
+    "name": "Kashgar",
+    "size": 50,
+    "capital": {
+      "x": 59,
+      "y": 43
+    }
+  },
+  {
+    "name": "Yinchuan",
+    "size": 50,
+    "capital": {
+      "x": 180,
+      "y": 47
+    }
+  },
+  {
+    "name": "Pingxiang",
+    "size": 50,
+    "capital": {
+      "x": 210,
+      "y": 91
+    }
+  },
+  {
+    "name": "Nagasaki",
+    "size": 50,
+    "capital": {
+      "x": 274,
+      "y": 70
+    }
+  },
+  {
+    "name": "Qiqihar",
+    "size": 50,
+    "capital": {
+      "x": 251,
+      "y": 12
+    }
+  },
+  {
+    "name": "Vishakhapatnam",
+    "size": 50,
+    "capital": {
+      "x": 88,
+      "y": 130
+    }
+  },
+  {
+    "name": "Nur-Sultan",
+    "size": 50,
+    "capital": {
+      "x": 41,
+      "y": 0
+    }
+  },
+  {
+    "name": "Qaraghandy",
+    "size": 50,
+    "capital": {
+      "x": 47,
+      "y": 1
+    }
+  },
+  {
+    "name": "Almaty",
+    "size": 50,
+    "capital": {
+      "x": 63,
+      "y": 28
+    }
+  },
+  {
+    "name": "Amritsar",
+    "size": 50,
+    "capital": {
+      "x": 54,
+      "y": 74
+    }
+  },
+  {
+    "name": "Varanasi",
+    "size": 50,
+    "capital": {
+      "x": 87,
+      "y": 100
+    }
+  },
+  {
+    "name": "Asansol",
+    "size": 50,
+    "capital": {
+      "x": 103,
+      "y": 106
+    }
+  },
+  {
+    "name": "Bhilai",
+    "size": 50,
+    "capital": {
+      "x": 80,
+      "y": 116
+    }
+  },
+  {
+    "name": "Bhopal",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 108
+    }
+  },
+  {
+    "name": "Madurai",
+    "size": 50,
+    "capital": {
+      "x": 67,
+      "y": 161
+    }
+  },
+  {
+    "name": "Coimbatore",
+    "size": 50,
+    "capital": {
+      "x": 63,
+      "y": 157
+    }
+  },
+  {
+    "name": "Vientiane",
+    "size": 50,
+    "capital": {
+      "x": 165,
+      "y": 129
+    }
+  },
+  {
+    "name": "Kandahar",
+    "size": 50,
+    "capital": {
+      "x": 18,
+      "y": 75
+    }
+  },
+  {
+    "name": "Phnom Penh",
+    "size": 50,
+    "capital": {
+      "x": 175,
+      "y": 155
+    }
+  },
+  {
+    "name": "Thimphu",
+    "size": 50,
+    "capital": {
+      "x": 113,
+      "y": 91
+    }
+  },
+  {
+    "name": "Naypyidaw",
+    "size": 50,
+    "capital": {
+      "x": 139,
+      "y": 122
+    }
+  },
+  {
+    "name": "Kaohsiung",
+    "size": 50,
+    "capital": {
+      "x": 236,
+      "y": 111
+    }
+  },
+  {
+    "name": "Shenzhen",
+    "size": 50,
+    "capital": {
+      "x": 211,
+      "y": 111
+    }
+  },
+  {
+    "name": "Zibo",
+    "size": 50,
+    "capital": {
+      "x": 227,
+      "y": 54
+    }
+  },
+  {
+    "name": "Hanoi",
+    "size": 50,
+    "capital": {
+      "x": 178,
+      "y": 117
+    }
+  },
+  {
+    "name": "Ho Chi Minh City",
+    "size": 50,
+    "capital": {
+      "x": 182,
+      "y": 158
+    }
+  },
+  {
+    "name": "Lahore",
+    "size": 50,
+    "capital": {
+      "x": 52,
+      "y": 75
+    }
+  },
+  {
+    "name": "Karachi",
+    "size": 50,
+    "capital": {
+      "x": 23,
+      "y": 102
+    }
+  },
+  {
+    "name": "Pyongyang",
+    "size": 50,
+    "capital": {
+      "x": 258,
+      "y": 45
+    }
+  },
+  {
+    "name": "Lanzhou",
+    "size": 50,
+    "capital": {
+      "x": 170,
+      "y": 57
+    }
+  },
+  {
+    "name": "Nanning",
+    "size": 50,
+    "capital": {
+      "x": 188,
+      "y": 110
+    }
+  },
+  {
+    "name": "Guiyang",
+    "size": 50,
+    "capital": {
+      "x": 182,
+      "y": 95
+    }
+  },
+  {
+    "name": "Chongqing",
+    "size": 50,
+    "capital": {
+      "x": 181,
+      "y": 83
+    }
+  },
+  {
+    "name": "Fuzhou",
+    "size": 50,
+    "capital": {
+      "x": 232,
+      "y": 97
+    }
+  },
+  {
+    "name": "Guangzhou",
+    "size": 50,
+    "capital": {
+      "x": 208,
+      "y": 109
+    }
+  },
+  {
+    "name": "Dongguan",
+    "size": 50,
+    "capital": {
+      "x": 210,
+      "y": 109
+    }
+  },
+  {
+    "name": "Xian",
+    "size": 50,
+    "capital": {
+      "x": 190,
+      "y": 64
+    }
+  },
+  {
+    "name": "Taiyuan",
+    "size": 50,
+    "capital": {
+      "x": 205,
+      "y": 49
+    }
+  },
+  {
+    "name": "Wuhan",
+    "size": 50,
+    "capital": {
+      "x": 212,
+      "y": 79
+    }
+  },
+  {
+    "name": "Changsha",
+    "size": 50,
+    "capital": {
+      "x": 207,
+      "y": 88
+    }
+  },
+  {
+    "name": "Kunming",
+    "size": 50,
+    "capital": {
+      "x": 166,
+      "y": 101
+    }
+  },
+  {
+    "name": "Zhengzhou",
+    "size": 50,
+    "capital": {
+      "x": 210,
+      "y": 62
+    }
+  },
+  {
+    "name": "Shenyeng",
+    "size": 50,
+    "capital": {
+      "x": 249,
+      "y": 34
+    }
+  },
+  {
+    "name": "Jinan",
+    "size": 50,
+    "capital": {
+      "x": 223,
+      "y": 54
+    }
+  },
+  {
+    "name": "Tianjin",
+    "size": 50,
+    "capital": {
+      "x": 224,
+      "y": 45
+    }
+  },
+  {
+    "name": "Nanchang",
+    "size": 50,
+    "capital": {
+      "x": 218,
+      "y": 86
+    }
+  },
+  {
+    "name": "Nanjing",
+    "size": 50,
+    "capital": {
+      "x": 230,
+      "y": 73
+    }
+  },
+  {
+    "name": "Hangzhou",
+    "size": 50,
+    "capital": {
+      "x": 236,
+      "y": 80
+    }
+  },
+  {
+    "name": "Hiroshima",
+    "size": 50,
+    "capital": {
+      "x": 285,
+      "y": 63
+    }
+  },
+  {
+    "name": "Changchun",
+    "size": 50,
+    "capital": {
+      "x": 256,
+      "y": 26
+    }
+  },
+  {
+    "name": "Baotou",
+    "size": 50,
+    "capital": {
+      "x": 194,
+      "y": 38
+    }
+  },
+  {
+    "name": "Harbin",
+    "size": 50,
+    "capital": {
+      "x": 261,
+      "y": 18
+    }
+  },
+  {
+    "name": "Sapporo",
+    "size": 50,
+    "capital": {
+      "x": 320,
+      "y": 29
+    }
+  },
+  {
+    "name": "Delhi",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 86
+    }
+  },
+  {
+    "name": "Hyderabad",
+    "size": 50,
+    "capital": {
+      "x": 69,
+      "y": 131
+    }
+  },
+  {
+    "name": "Pune",
+    "size": 50,
+    "capital": {
+      "x": 50,
+      "y": 127
+    }
+  },
+  {
+    "name": "Nagpur",
+    "size": 50,
+    "capital": {
+      "x": 71,
+      "y": 116
+    }
+  },
+  {
+    "name": "Jaipur",
+    "size": 50,
+    "capital": {
+      "x": 58,
+      "y": 93
+    }
+  },
+  {
+    "name": "Kanpur",
+    "size": 50,
+    "capital": {
+      "x": 76,
+      "y": 95
+    }
+  },
+  {
+    "name": "Patna",
+    "size": 50,
+    "capital": {
+      "x": 95,
+      "y": 99
+    }
+  },
+  {
+    "name": "Chennai",
+    "size": 50,
+    "capital": {
+      "x": 76,
+      "y": 149
+    }
+  },
+  {
+    "name": "Ahmedabad",
+    "size": 50,
+    "capital": {
+      "x": 45,
+      "y": 109
+    }
+  },
+  {
+    "name": "Surat",
+    "size": 50,
+    "capital": {
+      "x": 46,
+      "y": 116
+    }
+  },
+  {
+    "name": "Dhaka",
+    "size": 50,
+    "capital": {
+      "x": 117,
+      "y": 106
+    }
+  },
+  {
+    "name": "Chattogram",
+    "size": 50,
+    "capital": {
+      "x": 122,
+      "y": 112
+    }
+  },
+  {
+    "name": "Yangon",
+    "size": 50,
+    "capital": {
+      "x": 140,
+      "y": 134
+    }
+  },
+  {
+    "name": "Tashkent",
+    "size": 50,
+    "capital": {
+      "x": 32,
+      "y": 36
+    }
+  },
+  {
+    "name": "Bangkok",
+    "size": 50,
+    "capital": {
+      "x": 157,
+      "y": 146
+    }
+  },
+  {
+    "name": "Seoul",
+    "size": 50,
+    "capital": {
+      "x": 263,
+      "y": 51
+    }
+  },
+  {
+    "name": "Manila",
+    "size": 50,
+    "capital": {
+      "x": 239,
+      "y": 143
+    }
+  },
+  {
+    "name": "Ürümqi",
+    "size": 50,
+    "capital": {
+      "x": 105,
+      "y": 26
+    }
+  },
+  {
+    "name": "Chengdu",
+    "size": 50,
+    "capital": {
+      "x": 171,
+      "y": 78
+    }
+  },
+  {
+    "name": "Ōsaka",
+    "size": 50,
+    "capital": {
+      "x": 297,
+      "y": 62
+    }
+  },
+  {
+    "name": "New Delhi",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 87
+    }
+  },
+  {
+    "name": "Bengaluru",
+    "size": 50,
+    "capital": {
+      "x": 65,
+      "y": 149
+    }
+  },
+  {
+    "name": "Kabul",
+    "size": 50,
+    "capital": {
+      "x": 32,
+      "y": 63
+    }
+  },
+  {
+    "name": "Taipei",
+    "size": 50,
+    "capital": {
+      "x": 241,
+      "y": 101
+    }
+  },
+  {
+    "name": "Beijing",
+    "size": 50,
+    "capital": {
+      "x": 220,
+      "y": 41
+    }
+  },
+  {
+    "name": "Shanghai",
+    "size": 50,
+    "capital": {
+      "x": 241,
+      "y": 76
+    }
+  },
+  {
+    "name": "Tokyo",
+    "size": 50,
+    "capital": {
+      "x": 314,
+      "y": 58
+    }
+  },
+  {
+    "name": "Mumbai",
+    "size": 50,
+    "capital": {
+      "x": 46,
+      "y": 125
+    }
+  },
+  {
+    "name": "Kolkata",
+    "size": 50,
+    "capital": {
+      "x": 108,
+      "y": 111
+    }
+  },
+  {
+    "name": "Hong Kong",
+    "size": 50,
+    "capital": {
+      "x": 212,
+      "y": 112
+    }
+  }
+]

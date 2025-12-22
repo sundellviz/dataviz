@@ -1,0 +1,730 @@
+[
+  {
+    "name": "Nouméa",
+    "size": 50,
+    "capital": {
+      "x": 289,
+      "y": 114
+    }
+  },
+  {
+    "name": "Palikir",
+    "size": 50,
+    "capital": {
+      "x": 256,
+      "y": 0
+    }
+  },
+  {
+    "name": "Majuro",
+    "size": 50,
+    "capital": {
+      "x": 309,
+      "y": 0
+    }
+  },
+  {
+    "name": "Funafuti",
+    "size": 50,
+    "capital": {
+      "x": 340,
+      "y": 59
+    }
+  },
+  {
+    "name": "Melekeok",
+    "size": 50,
+    "capital": {
+      "x": 162,
+      "y": 0
+    }
+  },
+  {
+    "name": "Tarawa",
+    "size": 50,
+    "capital": {
+      "x": 316,
+      "y": 20
+    }
+  },
+  {
+    "name": "Goroka",
+    "size": 50,
+    "capital": {
+      "x": 205,
+      "y": 49
+    }
+  },
+  {
+    "name": "Mt.  Hagen",
+    "size": 50,
+    "capital": {
+      "x": 200,
+      "y": 49
+    }
+  },
+  {
+    "name": "Rabaul",
+    "size": 50,
+    "capital": {
+      "x": 232,
+      "y": 42
+    }
+  },
+  {
+    "name": "Lae",
+    "size": 50,
+    "capital": {
+      "x": 211,
+      "y": 52
+    }
+  },
+  {
+    "name": "Zamboanga",
+    "size": 50,
+    "capital": {
+      "x": 111,
+      "y": 0
+    }
+  },
+  {
+    "name": "General Santos",
+    "size": 50,
+    "capital": {
+      "x": 124,
+      "y": 1
+    }
+  },
+  {
+    "name": "Ternate",
+    "size": 50,
+    "capital": {
+      "x": 132,
+      "y": 22
+    }
+  },
+  {
+    "name": "Ambon",
+    "size": 50,
+    "capital": {
+      "x": 136,
+      "y": 40
+    }
+  },
+  {
+    "name": "Raba",
+    "size": 50,
+    "capital": {
+      "x": 98,
+      "y": 59
+    }
+  },
+  {
+    "name": "Jayapura",
+    "size": 50,
+    "capital": {
+      "x": 186,
+      "y": 35
+    }
+  },
+  {
+    "name": "Banda Aceh",
+    "size": 50,
+    "capital": {
+      "x": 4,
+      "y": 3
+    }
+  },
+  {
+    "name": "George Town",
+    "size": 50,
+    "capital": {
+      "x": 24,
+      "y": 3
+    }
+  },
+  {
+    "name": "Balikpapan",
+    "size": 50,
+    "capital": {
+      "x": 90,
+      "y": 30
+    }
+  },
+  {
+    "name": "Kuching",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 19
+    }
+  },
+  {
+    "name": "Surakarta",
+    "size": 50,
+    "capital": {
+      "x": 66,
+      "y": 55
+    }
+  },
+  {
+    "name": "Bandar Lampung",
+    "size": 50,
+    "capital": {
+      "x": 44,
+      "y": 47
+    }
+  },
+  {
+    "name": "Tanjung Pandan",
+    "size": 50,
+    "capital": {
+      "x": 53,
+      "y": 36
+    }
+  },
+  {
+    "name": "Malang",
+    "size": 50,
+    "capital": {
+      "x": 73,
+      "y": 57
+    }
+  },
+  {
+    "name": "Kupang",
+    "size": 50,
+    "capital": {
+      "x": 117,
+      "y": 66
+    }
+  },
+  {
+    "name": "Parepare",
+    "size": 50,
+    "capital": {
+      "x": 101,
+      "y": 41
+    }
+  },
+  {
+    "name": "Putrajaya",
+    "size": 50,
+    "capital": {
+      "x": 30,
+      "y": 13
+    }
+  },
+  {
+    "name": "Gorontalo",
+    "size": 50,
+    "capital": {
+      "x": 115,
+      "y": 23
+    }
+  },
+  {
+    "name": "Katherine",
+    "size": 50,
+    "capital": {
+      "x": 152,
+      "y": 83
+    }
+  },
+  {
+    "name": "Busselton",
+    "size": 50,
+    "capital": {
+      "x": 84,
+      "y": 160
+    }
+  },
+  {
+    "name": "Mandurah",
+    "size": 50,
+    "capital": {
+      "x": 86,
+      "y": 155
+    }
+  },
+  {
+    "name": "Broome",
+    "size": 50,
+    "capital": {
+      "x": 112,
+      "y": 97
+    }
+  },
+  {
+    "name": "Kalgoorlie",
+    "size": 50,
+    "capital": {
+      "x": 109,
+      "y": 148
+    }
+  },
+  {
+    "name": "Albany",
+    "size": 50,
+    "capital": {
+      "x": 94,
+      "y": 165
+    }
+  },
+  {
+    "name": "Port Hedland",
+    "size": 50,
+    "capital": {
+      "x": 97,
+      "y": 106
+    }
+  },
+  {
+    "name": "Karratha",
+    "size": 50,
+    "capital": {
+      "x": 90,
+      "y": 108
+    }
+  },
+  {
+    "name": "Geraldton",
+    "size": 50,
+    "capital": {
+      "x": 81,
+      "y": 140
+    }
+  },
+  {
+    "name": "Griffith",
+    "size": 50,
+    "capital": {
+      "x": 207,
+      "y": 162
+    }
+  },
+  {
+    "name": "Orange",
+    "size": 50,
+    "capital": {
+      "x": 220,
+      "y": 158
+    }
+  },
+  {
+    "name": "Dubbo",
+    "size": 50,
+    "capital": {
+      "x": 218,
+      "y": 154
+    }
+  },
+  {
+    "name": "Armidale",
+    "size": 50,
+    "capital": {
+      "x": 230,
+      "y": 147
+    }
+  },
+  {
+    "name": "Broken Hill",
+    "size": 50,
+    "capital": {
+      "x": 189,
+      "y": 153
+    }
+  },
+  {
+    "name": "Port Lincoln",
+    "size": 50,
+    "capital": {
+      "x": 167,
+      "y": 164
+    }
+  },
+  {
+    "name": "Whyalla",
+    "size": 50,
+    "capital": {
+      "x": 173,
+      "y": 157
+    }
+  },
+  {
+    "name": "Portland",
+    "size": 50,
+    "capital": {
+      "x": 190,
+      "y": 178
+    }
+  },
+  {
+    "name": "Bendigo",
+    "size": 50,
+    "capital": {
+      "x": 200,
+      "y": 172
+    }
+  },
+  {
+    "name": "Wangaratta",
+    "size": 50,
+    "capital": {
+      "x": 208,
+      "y": 171
+    }
+  },
+  {
+    "name": "Windorah",
+    "size": 50,
+    "capital": {
+      "x": 194,
+      "y": 127
+    }
+  },
+  {
+    "name": "Mount Isa",
+    "size": 50,
+    "capital": {
+      "x": 181,
+      "y": 108
+    }
+  },
+  {
+    "name": "Rockhampton",
+    "size": 50,
+    "capital": {
+      "x": 225,
+      "y": 119
+    }
+  },
+  {
+    "name": "Cairns",
+    "size": 50,
+    "capital": {
+      "x": 206,
+      "y": 93
+    }
+  },
+  {
+    "name": "Gold Coast",
+    "size": 50,
+    "capital": {
+      "x": 237,
+      "y": 137
+    }
+  },
+  {
+    "name": "Devonport",
+    "size": 50,
+    "capital": {
+      "x": 209,
+      "y": 190
+    }
+  },
+  {
+    "name": "Napier",
+    "size": 50,
+    "capital": {
+      "x": 331,
+      "y": 183
+    }
+  },
+  {
+    "name": "Manukau",
+    "size": 50,
+    "capital": {
+      "x": 323,
+      "y": 173
+    }
+  },
+  {
+    "name": "Hamilton",
+    "size": 50,
+    "capital": {
+      "x": 325,
+      "y": 176
+    }
+  },
+  {
+    "name": "Blenheim",
+    "size": 50,
+    "capital": {
+      "x": 319,
+      "y": 191
+    }
+  },
+  {
+    "name": "Dunedin",
+    "size": 50,
+    "capital": {
+      "x": 305,
+      "y": 209
+    }
+  },
+  {
+    "name": "Dili",
+    "size": 50,
+    "capital": {
+      "x": 125,
+      "y": 59
+    }
+  },
+  {
+    "name": "Port Vila",
+    "size": 50,
+    "capital": {
+      "x": 297,
+      "y": 96
+    }
+  },
+  {
+    "name": "Port Moresby",
+    "size": 50,
+    "capital": {
+      "x": 212,
+      "y": 63
+    }
+  },
+  {
+    "name": "Honiara",
+    "size": 50,
+    "capital": {
+      "x": 263,
+      "y": 63
+    }
+  },
+  {
+    "name": "Davao",
+    "size": 50,
+    "capital": {
+      "x": 126,
+      "y": 0
+    }
+  },
+  {
+    "name": "Padang",
+    "size": 50,
+    "capital": {
+      "x": 24,
+      "y": 29
+    }
+  },
+  {
+    "name": "Tarakan",
+    "size": 50,
+    "capital": {
+      "x": 93,
+      "y": 12
+    }
+  },
+  {
+    "name": "Semarang",
+    "size": 50,
+    "capital": {
+      "x": 65,
+      "y": 53
+    }
+  },
+  {
+    "name": "Palembang",
+    "size": 50,
+    "capital": {
+      "x": 42,
+      "y": 37
+    }
+  },
+  {
+    "name": "Bandjarmasin",
+    "size": 50,
+    "capital": {
+      "x": 81,
+      "y": 38
+    }
+  },
+  {
+    "name": "Makassar",
+    "size": 50,
+    "capital": {
+      "x": 101,
+      "y": 46
+    }
+  },
+  {
+    "name": "Suva",
+    "size": 50,
+    "capital": {
+      "x": 337,
+      "y": 98
+    }
+  },
+  {
+    "name": "Bandar Seri Begawan",
+    "size": 50,
+    "capital": {
+      "x": 83,
+      "y": 6
+    }
+  },
+  {
+    "name": "Darwin",
+    "size": 50,
+    "capital": {
+      "x": 146,
+      "y": 75
+    }
+  },
+  {
+    "name": "Alice Springs",
+    "size": 50,
+    "capital": {
+      "x": 159,
+      "y": 120
+    }
+  },
+  {
+    "name": "Canberra",
+    "size": 50,
+    "capital": {
+      "x": 220,
+      "y": 166
+    }
+  },
+  {
+    "name": "Newcastle",
+    "size": 50,
+    "capital": {
+      "x": 230,
+      "y": 157
+    }
+  },
+  {
+    "name": "Adelaide",
+    "size": 50,
+    "capital": {
+      "x": 178,
+      "y": 165
+    }
+  },
+  {
+    "name": "Townsville",
+    "size": 50,
+    "capital": {
+      "x": 210,
+      "y": 102
+    }
+  },
+  {
+    "name": "Brisbane",
+    "size": 50,
+    "capital": {
+      "x": 235,
+      "y": 135
+    }
+  },
+  {
+    "name": "Hobart",
+    "size": 50,
+    "capital": {
+      "x": 212,
+      "y": 197
+    }
+  },
+  {
+    "name": "Wellington",
+    "size": 50,
+    "capital": {
+      "x": 323,
+      "y": 190
+    }
+  },
+  {
+    "name": "Christchurch",
+    "size": 50,
+    "capital": {
+      "x": 314,
+      "y": 199
+    }
+  },
+  {
+    "name": "Medan",
+    "size": 50,
+    "capital": {
+      "x": 17,
+      "y": 11
+    }
+  },
+  {
+    "name": "Kuala Lumpur",
+    "size": 50,
+    "capital": {
+      "x": 30,
+      "y": 13
+    }
+  },
+  {
+    "name": "Bandung",
+    "size": 50,
+    "capital": {
+      "x": 53,
+      "y": 53
+    }
+  },
+  {
+    "name": "Surabaya",
+    "size": 50,
+    "capital": {
+      "x": 74,
+      "y": 54
+    }
+  },
+  {
+    "name": "Perth",
+    "size": 50,
+    "capital": {
+      "x": 86,
+      "y": 153
+    }
+  },
+  {
+    "name": "Melbourne",
+    "size": 50,
+    "capital": {
+      "x": 203,
+      "y": 176
+    }
+  },
+  {
+    "name": "Auckland",
+    "size": 50,
+    "capital": {
+      "x": 323,
+      "y": 172
+    }
+  },
+  {
+    "name": "Jakarta",
+    "size": 50,
+    "capital": {
+      "x": 50,
+      "y": 50
+    }
+  },
+  {
+    "name": "Sydney",
+    "size": 50,
+    "capital": {
+      "x": 228,
+      "y": 161
+    }
+  },
+  {
+    "name": "Singapore",
+    "size": 50,
+    "capital": {
+      "x": 38,
+      "y": 20
+    }
+  }
+]

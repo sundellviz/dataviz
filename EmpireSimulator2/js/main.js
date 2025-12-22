@@ -1,5 +1,8 @@
 // js/main.js
 
+const USE_REACH = false;  // When false, bidding ignores reach maps; eligibility = (finite cost && cap>0)
+
+
 // ─────────── Web-Worker Pathfinding Setup (POOL) ───────────
 let _pfMsgId = 0;
 // id -> resolve() for results coming back from any worker
@@ -77,7 +80,7 @@ const _POOL_SIZE = Math.max(
 );
 
 
-const pathPool = new PathWorkerPool('js/pathfindingWorker.js', _POOL_SIZE);
+const pathPool = new PathWorkerPool('js/pathfindingWorker.js?v=2', _POOL_SIZE);
 
 
 // Map the engine's terrain strings to compact byte codes.
@@ -85,6 +88,37 @@ const pathPool = new PathWorkerPool('js/pathfindingWorker.js', _POOL_SIZE);
 const TERRAIN_CODE = {
   PLAIN: 0, DESERT: 1, WATER: 2, MOUNTAIN: 3, FOREST: 4, SHRUB: 5, RIVER: 6, ICE: 7
 };
+
+
+
+// ---- Cached terrain bytes (0..7 per cell) ----
+window._terrainCodeFlatCache = null;
+
+function rebuildTerrainByteCache(grid) {
+  const { rows, cols } = grid;
+  const A = new Uint8Array(rows * cols);
+  let k = 0;
+  for (let y = 0; y < rows; y++) {
+    const row = grid.cells[y];
+    for (let x = 0; x < cols; x++) {
+      A[k++] = (TERRAIN_CODE[row[x].terrain] || 0);
+    }
+  }
+  window._terrainCodeFlatCache = A;
+}
+
+function getTerrainBytes(grid) {
+  const N = grid.rows * grid.cols;
+  if (!(window._terrainCodeFlatCache instanceof Uint8Array) ||
+      window._terrainCodeFlatCache.length !== N) {
+    rebuildTerrainByteCache(grid);
+  }
+  return window._terrainCodeFlatCache;
+}
+
+
+
+
 
 function encodeTerrainsToU8(grid) {
   const { rows, cols } = grid;
@@ -102,32 +136,30 @@ function encodeTerrainsToU8(grid) {
 
 
 // offload one empire’s cost-map job to the pool
-function computeCostMapOffload(emp, grid, ownerIdFlat, penalty) {
+function computeCostMapOffload(emp, grid) {
   const id = ++_pfMsgId;
 
   return new Promise(resolve => {
     _pfPending.set(id, resolve);
 
-    // NEW: pack terrains into bytes and transfer the buffer
-    const terrainCodeFlat = encodeTerrainsToU8(grid);
+const terrainCodeFlat = getTerrainBytes(grid);
 
-    const payload = {
-      id,
-      empireId: emp.id,
-      rows: grid.rows,
-      cols: grid.cols,
-      terrainCodeFlat,                 // <— bytes instead of string matrix
-      travelSpeeds: emp.travelSpeeds,
-      capital: emp.capital,
+const payload = {
+  id,
+  empireId: emp.id,
+  rows: grid.rows,
+  cols: grid.cols,
+  terrainCodeFlat,     // structured clone will copy, but we avoid re-encoding
+  travelSpeeds: emp.travelSpeeds,
+  capital: emp.capital,
+};
 
-      // territory-aware penalty inputs (unchanged)
-      ownerIdFlat,
-      penaltyScale: penalty?.penaltyScale ?? 1.0,
-      penaltyGamma: penalty?.penaltyGamma ?? 1.0
-    };
+// Do NOT transfer the cache buffer (it would detach it). Just post payload.
+pathPool.postMessage(payload);
 
-    // IMPORTANT: transfer the ArrayBuffer for zero-copy
-    pathPool.postMessage(payload, [terrainCodeFlat.buffer]);
+
+
+
   });
 }
  // ───────────────────────────────────────────────────────
@@ -185,41 +217,32 @@ viewTerrainBtn?.addEventListener('click', () => setViewMode('terrain'));
 viewValueBtn?.addEventListener('click',   () => setViewMode('value'));
 
 
+(function initCitiesMenu(){
+  const menu = document.getElementById('cities-menu');
+  if (!menu) return;
 
-// Recalibrate button (keep icon; only change the label text)
-const recBtn   = document.getElementById('recalibrate-btn');
-const recLabel = recBtn?.querySelector('.label');
+  menu.addEventListener('change', async () => {
+    const fname = menu.value;
+    if (!fname) return;
 
-recBtn.addEventListener('click', () => {
-  if (!window.isRecalibrating) {
-    // start recalibration
-    window.isRecalibrating   = true;
-    window.recalibrateCancel = false;
+    try {
+      const res = await fetch(`./${fname}`);
+      if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+      const text = await res.text();
 
-    if (recLabel) recLabel.textContent = 'Stop Recalibrate';
-    recBtn.classList.add('is-spinning');             // optional: spin animation
-    recBtn.setAttribute('aria-pressed', 'true');     // optional a11y
+      importEmpiresFromText(text, fname);
+    } catch (err) {
+      alert('Failed to load preset: ' + fname + '\n' + err.message);
+    } finally {
+      // allow picking the same option again later
+      menu.value = '';
+    }
+  });
+})();
 
-    recalibrateTerritory()
-      .catch(() => {}) // ignore cancellation “errors”
-      .finally(() => {
-        // reset button when done or cancelled
-        window.isRecalibrating   = false;
-        window.recalibrateCancel = false;
-
-        if (recLabel) recLabel.textContent = 'Recalibrate';
-        recBtn.classList.remove('is-spinning');
-        recBtn.removeAttribute('aria-pressed');
-      });
-  } else {
-    // request cancellation
-    window.recalibrateCancel = true;
-    if (recLabel) recLabel.textContent = 'Stopping…';
-  }
-});
 
 // --- Auto-Grow amount wiring (cells per tick) ---
-window.autoGrowAmount = 5;
+window.autoGrowAmount = 50;
 
 const autoGrowAmtSlider = document.getElementById('auto-grow-speed');
 const autoGrowAmtVal    = document.getElementById('auto-grow-speed-val');
@@ -234,23 +257,6 @@ if (autoGrowAmtSlider && autoGrowAmtVal) {
     // No need to restart the timer; next tick uses the new amount automatically
   });
 }
-
-// Include-enemy-territory-in-heatmap checkbox
-(function wireIncludeEnemyHeatmap(){
-  const cb = document.getElementById('include-enemy-heatmap');
-  if (!cb) return;
-  // default off
-  window.includeEnemyHeatmap = cb.checked;
-
-  cb.addEventListener('change', () => {
-    window.includeEnemyHeatmap = cb.checked;
-    // Recompute the heatmap’s ranks & redraw (cost maps don’t need recompute)
-    simulateAndDraw();
-  });
-})();
-
-
-
 
 
 
@@ -279,16 +285,34 @@ let gridHeight = parseInt(gridHeightSlider.value, 10);
 
 gridWidthSlider.addEventListener('input', () => {
   gridWidth = parseInt(gridWidthSlider.value, 10);
-if (gridWidthDisplay)  gridWidthDisplay.textContent  = cols;
+  if (gridWidthDisplay)  gridWidthDisplay.textContent  = String(gridWidth);
   rebuildGrid();
 });
 
 gridHeightSlider.addEventListener('input', () => {
   gridHeight = parseInt(gridHeightSlider.value, 10);
-if (gridHeightDisplay) gridHeightDisplay.textContent = rows;
+  if (gridHeightDisplay) gridHeightDisplay.textContent = String(gridHeight);
   rebuildGrid();
 });
 
+
+// Average land value helper
+function computeGlobalAvgLandValue() {
+  const rows = grid.rows, cols = grid.cols;
+  if (!grid.valueLayer) return 0; // or return 1 if you prefer a safe default
+
+  let sum = 0, count = 0;
+  for (let y = 0; y < rows; y++) {
+    const row = grid.cells[y];
+    for (let x = 0; x < cols; x++) {
+      if (row[x].terrain === 'WATER') continue;
+      const v = grid.getValueAt(x, y);  // 0..61 from valueLayer
+      sum += v;
+      count++;
+    }
+  }
+  return count ? (sum / count) : 0;
+}
 
 // Mouse hover info
 
@@ -300,6 +324,7 @@ window.infoMode = false;
 infoCheckbox.addEventListener('change', e => {
   window.infoMode = e.target.checked;
   tooltip.style.opacity = '0';
+    _lastInfoIdx = -1;                   // ← reset the cache when toggling
 });
 
 
@@ -415,7 +440,7 @@ function heatPercentAt(col, row) {
     empiresload:        { title: 'Load / export empires', text: 'Load empire capitals and characteristics from file, or export. Can also export ownership grid.' },
     valuesliders:        { title: 'Value sliders', text: 'Change the land value of all terrain of a certain type.' },
     terrainmodification:        { title: 'Terrain modification', text: 'Paint terrain type or randomize a completely new map. Warning: Randomizing or changing grid size erases current map.' },
-    optimizationdetail:        { title: 'Empire optimization', text: 'Vary capital locations or sliders to maximize territory or land value. Slider step determine how much sliders should change each attempt.' },
+    optimizationdetail:        { title: 'Empire simulation', text: 'Growth threshold: Above which land value empires grow. Discrimination: Threshold for which cells that should be ignored. Power weight: How much weight given to power relative to travel cost.' },
     growthdetail:        { title: 'Set threshold for land value that causes growth. Empire size becomes land value divided by growth threshold.' },
     optimization: { title: 'Optimization', text: 'Recalibrate recomputes territories fully. Optimization varies capital locations or empire characteristics to improve territory or land value. ' }
   };
@@ -502,6 +527,23 @@ const paintingOn  = isPaintingOn();
   syncFromUI();
 })();
 
+// --- Info-mode helpers: cheapest empires to a cell (uses precomputed cost maps) ---
+function topThreeCheapestAt(idx) {
+  const out = [];
+  for (const e of EmpireManager.empires) {
+    const A = e.costMapFlat;
+    if (!A || A.length === 0) continue;
+    const d = A[idx];
+    if (!(d < Infinity)) continue;
+    out.push({ id: e.id, name: e.name || `Empire ${e.id}`, cost: d });
+  }
+  out.sort((a, b) => (a.cost - b.cost) || (a.id - b.id)); // stable tie-break by id
+  return out.slice(0, 3);
+}
+
+// cache so we only compute when the hovered cell actually changes
+let _lastInfoIdx  = -1;
+let _lastTop3HTML = '';
 
 
 // ————— Mouse handlers —————
@@ -526,12 +568,36 @@ canvas.addEventListener('mousemove', e => {
   const terr    = grid.cells[row][col].terrain;
   const owner   = findOwner(idx);
  const pct = heatPercentAt(col, row);
+
+
+// Land value (0..61); show char if helper exists
+const landVal = (typeof grid.getValueAt === 'function')
+  ? grid.getValueAt(col, row)
+  : Number(grid.cells[row][col].value ?? grid.cells[row][col].landValue ?? 0);
+const valChar = (typeof valToCharLocal === 'function') ? ` (${valToCharLocal(landVal)})` : '';
+
+// Top 3 cheapest empires to this cell (only recompute when cell changes)
+let topHTML = '';
+//const idx = row * grid.cols + col;
+if (idx !== _lastInfoIdx) {
+  const top3 = topThreeCheapestAt(idx);
+  topHTML = top3.map((t, i) => `${i + 1}) ${t.name} (${t.cost.toFixed(2)})`).join('<br/>');
+  _lastInfoIdx  = idx;
+  _lastTop3HTML = topHTML;
+} else {
+  topHTML = _lastTop3HTML;
+}
+
 tooltip.innerHTML = `
   <strong>Owner:</strong> ${owner}<br/>
-  <strong>Terrain:</strong> ${terr}${
+  <strong>Terrain:</strong> ${terr}<br/>
+  <strong>Land value:</strong> ${landVal}${valChar}${
     (pct == null ? '' : `<br/><strong>Heatmap:</strong> ${pct.toFixed(0)}%`)
+  }${
+    (topHTML ? `<br/><strong>Cheapest:</strong><br/>${topHTML}` : '')
   }
 `;
+
   // position tooltip slightly offset from mouse
   tooltip.style.left    = e.pageX + 10 + 'px';
   tooltip.style.top     = e.pageY + 10 + 'px';
@@ -542,29 +608,6 @@ canvas.addEventListener('mouseleave', () => {
   tooltip.style.opacity = '0';
 });
 
-function autoGrowTick() {
-  const emps = EmpireManager.empires;
-  if (emps.length === 0) return;
-
-  const emp = emps[autoGrowIndex % emps.length];
-  emp.size += (window.autoGrowAmount || 5);
-
-  // keep UI in sync
-  if (emp._sizeSlider) emp._sizeSlider.value = emp.size;
-  if (emp._sizeInput)  emp._sizeInput.value  = emp.size;
-
-  simulateAndDraw();
-  autoGrowIndex++;
-}
-
-
-const panelsContainer = document.createElement('div');
-panelsContainer.id = 'empire-panels';
-// insert this just below your static Add Empire button in the #controls div:
-document
-  .getElementById('add-empire-btn')
-  .parentNode
-  .insertAdjacentElement('afterend', panelsContainer);
 
 // Add Empire
 document
@@ -583,22 +626,6 @@ document
     //alert(`Click on the map to place the capital for '${emp.name}'`);
   });
 
-// Auto-Grow start/stop
-let autoGrowInterval = null;
-let autoGrowIndex = 0;
-
-document.getElementById('auto-grow-btn').addEventListener('click', function() {
-  const btn = this;
-  if (!autoGrowInterval) {
-    autoGrowInterval = setInterval(autoGrowTick, 50); // fixed cadence
-    btn.textContent = 'Stop Auto-Grow';
-  } else {
-    clearInterval(autoGrowInterval);
-    autoGrowInterval = null;
-    btn.textContent = 'Auto-Grow Empires';
-  }
-});
-
 
 
 
@@ -613,17 +640,7 @@ let optimizingPlacement = false;
 let optimizingSliders   = false;
 
 // --- Adjust Size ←→ Land Value state ---
-window.growthThreshold = 10;        // default; synced to the slider
-let adjustingSizes = false;         // loop flag for "Adjust size to land value"
-let comboAdjustOptimize = false;    // loop flag for the combo mode
-
-// Which value-optimizers to run inside the combo loop
-let runPlacementValue = true;
-let runSlidersValue   = true;
-
-let runAdjustSize     = true;       // ← new: toggle “Adjust size ↔ value”
-
-
+window.growthThreshold = 1;        // default; synced to the slider
 
 
 const dirs8 = [
@@ -634,43 +651,6 @@ const dirs8 = [
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
 function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
-
-
-function updateComboButtonLabel() {
-  const btn = document.getElementById('combo-adjust-optimize-btn');
-  if (!btn) return;
-  const parts = [];
-  if (runAdjustSize)     parts.push('Adjust');
-  if (runPlacementValue) parts.push('Placement');
-  if (runSlidersValue)   parts.push('Sliders');
-  btn.textContent = parts.length ? `Run: ${parts.join(' + ')}` : 'Run: (choose options)';
-}
-
-
-// UI sliders for optimization step & delay
-(function wireOptimizeControls(){
-  const step = document.getElementById('opt-step');
-  const stepVal = document.getElementById('opt-step-val');
-  const dly = document.getElementById('opt-delay');
-  const dlyVal = document.getElementById('opt-delay-val');
-
-  if (step && stepVal) {
-    window.optimizeDelta = parseFloat(step.value);
-    stepVal.textContent = window.optimizeDelta.toFixed(2);
-    step.addEventListener('input', () => {
-      window.optimizeDelta = parseFloat(step.value);
-      stepVal.textContent = window.optimizeDelta.toFixed(2);
-    });
-  }
-  if (dly && dlyVal) {
-    window.optimizeDelayMs = parseInt(dly.value, 10) || 0;
-    dlyVal.textContent = String(window.optimizeDelayMs);
-    dly.addEventListener('input', () => {
-      window.optimizeDelayMs = parseInt(dly.value, 10) || 0;
-      dlyVal.textContent = String(window.optimizeDelayMs);
-    });
-  }
-})();
 
 // Growth-threshold slider
 (function wireGrowthThreshold(){
@@ -687,6 +667,49 @@ function updateComboButtonLabel() {
   });
 })();
 
+
+// Discrimination δ: empires only bid on cells with value >= δ (pure distance ranking)
+(function wireDiscrimination(){
+  const s   = document.getElementById('discrimination-threshold');
+  const out = document.getElementById('discrimination-threshold-val');
+
+  // default: if missing, use growthThreshold (keeps things sensible)
+  window.discriminationThreshold = Math.round(
+    Number(s?.value ?? window.growthThreshold ?? 1)
+  );
+
+  if (out) out.textContent = String(window.discriminationThreshold);
+
+  s?.addEventListener('input', () => {
+    const v = Math.max(0, Math.min(61, parseInt(s.value || '1', 10)));
+    window.discriminationThreshold = v;
+    if (out) out.textContent = String(v);
+    // optional: live recompute
+    //simulateAndDraw?.();
+  });
+})();
+
+// Power weight μ: how strongly power helps in contested cells (0 disables power)
+(function wirePowerWeight(){
+  const s   = document.getElementById('power-weight');
+  const out = document.getElementById('power-weight-val');
+
+  window.powerWeight = Number(s?.value ?? 0.15); // default 0.15
+  if (out) out.textContent = String(window.powerWeight);
+
+  s?.addEventListener('input', () => {
+    const v = Math.max(0, Math.min(5, Number(s.value || 0)));
+    window.powerWeight = v;
+    if (out) out.textContent = String(v);
+    //simulateAndDraw?.();
+  });
+})();
+
+
+
+
+
+
 // Helper: update one empire's capital label if available
 function updateCapitalLabel(emp) {
   if (emp._capitalDisplay && emp.capital) {
@@ -694,106 +717,6 @@ function updateCapitalLabel(emp) {
   }
 }
 
-// ---- Placement ROUND ----
-async function placementRound() {
-  const emps = EmpireManager.empires;
-  if (!emps.length) return;
-
-  // Snapshot previous capitals and territory sizes
-  const prevCaps  = emps.map(e => e.capital ? {x: e.capital.x, y: e.capital.y} : null);
-  const prevSizes = emps.map(e => e.territory ? e.territory.size : 0);
-
-  // Propose moves for everyone (simultaneous proposals)
-  for (let i = 0; i < emps.length; i++) {
-    const e = emps[i];
-    if (!e.capital) continue;
-
-    // Try up to 8 random directions to find a valid non-water cell
-    let tried = 0, moved = false;
-    const order = dirs8.slice().sort(() => Math.random() - 0.5);
-    while (tried < order.length && !moved) {
-      const {dx, dy} = order[tried++];
-      const nx = clamp(e.capital.x + dx, 0, grid.cols - 1);
-      const ny = clamp(e.capital.y + dy, 0, grid.rows - 1);
-      if (grid.cells[ny][nx].terrain === 'WATER') continue; // cannot place on water
-      // accept proposal (for now)
-      e.capital = { x: nx, y: ny };
-      updateCapitalLabel(e);
-      moved = true;
-    }
-    // If we couldn't find a legal neighbor, we keep the old capital
-  }
-
-  // Recalculate with all proposals applied
-  await simulateAndDraw();
-
-  // Accept/reject per-empire
-  let anyAccepted = false;
-  for (let i = 0; i < emps.length; i++) {
-    const e = emps[i];
-    const before = prevSizes[i];
-    const after  = e.territory ? e.territory.size : 0;
-
-// If equal or better accept
-    if (after < before) {
-      // revert this capital
-      if (prevCaps[i]) {
-        e.capital = { x: prevCaps[i].x, y: prevCaps[i].y };
-        updateCapitalLabel(e);
-      }
-    } else {
-      anyAccepted = true;
-    }
-  }
-
-  // Final recompute to reflect the mixed accepted/reverted state
-  await simulateAndDraw();
-
-  return anyAccepted;
-}
-
-
-// Optimization of placement for value
-async function placementRoundValue() {
-  const emps = EmpireManager.empires;
-  if (!emps.length) return;
-
-  // Baseline values before proposals
-  const prevCaps  = emps.map(e => e.capital ? {x:e.capital.x, y:e.capital.y} : null);
-  const prevVals  = emps.map(e => e._value || 0);
-
-  // Propose random 8-neighbor step (no WATER)
-  for (const e of emps) {
-    if (!e.capital) continue;
-    const order = dirs8.slice().sort(() => Math.random() - 0.5);
-    for (const {dx,dy} of order) {
-      const nx = clamp(e.capital.x + dx, 0, grid.cols - 1);
-      const ny = clamp(e.capital.y + dy, 0, grid.rows - 1);
-      if (grid.cells[ny][nx].terrain !== 'WATER') { e.capital = {x:nx,y:ny}; break; }
-    }
-    updateCapitalLabel(e);
-  }
-
-  // Recompute → this refreshes e._value via computeEmpireTotals()
-  await simulateAndDraw();
-
-  // Accept if value strictly increased, otherwise revert
-  let anyAccepted = false;
-  for (let i = 0; i < emps.length; i++) {
-    const e = emps[i];
-    const after = e._value || 0;
-    if (after < prevVals[i]) {
-      if (prevCaps[i]) e.capital = prevCaps[i];
-      updateCapitalLabel(e);
-    } else {
-      anyAccepted = true;
-    }
-  }
-
-  // Show mixed state
-  await simulateAndDraw();
-  return anyAccepted;
-}
 
 
 // Terrain-specific default travel costs (lower = faster)
@@ -805,7 +728,8 @@ const DEFAULT_TRAVEL_SPEEDS = {
   FOREST:   5,
   SHRUB:    4,
   RIVER:    1,
-  ICE:      10
+  ICE:      10,
+  SWITCH:   0   // NEW: default global switching cost (0 = off)
 };
 
 // ---- Sliders ROUND ----
@@ -876,45 +800,6 @@ async function slidersRound() {
 }
 
 
-// Optimize sliders for value
-async function slidersRoundValue() {
-  const emps = EmpireManager.empires;
-  if (!emps.length) return;
-
-  const delta = window.optimizeDelta || 0.2;
-  const prevSpeeds = emps.map(e => deepClone(e.travelSpeeds));
-  const prevVals   = emps.map(e => e._value || 0);
-
-  for (const e of emps) {
-    const keys = TERRAIN_KEYS.slice().sort(() => Math.random() - 0.5);
-    const downKey = keys[0];
-    const upKey   = keys.find(k => k !== downKey) || keys[1];
-    e.travelSpeeds[downKey] = clamp(+e.travelSpeeds[downKey] - delta, 0.1, 10);
-    e.travelSpeeds[upKey]   = clamp(+e.travelSpeeds[upKey]   + delta, 0.1, 10);
-    applySliderToUI(e, downKey);
-    applySliderToUI(e, upKey);
-  }
-
-  await simulateAndDraw();          // refresh e._value
-
-  let anyAccepted = false;
-  for (let i = 0; i < emps.length; i++) {
-    const e = emps[i];
-    const after = e._value || 0;
-    if (after < prevVals[i]) {
-      e.travelSpeeds = prevSpeeds[i];            // revert
-      for (const k of TERRAIN_KEYS) applySliderToUI(e, k);
-    } else {
-      anyAccepted = true;
-    }
-  }
-
-  await simulateAndDraw();
-  return anyAccepted;
-}
-
-
-
 // Global default speeds used for "apply to all" + new empires."
 // Initialize from the first empire if present; otherwise from terrain-specific defaults.
 window.globalTravelSpeeds = (function seedGlobals(){
@@ -923,20 +808,39 @@ window.globalTravelSpeeds = (function seedGlobals(){
   return { ...DEFAULT_TRAVEL_SPEEDS };
 })();
 
+// Ensure SWITCH exists in the global bag (in case of older saves)
+if (window.globalTravelSpeeds.SWITCH == null) window.globalTravelSpeeds.SWITCH = 0;
+
 function setGlobalSpeed(key, v) {
-  v = Math.max(0.1, Math.min(10, Math.round(parseFloat(v||0)*10)/10));
-  window.globalTravelSpeeds[key] = v;
+  let raw = parseFloat(v || 0);
+
+  // SWITCH: allow 0 (to disable) and allow values > 10 if typed
+  if (key === 'SWITCH') {
+    raw = Math.max(0, Math.round(raw * 10) / 10);
+  } else {
+    // Other terrains keep the 0.1..10 slider range
+    raw = Math.max(0.1, Math.min(10, Math.round(raw * 10) / 10));
+  }
+
+  window.globalTravelSpeeds[key] = raw;
 
   // Push to all existing empires + keep their UI in sync
   if (window.EmpireManager && EmpireManager.empires) {
     for (const e of EmpireManager.empires) {
-      e.travelSpeeds[key] = v;
+      e.travelSpeeds[key] = raw;
       applySliderToUI(e, key);
     }
   }
 
-  // Recompute territories so users see the effect
-  if (typeof simulateAndDraw === 'function') simulateAndDraw();
+
+  // Cheap redraw of basic map
+  window.drawCurrent?.();
+
+  // Only heavy recompute if a heatmap is active
+  window.requestRecomputeFromSliders?.();
+
+  
+
 }
 
 function buildGlobalSpeedSliders() {
@@ -944,8 +848,11 @@ function buildGlobalSpeedSliders() {
   if (!wrap) return;
   wrap.innerHTML = '';
 
+  // Make sure SWITCH exists
+  if (window.globalTravelSpeeds.SWITCH == null) window.globalTravelSpeeds.SWITCH = 0;
+
+  // 1) One row per terrain (unchanged)
   for (const t of TERRAIN_KEYS) {
-    // layout: label | slider | number (same as empire panel)
     const row = document.createElement('label');
     row.style.display = 'grid';
     row.style.gridTemplateColumns = '90px 1fr 56px';
@@ -986,37 +893,60 @@ function buildGlobalSpeedSliders() {
     row.append(name, slider, num);
     wrap.appendChild(row);
   }
+
+  // 2) EXTRA ROW: global SWITCH (0..10 on slider; number box can exceed 10)
+  {
+    const row = document.createElement('label');
+    row.style.display = 'grid';
+    row.style.gridTemplateColumns = '90px 1fr 56px';
+    row.style.alignItems = 'center';
+    row.style.columnGap  = '8px';
+    row.style.margin     = '4px 0';
+
+    const name = document.createElement('span');
+    name.textContent = 'Switching';
+
+    const slider = document.createElement('input');
+    slider.type  = 'range';
+    slider.min   = '0';     // allow 0 (off)
+    slider.max   = '10';
+    slider.step  = '0.1';
+    slider.value = String(window.globalTravelSpeeds.SWITCH);
+    slider.style.width  = '100%';
+    slider.style.margin = '0';
+
+    const num = document.createElement('input');
+    num.type   = 'number';
+    num.min    = '0';
+    num.step   = '0.1';
+    num.value  = Number(window.globalTravelSpeeds.SWITCH).toFixed(1);
+    num.style.width = '56px';
+    num.style.textAlign = 'right';
+    num.removeAttribute('max'); // ← allow higher than 10 if typed
+
+    function applyFromSlider(v) {
+      setGlobalSpeed('SWITCH', v);
+      slider.value = String(window.globalTravelSpeeds.SWITCH);
+      num.value    = Number(window.globalTravelSpeeds.SWITCH).toFixed(1);
+    }
+
+    function applyFromNumber(v) {
+      setGlobalSpeed('SWITCH', v);
+      // Slider parks at 10 if the typed value is > 10
+      slider.value = String(Math.min(10, window.globalTravelSpeeds.SWITCH));
+      num.value    = Number(window.globalTravelSpeeds.SWITCH).toFixed(1);
+    }
+
+    slider.addEventListener('input', () => applyFromSlider(slider.value));
+    num.addEventListener('change',   () => applyFromNumber(num.value));
+
+    row.append(name, slider, num);
+    wrap.appendChild(row);
+  }
 }
 
 // Build once when the DOM is ready (call after your constants exist)
 buildGlobalSpeedSliders();
-
-
-
-// ── Global Target Size (logarithmic) ──────────────────────────────
-(function wireGlobalTargetSize(){
-  const s   = document.getElementById('global-size-slider');
-  const out = document.getElementById('global-size-display');
-  if (!s || !out || !window.sliderToSize || !window.sizeToSlider) return;
-
-  // Init to geometric-mean-ish: use first empire if present, else 50
-  const init = (window.EmpireManager?.empires?.[0]?.size) || 50;
-  s.value = String(sizeToSlider(init));
-  out.textContent = String(init);
-
-  function applyAll(size) {
-    out.textContent = String(size);
-    for (const e of EmpireManager.empires) {
-      e.size = size;
-      // keep each panel in sync (log slider!)
-      if (e._sizeInput)  e._sizeInput.value  = String(size);
-      if (e._sizeSlider) e._sizeSlider.value = String(sizeToSlider(size));
-    }
-    simulateAndDraw(); drawCurrent();
-  }
-
-  s.addEventListener('input', () => applyAll(sliderToSize(s.value)));
-})();
 
 
 // Random empires
@@ -1051,7 +981,7 @@ function pickRandomLandCells(n) {
 }
 
 async function addRandomEmpires(n) {
-  n = Math.max(1, Math.min(20, n|0));
+  n = Math.max(1, Math.min(100, n|0));
   const cells = pickRandomLandCells(n);
   if (!cells.length) return;
 
@@ -1062,6 +992,8 @@ async function addRandomEmpires(n) {
     // default travel costs from global settings + sync the panel UI
     if (window.globalTravelSpeeds) emp.travelSpeeds = deepClone(window.globalTravelSpeeds);
     for (const k of TERRAIN_KEYS) applySliderToUI(emp, k);
+    applySliderToUI(emp, 'SWITCH');
+
 
     // place capital at the picked land cell
     emp.capital = { x: cells[i].x, y: cells[i].y };
@@ -1069,7 +1001,7 @@ async function addRandomEmpires(n) {
   }
 
   // compute territories for the new set
-  await simulateAndDraw();
+  //await simulateAndDraw();
 }
 
 // Wire the button
@@ -1085,19 +1017,7 @@ async function addRandomEmpires(n) {
 
 
 // ---- Loop drivers & buttons ----
-async function runPlacementOptimizeLoop(btn) {
-  optimizingPlacement = true;
-  btn.textContent = 'Stop Optimize Placement';
-  try {
-    while (optimizingPlacement) {
-      await placementRound();
-      if (window.optimizeDelayMs) await sleep(window.optimizeDelayMs);
-    }
-  } finally {
-    optimizingPlacement = false;
-    btn.textContent = 'Optimize Placement';
-  }
-}
+
 
 async function runSlidersOptimizeLoop(btn) {
   optimizingSliders = true;
@@ -1113,152 +1033,36 @@ async function runSlidersOptimizeLoop(btn) {
   }
 }
 
-async function runAdjustSizesLoop(btn) {
-  adjustingSizes = true;
-  btn.textContent = 'Stop Adjust (Value ↔ Size)';
-  try {
-    let iter = 0;
-    const MAX_ITERS = 200;
 
-    while (adjustingSizes && iter++ < MAX_ITERS) {
-      // Ensure e._value is up-to-date
-      await simulateAndDraw();
-
-      // One pass of size = round(value / threshold)
-      const changed = adjustSizesOnceFromValue(window.growthThreshold);
-
-      // If nothing changed, we’ve converged
-      if (!changed) break;
-
-      // Reflect the new target sizes on the map
-      await simulateAndDraw();
-
-      if (window.optimizeDelayMs) await sleep(window.optimizeDelayMs);
-    }
-  } finally {
-    adjustingSizes = false;
-    btn.textContent = 'Adjust size to land value';
-  }
-}
-
-async function runComboAdjustOptimizeLoop(btn) {
-  // Don’t start if nothing is selected
-  if (!runAdjustSize && !runPlacementValue && !runSlidersValue) {
-    alert('Choose at least one option: Adjust, Placement, or Sliders.');
-    return;
-  }
-
-  comboAdjustOptimize = true;
-  btn.textContent = 'Stop';
-  try {
-    while (comboAdjustOptimize) {
-      // Always work off current state
-      await simulateAndDraw();
-
-      // 1) Optional: size step from land value
-      if (runAdjustSize) {
-        adjustSizesOnceFromValue(window.growthThreshold);
-        await simulateAndDraw();
-      }
-
-      // 2) Optional: run value-based optimizers
-      if (runPlacementValue) await placementRoundValue();
-      if (runSlidersValue)   await slidersRoundValue();
-
-      if (window.optimizeDelayMs) await sleep(window.optimizeDelayMs);
-    }
-  } finally {
-    comboAdjustOptimize = false;
-    updateComboButtonLabel(); // restore label to “Run: …”
-  }
-}
-
-// Wire buttons
-(function wireOptimizeButtons(){
-  const pBtn = document.getElementById('opt-placement-btn');
-  const sBtn = document.getElementById('opt-sliders-btn');
-  if (pBtn) {
-    pBtn.addEventListener('click', async () => {
-      if (!optimizingPlacement) {
-        // If slider optimization is running, stop it first
-        optimizingSliders = false;
-        await runPlacementOptimizeLoop(pBtn);
-      } else {
-        optimizingPlacement = false;
-      }
-    });
-  }
-  if (sBtn) {
-    sBtn.addEventListener('click', async () => {
-      if (!optimizingSliders) {
-        // If placement optimization is running, stop it first
-        optimizingPlacement = false;
-        await runSlidersOptimizeLoop(sBtn);
-      } else {
-        optimizingSliders = false;
-      }
-    });
-  }
-})();
-
-
-// Wire "Adjust size to land value" and "Adjust ↔ Optimize (Value)"
+// Wire "Adjust size to land value" to the new recalibrate+sizes loop.
+// Also wire the "Adjust size and optimize (Value)" button to the same behavior.
 (function wireAdjustButtons(){
-  const adjustBtn = document.getElementById('adjust-size-to-value-btn');
-  const comboBtn  = document.getElementById('combo-adjust-optimize-btn');
-  if (!adjustBtn && !comboBtn) return;
+  let comboBtn = document.getElementById('combo-adjust-optimize-btn');
 
-  // Convenience: if any other loops are running, stop them before starting ours
+  // If neither exists, nothing to do
+  if (!comboBtn) return;
+
   function stopOthers() {
     optimizingPlacement = false;
     optimizingSliders = false;
     optimizingPlacementValue = false;
     optimizingSlidersValue = false;
+    // also stop the older loops if they were mid-flight
+    window.recalibrateCancel = false;
   }
 
-  adjustBtn?.addEventListener('click', async () => {
-    if (!adjustingSizes) {
-      stopOthers();
-      await runAdjustSizesLoop(adjustBtn);
-    } else {
-      adjustingSizes = false;
+  // helper to toggle a button into/out of running state and run the loop
+  async function toggleRun(btn) {
+    if (btn.dataset.running === '1') { // request stop
+      btn.dataset.running = '0';
+      return;
     }
-  });
+    stopOthers();
+    await runRecalibrateWithDynamicSizes(btn);
+  }
 
-  comboBtn?.addEventListener('click', async () => {
-    if (!comboAdjustOptimize) {
-      stopOthers();
-      await runComboAdjustOptimizeLoop(comboBtn);
-    } else {
-      comboAdjustOptimize = false;
-    }
-  });
-})();
-
-
-// Combo-loop toggles
-(function wireComboToggles(){
-  const cAdjust    = document.getElementById('run-adjust-size');
-  const cPlacement = document.getElementById('run-placement-value');
-  const cSliders   = document.getElementById('run-sliders-value');
-  if (!cPlacement || !cSliders || !cAdjust) return;
-
-  // initial sync
-  runAdjustSize     = !!cAdjust.checked;
-  runPlacementValue = !!cPlacement.checked;
-  runSlidersValue   = !!cSliders.checked;
-  updateComboButtonLabel();
-
-  const sync = () => {
-    runAdjustSize     = !!cAdjust.checked;
-    runPlacementValue = !!cPlacement.checked;
-    runSlidersValue   = !!cSliders.checked;
-    updateComboButtonLabel();
-  };
-
-  cAdjust.addEventListener('change', sync);
-  cPlacement.addEventListener('change', sync);
-  cSliders.addEventListener('change',   sync);
+  // Bind whichever buttons exist
+  comboBtn ?.addEventListener('click', () => toggleRun(comboBtn));
 })();
 
 
@@ -1273,89 +1077,6 @@ if (importEmpiresBtn && importEmpiresInput) {
 
 let optimizingPlacementValue = false;
 let optimizingSlidersValue   = false;
-
-async function runPlacementOptimizeLoopValue(btn) {
-  optimizingPlacementValue = true;
-  btn.textContent = 'Stop Optimize Placement (Value)';
-  try {
-    while (optimizingPlacementValue) {
-      await placementRoundValue();
-      if (window.optimizeDelayMs) await sleep(window.optimizeDelayMs);
-    }
-  } finally {
-    optimizingPlacementValue = false;
-    btn.textContent = 'Optimize Placement (Value)';
-  }
-}
-
-async function runSlidersOptimizeLoopValue(btn) {
-  optimizingSlidersValue = true;
-  btn.textContent = 'Stop Optimize Sliders (Value)';
-  try {
-    while (optimizingSlidersValue) {
-      await slidersRoundValue();
-      if (window.optimizeDelayMs) await sleep(window.optimizeDelayMs);
-    }
-  } finally {
-    optimizingSlidersValue = false;
-    btn.textContent = 'Optimize Sliders (Value)';
-  }
-}
-
-(function wireValueOptimizeButtons(){
-  const pBtn = document.getElementById('opt-placement-value-btn');
-  const sBtn = document.getElementById('opt-sliders-value-btn');
-  if (pBtn) {
-    pBtn.addEventListener('click', async () => {
-      if (!optimizingPlacementValue) {
-        optimizingSlidersValue = false;   // stop the other if running
-        await runPlacementOptimizeLoopValue(pBtn);
-      } else {
-        optimizingPlacementValue = false;
-      }
-    });
-  }
-  if (sBtn) {
-    sBtn.addEventListener('click', async () => {
-      if (!optimizingSlidersValue) {
-        optimizingPlacementValue = false;
-        await runSlidersOptimizeLoopValue(sBtn);
-      } else {
-        optimizingSlidersValue = false;
-      }
-    });
-  }
-})();
-
-
-
-
-// Hook up penalty sliders (now defined in index.html)
-(function wirePenaltySliders(){
-  const s = document.getElementById('penalty-scale');
-  const g = document.getElementById('penalty-gamma');
-  const sv = document.getElementById('penalty-scale-val');
-  const gv = document.getElementById('penalty-gamma-val');
-
-  if (!s || !g) return; // if the HTML isn't present, bail
-
-  // Initialize globals from slider defaults
-  window.penaltyScale = parseFloat(s.value);
-  window.penaltyGamma = parseFloat(g.value);
-  sv.textContent = window.penaltyScale.toFixed(1);
-  gv.textContent = window.penaltyGamma.toFixed(1);
-
-  const onChange = () => {
-    window.penaltyScale = parseFloat(s.value);
-    window.penaltyGamma = parseFloat(g.value);
-    sv.textContent = window.penaltyScale.toFixed(1);
-    gv.textContent = window.penaltyGamma.toFixed(1);
-    simulateAndDraw();
-  };
-
-  s.addEventListener('input', onChange);
-  g.addEventListener('input', onChange);
-})();
 
 
   // Collapse All Empires button
@@ -1812,6 +1533,7 @@ function renderBackground() {
 
 function drawCurrent() {
   // 1) recompute cellSize to match current canvas & grid
+  //computeEmpireTotals();  // keep land value & average live in the panel at all times
   const cellSize = canvas.width / grid.cols;
 
   // 2) draw the cached background (terrain OR value) from offscreen
@@ -2041,6 +1763,60 @@ function pathUsesHostileTransitMemo(emp, idx, hostileSet, grid) {
 }
 
 
+
+// Is cell `idx` eligible by a WATER route from *any currently-owned* cell?
+// We follow the parent chain from idx towards the capital and accept iff
+// we hit one of our owned cells and *all steps after that are WATER*.
+// (We allow the last leg over water; no crossing enemy/neutral land.)
+function reachableByWaterFromOwned(emp, idx, ownerPrev, grid) {
+  const cols = grid.cols;
+
+  // Access parent index for this empire (typed or legacy)
+  let getParentIdx;
+  if (emp.parentIdx instanceof Int32Array) {
+    getParentIdx = (i) => emp.parentIdx[i];
+  } else if (emp.parentMap) {
+    getParentIdx = (i) => {
+      const x = i % cols, y = (i / cols) | 0;
+      const p = emp.parentMap[y]?.[x];
+      return p ? (p.y * cols + p.x) : -1;
+    };
+  } else {
+    return false; // no path info; be conservative
+  }
+
+  let i = idx;
+  let hops = 0, N = grid.rows * grid.cols;
+
+  // skip the destination cell itself; we examine the *intermediate* steps
+  i = getParentIdx(i);
+  let sawWater = false;
+
+  while (i >= 0 && hops++ < N) {
+    // If we reached one of our owned cells: true iff we actually sailed at least one water step
+    if (ownerPrev[i] === emp.id) return sawWater;
+
+    const x = i % cols, y = (i / cols) | 0;
+    const terr = grid.cells[y][x].terrain;
+
+    if (terr === 'WATER') {
+      sawWater = true;
+      i = getParentIdx(i);
+      continue;
+    }
+
+    // we hit land that we don't own before touching our coast ⇒ not eligible by water
+    return false;
+  }
+  return false;
+}
+
+
+
+
+
+
+
   // --- Randomize Terrain ---
   rndBtn.addEventListener('click', () => {
     const raw = {}, keys = Object.keys(TERRAIN);
@@ -2055,13 +1831,16 @@ function pathUsesHostileTransitMemo(emp, idx, hostileSet, grid) {
     grid.randomize(weights);
     window.applyAllTerrainValues();   // <— add this
 
+// NEW:
+rebuildTerrainByteCache(grid);
+
     generateVariantGrid();
     computeMountainDepth(grid);
 
     window.precomputeWaterShading(grid, canvas.width, canvas.height);
     resizeCanvases();
     renderBackground();
-      simulateAndDraw();
+      //simulateAndDraw();
 
     
 
@@ -2100,6 +1879,13 @@ function pathUsesHostileTransitMemo(emp, idx, hostileSet, grid) {
           );
           // keep value layer aligned with terrain type
           grid.setValueAt(xx, yy, (window.terrainValueMap?.[paintType] ?? 1));
+
+// NEW: keep bytes cache in sync (if it exists)
+if (window._terrainCodeFlatCache) {
+  const idx = yy * grid.cols + xx;
+  window._terrainCodeFlatCache[idx] = (TERRAIN_CODE[paintType] || 0);
+}
+          
         }
       }
     }
@@ -2110,6 +1896,7 @@ function pathUsesHostileTransitMemo(emp, idx, hostileSet, grid) {
 
     renderBackground();
     drawCurrent();
+    window.requestRecomputeFromSliders?.();   // ← recompute when painting while route/heatmap is on
   }
 }
 
@@ -2139,13 +1926,22 @@ const x     = Math.floor(cx / cellW);
 const y     = Math.floor(cy / cellH);
 
   // (1) Route-finding mode?  [if you’ve wired that up]
-  if (window.currentMode === 'findRoute' && window.pendingRouteEmpire) {
-    window.currentRouteEmpire = window.pendingRouteEmpire;
-    window.currentRouteTarget = { x, y };
-    window.pendingRouteEmpire = null;
-    window.currentMode        = null;
-    return;
-  }
+if (window.currentMode === 'findRoute' && window.pendingRouteEmpire) {
+  window.currentRouteEmpire = window.pendingRouteEmpire;
+  window.currentRouteTarget = { x, y };
+  window.pendingRouteEmpire = null;
+  window.currentMode        = null;
+
+  // Ensure cost maps exist before drawing the route
+  setTimeout(async () => {
+    if (typeof window.recomputeCostMapsOnly === 'function') {
+      await window.recomputeCostMapsOnly();
+    }
+    window.drawCurrent?.();
+  }, 0);
+
+  return;
+}
 
   // (2) Capital-placement mode
   if (window.currentMode === 'placeCapital' && window.currentEmpire) {
@@ -2155,7 +1951,7 @@ const y     = Math.floor(cy / cellH);
 
     window.currentEmpire = null;
     window.currentMode   = null;
-    window.simulateAndDraw();
+    //window.simulateAndDraw();
     window.drawCurrent();
     return;
   }
@@ -2257,13 +2053,16 @@ if (window.__resizerSnapToCurrent) { window.__resizerSnapToCurrent(); }
     });
   });
 
+  // NEW: rebuild terrain bytes cache once
+rebuildTerrainByteCache(grid);
+
   // regenerate variants + shading + redraw
   generateVariantGrid();
   computeMountainDepth(grid);
   window.precomputeWaterShading(grid, canvas.width, canvas.height);
   resizeCanvases();
   renderBackground();
-  simulateAndDraw();
+  //simulateAndDraw();
   drawCurrent();
 }
 
@@ -2290,6 +2089,44 @@ function initTerrainMenu() {
       if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
       const text = await res.text();
       loadTerrainFromText(text);
+
+
+
+// Automatically load value layer
+      const res_value = await fetch(`./landvalue/landvalue_${fname}`);
+      if (!res_value.ok) throw new Error(res_value.status + ' ' + res_value.statusText);
+      const text_value = await res_value.text();
+
+      // Try to import into current grid dimensions
+      const ok = grid.importValueLayerFromText(text_value);
+
+
+      const avgValue = computeGlobalAvgLandValue();
+window.growthThreshold = avgValue;     // default = map’s average value
+
+// After you compute avgValue for the loaded map:
+const slider = document.getElementById('growth-threshold');      // <input id="growth-threshold">
+const label  = document.getElementById('growth-threshold-val');  // <span id="growth-threshold-val">
+if (slider) {
+  const min = Number(slider.min) || 1;
+  const max = Number(slider.max) || 61;
+  //const v = Math.max(min, Math.min(max, Math.round(avgValue)));
+  const v = 1;
+
+
+  slider.value = String(v);
+  if (label) label.textContent = String(v);
+
+  // If you rely on this elsewhere (power calc), keep this; otherwise remove:
+  window.growthThreshold = v;
+
+  // Optional: trigger a recompute if you want it to apply immediately
+  // simulateAndDraw();
+}
+
+
+
+
     } catch (err) {
       alert('Failed to load terrain: ' + err.message);
     } finally {
@@ -2366,6 +2203,46 @@ function downloadJSON(name, text) {
   a.click();
 }
 
+
+function importEmpiresFromText(jsonText, sourceLabel = 'JSON') {
+  const configs = JSON.parse(jsonText);
+  if (!Array.isArray(configs)) {
+    throw new Error('Expected a JSON array of empire configs.');
+  }
+
+  // Clear existing (keep the same array object if possible)
+  if (Array.isArray(EmpireManager.empires)) EmpireManager.empires.length = 0;
+  else EmpireManager.empires = [];
+
+  EmpireManager.nextId = 1;
+  EmpireManager.nextColorIdx = 0;
+  document.getElementById('empire-panels').innerHTML = '';
+
+  const defaults = window.globalTravelSpeeds || { ...DEFAULT_TRAVEL_SPEEDS };
+
+  configs.forEach(cfg => {
+    const emp = EmpireManager.addEmpire(cfg.name, cfg.color);
+
+    // Build UI first so sliders exist
+    EmpireManager.createEmpirePanel(emp);
+
+    // Restore properties (with sane fallbacks)
+    emp.size = (cfg.size != null) ? cfg.size : emp.size;
+    emp.travelSpeeds = Object.assign({}, defaults, cfg.travelSpeeds || {});
+    emp.capital = cfg.capital || null;
+
+    // Sync UI values (terrain + switch)
+    for (const k of TERRAIN_KEYS) applySliderToUI(emp, k);
+    applySliderToUI(emp, 'SWITCH');
+
+    // Capital label
+    updateCapitalLabel(emp);
+  });
+
+  drawCurrent();
+}
+
+
 // EXPORT: dump empire state to JSON
 document
   .getElementById('export-empires-btn')
@@ -2388,66 +2265,13 @@ document
     if (!file) return;
     const reader = new FileReader();
 
-    reader.onload = () => {
-      try {
-        const configs = JSON.parse(reader.result);
-
-        // 1) Clear existing
-        EmpireManager.empires = [];
-        EmpireManager.nextId  = 1;
-        document.getElementById('empire-panels').innerHTML = '';
-
-
-        // 2) For each saved empire, recreate data + UI
-        configs.forEach(cfg => {
-          // a) Data
-          const emp = EmpireManager.addEmpire(cfg.name, cfg.color);
-          emp.size         = cfg.size;
-          emp.travelSpeeds = cfg.travelSpeeds;
-          emp.capital      = cfg.capital;
-
-          // b) Build its panel & wire up all controls
-          EmpireManager.createEmpirePanel(emp);
-
-          // c) Sync sliders & labels to imported values
-          emp._sizeSlider.value = cfg.size;
-          if (emp._sizeInput) {
-            emp._sizeInput.value = cfg.size;
-          }
-
-
-
- // c) Travel speeds: merge defaults with the imported ones
-const defaults = window.globalTravelSpeeds || { ...DEFAULT_TRAVEL_SPEEDS };
-emp.travelSpeeds = Object.assign({}, defaults, cfg.travelSpeeds || {});
-
-
-// d) Sync ALL terrain rows in the UI (even ones missing in the file)
-for (const t of TERRAIN_KEYS) {
-  const s = emp._speedSliders?.[t];
-  const v = emp._speedValues?.[t];
-  const val = emp.travelSpeeds[t];
-  if (s) s.value = val;
-  if (v) {
-    const formatted = Number(val).toFixed(1);
-    if (v.tagName === 'INPUT') v.value = formatted;
-    else v.textContent = formatted;
+ reader.onload = () => {
+  try {
+    importEmpiresFromText(String(reader.result), file.name || 'file');
+  } catch (err) {
+    alert('Error loading ' + (file.name || 'empires.json') + ': ' + err.message);
   }
-}
-          // d) Only show capital if it was set
-          if (cfg.capital) {
-            emp._capitalDisplay.textContent =
-              `Capital: (${cfg.capital.x},${cfg.capital.y})`;
-          }
-        });
-
-        // ) Rerun the sim & redraw
-        simulateAndDraw();
-        drawCurrent();
-      } catch (err) {
-        alert('Error loading empires.json: ' + err.message);
-      }
-    };
+};
     reader.readAsText(file);
     this.value = '';
   });
@@ -2497,156 +2321,756 @@ if (toggleGridBtn) {
 }
 
 
-// Function for computing total land value
- function computeEmpireTotals() {
-  const cols = grid.cols;
-  for (const e of EmpireManager.empires) {
-    let val = 0;
-    if (e.territory && e.territory.size) {
-      for (const idx of e.territory) {
-        const x = idx % cols, y = (idx / cols) | 0;
-        val += grid.getValueAt(x, y);       // 0..61 per cell
-      }
-    }
-    e._area  = e.territory ? e.territory.size : 0;
-    e._value = val;
 
-    // Optional: show in panel if you’ve created a slot for it
-    if (e._valueDisplay) e._valueDisplay.textContent = `Land value: ${e._value}`;
+// Recompute per-empire totals from current territory and set display power.
+// _value: sum of cell values; _area: number of cells; _avg: average value
+// power = sqrt( max(0, _avg - growthThreshold) * _area )
+function computeEmpireTotals() {
+  const rows = grid.rows, cols = grid.cols;
+  const thr  = Number(window.growthThreshold ?? 0) || 0;
+
+  for (const e of EmpireManager.empires) {
+    let sum = 0, area = 0;
+
+    // territory is a Set of flat indices (create if missing)
+    if (!e.territory) e.territory = new Set();
+
+    for (const idx of e.territory) {
+      const y = (idx / cols) | 0;
+      const x = idx % cols;
+      const v = (typeof grid.getValueAt === 'function')
+        ? grid.getValueAt(x, y)
+        : Number(grid.cells[y][x].value ?? grid.cells[y][x].landValue ?? 0);
+      sum  += v;
+      area += 1;
+    }
+
+    e._value = sum;
+    e._area  = area;
+    e._avg   = area > 0 ? (sum / area) : 0;
+
+    const surplus = Math.max(0, e._avg - thr);
+    let P = Math.sqrt(surplus * area) || 0;
+    if (window.powerScale != null) {
+      const s = Number(window.powerScale) || 1;
+      P *= s;
+    }
+    e.power = P;   // for UI/debug; the auction uses P_byId it computes itself
+
+    // --- NEW: keep the panel meta-row in sync ---
+    if (e._sizeDisplay) {
+      // use area = number of cells currently in territory
+      e._sizeDisplay.textContent = `Size: ${area}`;
+    }
+    if (e._valueDisplay) {
+      // round for readability; you can use sum directly if you prefer
+      e._valueDisplay.textContent = `Land value: ${Math.round(sum)}`;
+    }
 
   }
 }
 
 
-// One pass: set each empire.size = round(value / threshold). Returns true if any size changed.
-function adjustSizesOnceFromValue(threshold) {
+
+// Build and draw the Leaderboard (size = cells; power already computed in computeEmpireTotals)
+window.renderLeaderboard = function renderLeaderboard() {
+  const table = document.getElementById('leaderboard-table');
+  if (!table) return;
+
+  // Make sure totals (including power) are up to date
+  computeEmpireTotals();
+
+  // Collect data
+  const rows = EmpireManager.empires.map(e => ({
+    name: e.name || `Empire ${e.id}`,
+    cells: e.territory ? e.territory.size : 0,
+    power: Number.isFinite(e.power) ? e.power : 0
+  }));
+
+  // Sort by size (cells), then power as tie-breaker
+  rows.sort((a, b) => (b.cells - a.cells) || (b.power - a.power));
+
+  // Fill table body
+  const tbody = table.querySelector('tbody');
+  tbody.innerHTML = '';
+  rows.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="padding:3px 6px;">${i + 1}</td>
+      <td style="padding:3px 6px;">${r.name}</td>
+      <td style="text-align:right; padding:3px 6px;">${r.cells}</td>
+      <td style="text-align:right; padding:3px 6px;">${r.power.toFixed(3)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+// Wire the CSV export button once (build fresh data on each click)
+const btn = document.getElementById('export-leaderboard-btn');
+if (btn && !btn.dataset.wired) {
+  btn.dataset.wired = '1';
+  btn.addEventListener('click', () => {
+    // 1) Make sure totals are up to date
+    computeEmpireTotals();
+
+    // 2) Collect fresh data, and include each empire’s travel costs
+    const rowsNow = EmpireManager.empires.map(e => ({
+      name:  e.name || `Empire ${e.id}`,
+      cells: e.territory ? e.territory.size : 0,
+      power: Number.isFinite(e.power) ? e.power : 0,
+      speeds: e.travelSpeeds || {}   // ← per-terrain travel cost settings
+    }))
+    .sort((a, b) => (b.cells - a.cells) || (b.power - a.power));
+
+    // 3) Decide the order of the terrain columns (keep it simple + consistent)
+const TERRAIN_ORDER = ['PLAIN','DESERT','WATER','MOUNTAIN','FOREST','SHRUB','RIVER','ICE'];
+
+// 4) CSV header: rank, empire, cells, power, switch, then one column per terrain
+const header =
+  ['rank','empire','cells','power','switch', ...TERRAIN_ORDER.map(t => t.toLowerCase())]
+  .join(',') + '\n';
+
+// 5) Build CSV rows (numbers are formatted; names are JSON-escaped)
+const lines = rowsNow.map((r, i) => {
+  const terrainVals = TERRAIN_ORDER.map(k => {
+    const v = r.speeds[k];
+    return (v == null) ? '' : Number(v).toFixed(3);
+  });
+  const switchVal = (r.speeds && r.speeds.SWITCH != null)
+    ? Number(r.speeds.SWITCH).toFixed(3)
+    : '0.000';
+
+  return [
+    i + 1,
+    JSON.stringify(r.name),
+    r.cells,
+    r.power.toFixed(6),
+    switchVal,
+    ...terrainVals
+  ].join(',');
+});
+
+    // 6) Download the file
+    const csv = header + lines.join('\n');
+    downloadTextFile('leaderboard.csv', csv);
+  });
+}
+};
+
+
+
+// Compute target size per empire from total land value and threshold.
+// Writes e._targetSize but DOES NOT change e.size.
+function computeTargetSizesFromValue(threshold) {
   threshold = Math.max(1, Math.min(61, Math.floor(threshold || 1)));
   let changed = false;
 
   for (const e of EmpireManager.empires) {
-    const val = Math.max(0, Math.floor(e._value || 0));
-    let newSize = Math.round(val / threshold);
-    // keep sane bounds (match your size UI)
-    newSize = Math.max(1, Math.min(30000, newSize));
+    const val = Math.max(0, Math.floor(e._value || 0)); // total land value
+    let t = Math.round(val / threshold);
+    t = Math.max(0, Math.min(100000, t));                // same sane bounds as your UI
 
-    if (newSize !== e.size) {
-      e.size = newSize;
+    if ((e._targetSize | 0) !== t) {
+      e._targetSize = t;
       changed = true;
-      // keep the panel UI in sync
-      if (e._sizeSlider) e._sizeSlider.value = String(newSize);
-      if (e._sizeInput)  e._sizeInput.value  = String(newSize);
+    }
+  }
+  return changed;
+}
+
+// Nudge actual caps (e.size) TOWARD e._targetSize by at most `step`.
+// By default we only GROW toward the target (no shrinking). Set `bidirectional=true` if you want both.
+function nudgeSizesTowardTarget(step, bidirectional = false) {
+  step = Math.max(1, Math.floor(step || 1));
+  let changed = false;
+
+  for (const e of EmpireManager.empires) {
+    const target = (e._targetSize != null) ? (e._targetSize | 0) : (e.size | 0);
+    let s = e.size | 0;
+
+    if (s < target) {
+      const inc = Math.min(step, target - s);
+      s += inc;
+    } else if (bidirectional && s > target) {
+      const dec = Math.min(step, s - target);
+      s -= dec;
+    }
+
+    if (s !== (e.size | 0)) {
+      e.size = s;
+      changed = true;
     }
   }
   return changed;
 }
 
 
-// --- 1) Single-ring simulation step (same logic, less churn) ---
-async function simulateOneRing() {
-  // 1a) Recompute cost maps (hostile-cell barrier + penalty)
-  await EmpireManager.updateAllCostMaps(grid);
+// Recalibrate loop using the new global auction (no heap).
+// Each iteration does:
+//   (1) computeEmpireTotals()  -> updates e._value, e._avg, e.power
+//   (2) adjustSizesOnceFromValue(threshold) -> sets e.size cap
+//   (3) updateAllCostMaps() + recomputeOwnershipAuctionOptionA() -> assign cells
+//   (4) repeat until the user stops, or break early if nothing changes
+async function runRecalibrateWithDynamicSizes(btn) {
+  // mark running and set button label
+  btn.dataset.running = '1';
+  const originalLabel = btn.textContent;
+  btn.textContent = 'Stop';
 
+  try {
+    let iter = 0;
+
+    // Prime base travel-cost maps once (terrain/capitals/speeds stable most of the time)
+    await EmpireManager.updateAllCostMaps(grid);
+
+    while (btn.dataset.running === '1') {
+      const prevOwnerVersion = window._ownerVersion | 0;
+
+      // 1) Totals + power from current territory (value + avg)
+      computeEmpireTotals();
+
+      // 2) Compute TARGET sizes, then nudge actual sizes up toward target
+      computeTargetSizesFromValue(window.growthThreshold);
+      const sizeChanged = nudgeSizesTowardTarget(window.autoGrowAmount, /*bidirectional=*/true);
+
+
+      // 3) Full, atomic global auction assignment
+      await recomputeOwnershipAuctionGlobal();
+
+      // 4) Draw occasionally to keep UI snappy
+      if ((iter++ % 2) === 0) drawCurrent();
+
+      // Exit early if nothing changed (ownership and sizes stable)
+      const ownerUnchanged = (window._ownerVersion | 0) === prevOwnerVersion;
+      if (!sizeChanged && ownerUnchanged) break;
+
+      // Yield to UI
+      await new Promise(r => setTimeout(r, 0));
+    }
+  } finally {
+    btn.dataset.running = '0';
+    btn.textContent = originalLabel || 'Adjust size to land value';
+    computeEmpireTotals();
+    drawCurrent();
+  }
+}
+
+
+
+
+// === Global auction-based reassignment (Option A++) ===
+// Recomputes the entire ownership map in 3 passes using precomputed base costs.
+// - Never assigns WATER
+// - Deterministic tie-breaks (lower empire id, then lower cell idx)
+// - Respects per-empire caps (emp.size)
+// - Gives runner-up a chance, then a final fallback so small empires can still fill
+// GLOBAL AUCTION (single-pass): assigns cells to the lowest-cost empires,
+// respecting per-tick quotas, with no defense/reach special cases.
+async function recomputeOwnershipAuctionGlobal() {
+  // --- Config (deterministic) ---
+  const EPS = 1e-6;   // tiny hysteresis for float ties
+  const K   = 8;      // keep top-K empires per cell (4–8 is enough)
+
+
+// 8-neighbour offsets (needed by eligibleFrontier)
+const DX8 = [ 1, -1,  0,  0,  1,  1, -1, -1 ];
+const DY8 = [ 0,  0,  1, -1,  1, -1,  1, -1 ];
+
+  // --- Inputs & basics ---
+  const emps = EmpireManager.empires;           // <— your project’s list
   const rows = grid.rows, cols = grid.cols, N = rows * cols;
 
-  // Build a one-time list of all non-water cell indices (avoid repeating the water check per-empire)
-  const nonWaterIdx = [];
+  // Land mask (WATER never assigned)
+  const isLand = new Uint8Array(N);
+  for (let y = 0, i = 0; y < rows; y++) {
+    const row = grid.cells[y];
+    for (let x = 0; x < cols; x++, i++) {
+      isLand[i] = (row[x].terrain === 'WATER') ? 0 : 1;
+    }
+  }
+
+
+  // Bidding gates
+const delta = Number(window.discriminationThreshold ?? window.growthThreshold ?? 1); // δ
+const mu    = Math.max(0, Number(window.powerWeight ?? 0)); // μ in [0..1] (or 0.3), 0 disables power
+
+
+
+
+
+  // Max id & power hook (power = 1 for now; keep the knob)
+  let maxId = 0;
+  for (const e of emps) if (e.id > maxId) maxId = e.id;
+
+
+/// POWER EPSILON
+  const EPSD = 1e-6;  // small distance epsilon for d=0 at capitals
+
+// Flattened value map for quick access (and build isLand at the same time)
+const valFlat = new Float32Array(N);
+{
+  let i = 0;
   for (let y = 0; y < rows; y++) {
     const row = grid.cells[y];
-    for (let x = 0; x < cols; x++) {
-      if (row[x].terrain !== 'WATER') nonWaterIdx.push(y * cols + x);
+    for (let x = 0; x < cols; x++, i++) {
+      const cell = row[x];
+      // Use your actual value source; grid.getValueAt(x,y) if that’s your accessor
+      const v = (typeof grid.getValueAt === 'function') ? grid.getValueAt(x, y)
+                                                       : Number(cell.value ?? cell.landValue ?? 0);
+      valFlat[i] = v;
+      // (your isLand code is already present above; keep it as-is)
     }
   }
-
-  // 1b) Collect all reachable, non-water cells
-  // (Keep the same global “cheapest-first” behavior.)
-  const all = [];
-  for (const emp of EmpireManager.empires) {
-    // Accept either typed (Float64/32) flat buffer or legacy 2D array
-    const cm = (emp.costMapFlat != null) ? emp.costMapFlat : emp.costMap;
-    if (!cm) continue;                 // no map yet for this empire
-    const isFlat = ArrayBuffer.isView(cm);
-
-    for (let k = 0; k < nonWaterIdx.length; k++) {
-      const idx = nonWaterIdx[k];
-      const cost = isFlat ? cm[idx] : cm[(idx / cols | 0)][idx % cols];
-      if (!Number.isFinite(cost)) continue;
-      all.push({ emp, idx, cost });
-    }
-  }
-
-  // 1c) Global sort, clear, assign exactly `size` cells per empire, one owner per cell
-  all.sort((a, b) => a.cost - b.cost);
-
-  // Important: we only clear after 1b, so any earlier checks would have seen last ring's territory
-  // (We don’t do owner-crossing checks here, so this is just the right place to clear.)
-  for (const emp of EmpireManager.empires) emp.territory.clear();
-
-  const taken  = new Uint8Array(N);    // faster & smaller than Set()
-  const counts = Object.create(null);
-  for (const emp of EmpireManager.empires) counts[emp.id] = 0;
-
-  for (let i = 0; i < all.length; i++) {
-    const { emp, idx } = all[i];
-    if (counts[emp.id] >= emp.size) continue;
-    if (taken[idx]) continue;
-    emp.territory.add(idx);
-    taken[idx] = 1;
-    counts[emp.id]++;
-  }
-
-  // Update the per-empire "Size: N" label in each panel (only if changed)
-  for (const emp of EmpireManager.empires) {
-    if (emp._sizeDisplay) {
-      const txt = `Size: ${emp.territory.size}`;
-      if (emp._sizeDisplay.textContent !== txt) emp._sizeDisplay.textContent = txt;
-    }
-  }
-
-  // Compute empire value (unchanged)
-  computeEmpireTotals();
 }
 
-// --- 2) Full “recalibration” loop, now checking actual territory changes ---
-// 2) Full “recalibration” loop with live updates
-  async function recalibrateTerritory() {
-  if (window.disablePenalty || window.recalibrateCancel) {
-    // one‐shot, no penalty
-    await simulateOneRing();
-    drawCurrent();
-    return;
+
+
+
+  // --- Previous ownership (only for measuring curr size; no incumbency) ---
+  const ownerPrev = new Int16Array(N);
+  for (const e of emps) {
+    if (!e.territory) continue;
+    for (const idx of e.territory) ownerPrev[idx] = e.id;
   }
-  let changed;
-  do {
-    if (window.recalibrateCancel) break;
 
-    // snapshot each empire’s territory
-    const prev = EmpireManager.empires.map(e => new Set(e.territory));
 
-// do one ring of capture (now waits for workers)
-     await simulateOneRing();
 
-    // redraw so the user sees that ring land
-    //drawCurrent();
+  // --- Per-tick quotas (your "good cap"): total cells each empire may end with this tick ---
+  const curr = new Int32Array(maxId + 1);
+  for (let i = 0; i < N; i++) { const id = ownerPrev[i]; if (id > 0) curr[id]++; }
 
-    // small pause so the frame can render (20ms = ~50fps)
-    await new Promise(r => setTimeout(r, 0));
-
-    // detect any empire whose territory actually changed
-    changed = EmpireManager.empires.some((e,i) => {
-      const before = prev[i];
-      if (e.territory.size !== before.size) return true;
-      for (const cell of e.territory) if (!before.has(cell)) return true;
-      for (const cell of before)    if (!e.territory.has(cell)) return true;
-      return false;
-    });
-  } while (changed);
+ const target = new Int32Array(maxId + 1);
+for (const e of emps) {
+  // use target size if present; else use UI size slider
+  target[e.id] = (e._targetSize != null) ? (e._targetSize | 0) : (e.size | 0);
 }
 
-// --- 3) Swap your old simulateAndDraw and add the Recalibrate button ---
-// NEW:
+
+
+
+// S_e = max(1, (avg - threshold)+ * size)
+// We'll derive avg from current ownership to avoid relying on other places.
+const thr = Number(window.growthThreshold ?? 0) || 0;
+
+// From ownerPrev we already have curr sizes; accumulate value sums per empire
+const sumVal = new Float64Array(maxId + 1);
+for (let i = 0; i < N; i++) {
+  const id = ownerPrev[i];
+  if (id > 0) sumVal[id] += valFlat[i];
+}
+
+// Compute per-empire power P = sqrt( max(0, avg - thr) * area )
+const P_byId = new Float32Array(maxId + 1);
+{
+  const thr = Number(window.growthThreshold ?? 0) || 0;
+
+  for (const e of emps) {
+    const id = e.id;
+    const n  = curr[id] | 0;
+    const avg = (n > 0) ? (sumVal[id] / n) : 0;
+    const surplus = Math.max(0, avg - thr);
+    let P = Math.sqrt(surplus * n) || 0;
+
+    if (window.powerScale != null) {
+      const s = Number(window.powerScale) || 1;
+      P *= s;
+    }
+    P_byId[id] = P;
+  }
+}
+
+
+  const G = Math.max(1, (Number(window.assignGrowthStep ?? window.autoGrowAmount ?? 5) | 0));
+  const quota = new Int32Array(maxId + 1);
+  let sumQuota = 0;
+  for (const e of emps) {
+    const q = Math.max(0, Math.min(target[e.id], curr[e.id] + G));
+    quota[e.id] = q;
+    sumQuota += q;
+  }
+
+  // Ensure all active empires have a ready cost map with finite cost at their capital
+let mapsReady = true;
+for (const e of emps) {
+  if (!e.capital) continue;
+  const base = e.costMapFlat;
+  if (!base || base.length !== N) { mapsReady = false; break; }
+  const ci = e.capital.y * cols + e.capital.x;
+  if (!(base[ci] < Infinity)) { mapsReady = false; break; } // capital must be reachable
+}
+if (!mapsReady) {
+  // Compute cost maps before assigning, then proceed once ready
+  await EmpireManager.updateAllCostMaps(grid);
+  // (Optional) re-check here; in practice the awaited call is sufficient
+}
+
+
+
+
+// Map empire id -> flat capital index (or -1 if none)
+const capIdxById = new Int32Array(maxId + 1);
+capIdxById.fill(-1);
+for (const e of emps) {
+  if (e.capital) {
+    capIdxById[e.id] = e.capital.y * cols + e.capital.x;
+  }
+}
+
+// Quick access to cost maps by id (for defender distance on hostile tiles)
+const costById = new Array(maxId + 1);
+for (const e of emps) costById[e.id] = e.costMapFlat || null;
+
+// Frontier adjacency: cell i is eligible for empire id if
+// - it was owned by id last tick, OR
+// - it is the capital tile itself (seed), OR
+// - any of its 8-neighbors was owned by id last tick, OR
+// - it is adjacent to the capital tile (for the very first tick)
+function eligibleFrontier(id, i) {
+  if (id <= 0) return false;
+
+  //// 1) Always allow defending/retaining your own previous tiles
+  //if (ownerPrev[i] === id) return true;
+
+  const capIdx = capIdxById[id];
+
+  // 2) Full border from last tick: any of 8 neighbors owned by id last tick
+  const x = i % cols, y = (i / cols) | 0;
+  for (let k = 0; k < 8; k++) {
+    const nx = x + DX8[k], ny = y + DY8[k];
+    if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) continue;
+    const ni = ny * cols + nx;
+    if (ownerPrev[ni] === id) return true;
+  }
+
+  // 3) First-seed convenience: ONLY if empire has no territory yet,
+  // allow the capital tile and its 8-neighbors as eligible.
+  if ((curr[id] | 0) === 0 && capIdx >= 0) {
+    if (i === capIdx) return true;
+    const cx = capIdx % cols, cy = (capIdx / cols) | 0;
+    for (let k = 0; k < 8; k++) {
+      const nx = cx + DX8[k], ny = cy + DY8[k];
+      if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) continue;
+      const ni = ny * cols + nx;
+      if (ni === i) return true;
+    }
+  }
+
+  return false;
+}
+
+
+
+
+
+
+  // --- Top-K candidates per cell (sorted by ascending cost) ---
+  // Store as structure-of-arrays for speed/determinism.
+  const topKId   = new Int16Array(N * K);
+  const topKCost = new Float32Array(N * K);
+  const topKLen  = new Uint8Array(N);
+  for (let i = 0; i < topKCost.length; i++) topKCost[i] = Infinity;
+
+  // Scan by empire (cache-friendly over costMapFlat)
+  for (const e of emps) {
+    const id = e.id;
+    const base = e.costMapFlat;
+    if (!base || base.length !== N) continue;
+    //const inv = invPow[id];
+
+    for (let i = 0; i < N; i++) {
+      if (!isLand[i]) continue;
+
+const d = base[i];
+if (!(d < Infinity)) continue;
+
+    const v = valFlat[i];
+
+    // --- Eligibility: frontier OR reachable by WATER from any owned cell
+    const eligible =
+      eligibleFrontier(id, i) ||
+      reachableByWaterFromOwned(e, i, ownerPrev, grid);
+    if (!eligible) continue;
+
+    // --- Discrimination: only consider cells with value >= δ
+    if (!(v >= delta)) continue;
+
+    // --- Pure distance bidding (no benefit division, no hostile bias, no thinning)
+    const c = d + EPSD;
+
+      const off = i * K;
+      let len = topKLen[i];
+
+      // Fast drop if full and new cost not better than worst
+      if (len === K) {
+        const worstC  = topKCost[off + (K - 1)];
+        const worstId = topKId  [off + (K - 1)];
+        if (!((c < worstC - EPS) || (Math.abs(c - worstC) <= EPS && id < worstId))) continue;
+      }
+
+      // Insert in sorted position (stable tie: id)
+      let pos = Math.min(len, K - 1);
+      while (pos > 0) {
+        const prevC  = topKCost[off + (pos - 1)];
+        const prevId = topKId  [off + (pos - 1)];
+        if ((c < prevC - EPS) || (Math.abs(c - prevC) <= EPS && id < prevId)) {
+          topKCost[off + pos] = prevC;
+          topKId  [off + pos] = prevId;
+          pos--;
+        } else break;
+      }
+      topKCost[off + pos] = c;
+      topKId  [off + pos] = id;
+      if (len < K) len++;
+      topKLen[i] = len;
+    }
+  }
+
+  // --- Min-heap over (cost, cellIdx, empireId, ptrIntoTopK) ---
+  const heapCost = []; const heapCell = []; const heapEmp = []; const heapPtr = []; let H = 0;
+  function less(a, b) {
+    const da = heapCost[a], db = heapCost[b];
+    if (Math.abs(da - db) > EPS) return da < db;
+    if (heapCell[a] !== heapCell[b]) return heapCell[a] < heapCell[b];
+    return heapEmp[a] < heapEmp[b];
+  }
+  function swap(a, b) {
+    [heapCost[a], heapCost[b]] = [heapCost[b], heapCost[a]];
+    [heapCell[a], heapCell[b]] = [heapCell[b], heapCell[a]];
+    [heapEmp [a], heapEmp [b]] = [heapEmp [b], heapEmp [a]];
+    [heapPtr [a], heapPtr [b]] = [heapPtr [b], heapPtr [a]];
+  }
+  function push(cost, cell, emp, ptr) {
+    heapCost[H] = cost; heapCell[H] = cell; heapEmp[H] = emp; heapPtr[H] = ptr;
+    let i = H++; while (i > 0) { const p = (i - 1) >> 1; if (less(i, p)) { swap(i, p); i = p; } else break; }
+  }
+  function pop() {
+    if (H <= 0) return null;
+    const out = { cost: heapCost[0], cell: heapCell[0], emp: heapEmp[0], ptr: heapPtr[0] };
+    const last = --H;
+    if (last >= 0) {
+      heapCost[0] = heapCost[last]; heapCell[0] = heapCell[last];
+      heapEmp [0] = heapEmp [last]; heapPtr [0] = heapPtr [last];
+    }
+    let i = 0; for (;;) {
+      const l = i*2+1, r = l+1; if (l >= H) break;
+      const m = (r < H && less(r, l)) ? r : l;
+      if (less(m, i)) { swap(m, i); i = m; } else break;
+    }
+    return out;
+  }
+
+  // Track which per-cell candidates we've already pushed
+const topKUsed = new Uint8Array(N * K);
+
+// Helper: for a given cell i, pick the unused candidate j that minimizes
+// effective cost = distance / (1 + mu * P_byId[id])
+function pickBestByEffective(i) {
+  const off = i * K;
+  const len = topKLen[i];
+  let bestJ = -1, bestEff = Infinity;
+
+  for (let j = 0; j < len; j++) {
+    if (topKUsed[off + j]) continue;
+    const id2 = topKId  [off + j];
+    const d2  = topKCost[off + j];     // stored as PURE distance
+    const eff = d2 / (1 + mu * (P_byId[id2] || 0));
+    if (eff < bestEff) { bestEff = eff; bestJ = j; }
+  }
+  return (bestJ >= 0) ? { j: bestJ, eff: bestEff } : null;
+}
+
+// Seed heap: best (distance+power) candidate per cell (topKCost holds raw distance)
+for (let i = 0; i < N; i++) {
+  if (!isLand[i]) continue;
+  if (topKLen[i] === 0) continue;
+
+  const pick = pickBestByEffective(i);
+  if (!pick) continue;
+
+  const j   = pick.j;
+  const id  = topKId  [i*K + j];
+  const eff = pick.eff;
+
+  topKUsed[i*K + j] = 1;
+  push(eff, i, id, j);  // heap key is effective cost (distance adjusted by power)
+}
+
+
+  // --- Single global auction ---
+  const owner = new Int16Array(N); // 0 = neutral/water initially
+  while (H > 0 && sumQuota > 0) {
+    const it = pop(); if (!it) break;
+    const i = it.cell, e = it.emp, p = it.ptr;
+
+    if (owner[i] !== 0) continue;        // cell already assigned
+
+    if (quota[e] > 0) {
+      owner[i] = e;                      // assign to this empire
+      quota[e]--; sumQuota--;
+      continue;
+    }
+
+// No quota: advance this cell to its NEXT best by effective cost
+const pick = pickBestByEffective(i);
+if (pick) {
+  const j2  = pick.j;
+  const id2 = topKId  [i*K + j2];
+  const eff = pick.eff;
+  topKUsed[i*K + j2] = 1;
+  push(eff, i, id2, j2);
+}
+
+  }
+
+// --- Rebuild territories from owner[] deterministically ---
+
+// 0) Build O(1) lookup from id -> empire (avoid O(E) .find per cell)
+const idToEmp = new Array(maxId + 1);
+for (const e of emps) idToEmp[e.id] = e;
+
+// 1) Clear (or create) existing sets once
+for (const e of emps) {
+  if (e.territory instanceof Set) e.territory.clear();
+  else e.territory = new Set();
+}
+
+// 2) Single linear pass filling sets via O(1) lookup
+for (let i = 0; i < N; i++) {
+  const id = owner[i];
+  if (id > 0) {
+    const e = idToEmp[id];
+    if (e) e.territory.add(i);
+  }
+}
+
+// --- Elimination & cleanup: (1) capital taken by others  (2) zero-size empires ---
+{
+  const toRemove = [];
+
+  // (1) Capital taken by someone else
+  for (const e of emps) {
+    if (!e.capital) continue;
+    const capIdx   = e.capital.y * cols + e.capital.x;
+    const capOwner = owner[capIdx] | 0;
+    if (capOwner > 0 && capOwner !== e.id) {
+      toRemove.push(e);
+    }
+  }
+
+  // (2) Zero-size empires (no cells at all → remove, even if not overrun)
+  for (const e of emps) {
+    const area = e && e.territory ? e.territory.size : 0;
+    if (area === 0) {
+      toRemove.push(e);
+    }
+  }
+
+  // Deduplicate (in case an empire matches both rules)
+  const seen = new Set();
+  const unique = [];
+  for (const e of toRemove) {
+    if (!e || seen.has(e.id)) continue;
+    seen.add(e.id);
+    unique.push(e);
+  }
+
+  // Remove from the board + from the UI + from the model
+  for (const e of unique) {
+    // Clear any leftover tiles on the board
+    for (let i = 0; i < N; i++) {
+      if (owner[i] === e.id) owner[i] = 0;
+    }
+
+    // Mark and remove from your model
+    e._dead = true;
+    EmpireManager.removeEmpire(e.id);
+
+    // Remove the control panel on the left, if it exists
+    const panel = document.getElementById(`empire-panel-${e.id}`);
+    if (panel && panel.parentNode) panel.parentNode.removeChild(panel);
+  }
+}
+
+  // Notify visuals that ownership changed
+  window._ownerVersion = (window._ownerVersion | 0) + 1;
+
+  // Done
+  return owner;
+}
+
+////////////
+//////////// END OF GLOBAL ASSIGNMENT FUNCTION
+////////////
+
+
+// Recompute only the travel-cost maps for each empire (no territory changes)
+async function recomputeCostMapsOnly() {
+  // If you want land totals to affect only simulation, we can skip computeEmpireTotals() here.
+  await EmpireManager.updateAllCostMaps(grid);
+}
+
+// Expose for other files / UI helpers
+window.recomputeCostMapsOnly = recomputeCostMapsOnly;
+
+
+
+// Recompute full assignment using worker cost maps + auction
 async function simulateAndDraw() {
-  await simulateOneRing();
-  //drawCurrent();
+
+  // 1) Refresh land totals so power reflects current average value
+  computeEmpireTotals();
+
+  // 2) Ensure all empires have up-to-date base travel-cost maps
+  //    (Terrain/capital/speed changes → rerun Dijkstra in the worker)
+  await EmpireManager.updateAllCostMaps(grid);   // returns when all worker jobs finish
+  //      ^ This uses the pool + transfers terrain bytes, sets emp.costMapFlat. :contentReference[oaicite:5]{index=5} :contentReference[oaicite:6]{index=6}
+
+  // 3) Global auction recompute (winner + runner-up + fallback)
+  await recomputeOwnershipAuctionGlobal();
+
+  // 4) Keep “Size: N” labels in sync
+  for (const emp of EmpireManager.empires) {
+    if (emp._sizeDisplay) emp._sizeDisplay.textContent = `Size: ${emp.territory.size}`;
+
+    window.renderLeaderboard?.();
+  }
+}
+
+
+
+// Debounced + non-overlapping recompute for UI changes.
+// Triggers if a heatmap is active OR a route is currently displayed.
+window._recomputeFromSlidersRunning = false;
+window._recomputeFromSlidersQueued  = false;
+
+window.requestRecomputeFromSliders = function () {
+  const need =
+    !!window.currentHeatEmpire ||
+    (!!window.currentRouteEmpire && !!window.currentRouteTarget);
+  if (!need) return;
+
+  window._recomputeFromSlidersQueued = true;
+  scheduleRecomputeFromSliders();
+};
+
+function scheduleRecomputeFromSliders() {
+  if (window._recomputeFromSlidersRunning) return;
+  if (!window._recomputeFromSlidersQueued) return;
+
+  window._recomputeFromSlidersQueued  = false;
+  window._recomputeFromSlidersRunning = true;
+
+  (async () => {
+    try {
+      if (typeof window.recomputeCostMapsOnly === 'function') {
+        await window.recomputeCostMapsOnly();
+      }
+      // drawCurrent() will redraw heatmap and/or the route using fresh parents
+      window.drawCurrent?.();
+    } finally {
+      window._recomputeFromSlidersRunning = false;
+      if (window._recomputeFromSlidersQueued) scheduleRecomputeFromSliders();
+    }
+  })();
 }
 
 
@@ -2672,6 +3096,9 @@ initValueMenu();
 ;(function renderLoop() {
   // 1) always redraw the base map (terrain + grid + territory + capitals)
   drawCurrent();
+
+      window.renderLeaderboard?.();
+
 
   // 2) now overlay the semi‑transparent heatmap if toggled
   if (window.currentHeatEmpire) {

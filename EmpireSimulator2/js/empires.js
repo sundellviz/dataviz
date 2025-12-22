@@ -6,20 +6,22 @@ class Empire {
     this.name         = name || `Empire ${id}`;
     this.color        = color || '#ff000080';
     this.capital      = null;      // { x, y }
-    this.travelSpeeds = {
-      PLAIN:    2.0,
-      DESERT:   4.0,
-      WATER:    1.0,
-      MOUNTAIN: 6.0,
-      FOREST:   3.0,
-      SHRUB:    3.0,
-      RIVER:    1.5,
-      ICE:      7.0,
-    };
-    this.size       = 50;
-    this.territory  = new Set();   // Set<number> of flat indices
-    this.costMap    = [];
-    this.parentMap  = [];
+this.travelSpeeds = {
+  PLAIN:    2.0,
+  DESERT:   4.0,
+  WATER:    1.0,
+  MOUNTAIN: 6.0,
+  FOREST:   3.0,
+  SHRUB:    3.0,
+  RIVER:    1.5,
+  ICE:      7.0,
+  SWITCH:   0.0
+};
+this.size       = 50;           // target number of cells
+this.power      = 1.0;          // ← NEW: influences (step_cost / power)
+this.territory  = new Set();    // Set<number> of flat indices
+this.costMap    = [];           // (kept for UI/heatmap compatibility; not used by global-heap)
+this.parentMap  = [];
   }
 }
 
@@ -169,14 +171,11 @@ async updateAllCostMaps(grid) {
   const rows = grid.rows, cols = grid.cols;
 
   // 1) Build owner arrays from last ring’s territory
-  const ownerIdFlat    = buildOwnerIdFlat(rows, cols, EmpireManager.empires);
+  //const ownerIdFlat    = buildOwnerIdFlat(rows, cols, EmpireManager.empires);
 
   // 2) Kick off one worker job per empire with shared owner arrays
-  const jobs = EmpireManager.empires.map(emp =>
-    computeCostMapOffload(emp, grid, ownerIdFlat, {
-      penaltyScale:  (window.penaltyScale ?? 1.0),
-      penaltyGamma:  (window.penaltyGamma ?? 1.0)
-}).then((msg) => {
+const jobs = EmpireManager.empires.map(emp =>
+  computeCostMapOffload(emp, grid).then((msg) => {
   // Accept any of the shapes we might get back:
   // - { dist, parentIdx }     // Float32 (new)
   // - { dist64, parentIdx }   // Float64 (older)
@@ -266,14 +265,7 @@ function createEmpirePanel(emp) {
       <div class="value-display pill">Land value: 0</div>
     </div>
 
-<div class="size-row">
-  <label class="size-label">
-    Target size:
-    <input type="number" class="size-input" min="1" max="${SIZE_MAX}" value="${emp.size}" />
-  </label>
-  <!-- Log slider: 0..1000 maps to 1..100000 -->
-  <input type="range" class="size-slider" min="0" max="1000" step="1" value="${sizeToSlider(emp.size)}" />
-</div>
+
 
     <hr/>
     <div style="font-weight:600; color: var(--muted); margin-bottom:4px;">Travel costs</div>
@@ -379,36 +371,9 @@ nameSpan.addEventListener('click', (e) => { stopToggle(e); startNameEdit(); });
   colorInput.addEventListener('input', () => {
     emp.color = colorInput.value + '80';
     summary.style.background = emp.color;
-    window.simulateAndDraw(); window.drawCurrent();
+    //window.simulateAndDraw();
+    window.drawCurrent();
   });
-
-// — Size Slider + Number Input — (logarithmic)
-const sizeSlider = panel.querySelector('.size-slider');
-const sizeInput  = panel.querySelector('.size-input');
-emp._sizeSlider  = sizeSlider;
-emp._sizeInput   = sizeInput;
-
-function applySize(n) {
-  // clamp and round
-  n = Math.max(SIZE_MIN, Math.min(SIZE_MAX, Math.round(Number(n) || 0)));
-  emp.size = n;
-  // sync UI
-  sizeInput.value  = String(n);
-  sizeSlider.value = String(sizeToSlider(n));
-  // reflect immediately
-  simulateAndDraw(); drawCurrent();
-}
-
-// slider drives size via log map
-sizeSlider.addEventListener('input', () => {
-  const n = sliderToSize(sizeSlider.value);
-  applySize(n);
-});
-
-// number box sets exact size; slider follows
-sizeInput.addEventListener('change', () => {
-  applySize(sizeInput.value);
-});
 
 // — Travel Speed Sliders —
 const speedDiv = panel.querySelector('.speed-sliders');
@@ -452,25 +417,39 @@ for (const t of KEYS) {
   slider.style.margin = '0';
 
   const num = document.createElement('input');
-  num.type  = 'number';
-  num.min   = '0.1';
-  num.max   = '10';
-  num.step  = '0.1';
-  num.value = Number(emp.travelSpeeds[t]).toFixed(1);
-  num.style.width = '56px';
-  num.style.textAlign = 'right';
+num.type  = 'number';
+num.min   = '0';
+num.removeAttribute('max');   // ← allow any high value
+num.step  = '0.1';
+num.value = Number(emp.travelSpeeds[t]).toFixed(1);
 
-  function apply(v) {
-    let val = Math.max(0.1, Math.min(10, Math.round(parseFloat(v || 0) * 10) / 10));
-    emp.travelSpeeds[t] = val;
-    slider.value = String(val);
-    num.value    = val.toFixed(1);
-    // kick a recompute so the change is visible
-    window.simulateAndDraw?.(); window.drawCurrent?.();
-  }
+// Keep the slider only for quick scrubbing (0..10)
+function applyFromSlider(v) {
+  let val = Math.max(0, Math.min(10, Math.round(parseFloat(v || 0) * 10) / 10));
+  emp.travelSpeeds[t] = val;
+  slider.value = String(val);            // slider shows its capped value
+  num.value    = val.toFixed(1);         // box shows that same capped value (until user edits)
+  window.drawCurrent?.();
 
-  slider.addEventListener('input', () => apply(slider.value));
-  num.addEventListener('change',   () => apply(num.value));
+  // Live recompute only if a heatmap is active
+  window.requestRecomputeFromSliders?.();
+}
+
+// Let the number box exceed slider’s max
+function applyFromNumber(v) {
+  let raw = parseFloat(v || 0);
+  let val = Math.max(0, Math.round(raw * 10) / 10); // no upper cap
+  emp.travelSpeeds[t] = val;
+  slider.value = String(Math.min(10, val));         // slider parks at top if val > 10
+  num.value    = val.toFixed(1);                    // box shows full value (e.g., 25.0)
+  window.drawCurrent?.();
+
+  // Live recompute only if a heatmap is active
+  window.requestRecomputeFromSliders?.();
+}
+
+slider.addEventListener('input', () => applyFromSlider(slider.value));
+num.addEventListener('change',   () => applyFromNumber(num.value));
 
   row.append(name, slider, num);
   speedDiv.appendChild(row);
@@ -478,6 +457,68 @@ for (const t of KEYS) {
   // references for programmatic updates (optimizers, import, globals)
   emp._speedSliders[t] = slider;
   emp._speedValues[t]  = num;
+}
+
+// — Switching cost (one slider, same scale; 0 turns it off) —
+{
+  if (emp.travelSpeeds.SWITCH == null) emp.travelSpeeds.SWITCH = 0.0;
+
+  const row = document.createElement('label');
+  row.style.display = 'grid';
+  row.style.gridTemplateColumns = '90px 1fr 56px';
+  row.style.alignItems = 'center';
+  row.style.columnGap  = '8px';
+  row.style.margin     = '4px 0';
+
+  const name = document.createElement('span');
+  name.textContent = 'Switching';
+
+  const slider = document.createElement('input');
+  slider.type  = 'range';
+  slider.min   = '0';     // allow 0 to fully disable
+  slider.max   = '10';
+  slider.step  = '0.1';
+  slider.value = String(emp.travelSpeeds.SWITCH);
+  slider.style.width  = '100%';
+  slider.style.margin = '0';
+
+const num = document.createElement('input');
+num.type  = 'number';
+num.min   = '0';
+num.removeAttribute('max');    // ← allow any high value
+num.step  = '0.1';
+num.value = Number(emp.travelSpeeds.SWITCH).toFixed(1);
+
+// Slider: capped 0..10
+function applySwitchFromSlider(v) {
+  let val = Math.max(0, Math.min(10, Math.round(parseFloat(v || 0) * 10) / 10));
+  emp.travelSpeeds.SWITCH = val;
+  slider.value = String(val);
+  num.value    = val.toFixed(1);
+  //window.simulateAndDraw?.();
+  window.drawCurrent?.();
+}
+
+// Number box: no upper cap
+function applySwitchFromNumber(v) {
+  let raw = parseFloat(v || 0);
+  let val = Math.max(0, Math.round(raw * 10) / 10); // no upper bound
+  emp.travelSpeeds.SWITCH = val;
+  slider.value = String(Math.min(10, val));         // slider parks at top if val > 10
+  num.value    = val.toFixed(1);
+  //window.simulateAndDraw?.();
+  window.drawCurrent?.();
+}
+
+slider.addEventListener('input', () => applySwitchFromSlider(slider.value));
+num.addEventListener('change',   () => applySwitchFromNumber(num.value));
+
+  row.append(name, slider, num);
+  speedDiv.appendChild(row);
+
+  // keep references like other sliders
+  emp._speedSliders['SWITCH'] = slider;
+  emp._speedValues['SWITCH']  = num;
 }
 
   // — Place Capital —
@@ -509,10 +550,16 @@ if (emp._valueDisplay) {
   let heatOn = false;
   heatBtn.addEventListener('click', () => {
     heatOn = !heatOn;
-    window.currentHeatEmpire = heatOn ? emp : null;
-    heatBtn.textContent      = heatOn ? 'Hide Heatmap' : 'Show Heatmap';
-    window.drawCurrent();
-  });
+
+  if (heatOn && typeof window.recomputeCostMapsOnly === 'function') {
+    // Ensure we have cost maps, but don't move borders
+    window.recomputeCostMapsOnly();
+  }
+
+  window.currentHeatEmpire = heatOn ? emp : null;
+  heatBtn.textContent      = heatOn ? 'Hide Heatmap' : 'Show Heatmap';
+  window.drawCurrent();
+});
 
   // — Route-Finding Toggle —
   const routeBtn = panel.querySelector('.route-btn');
@@ -536,7 +583,8 @@ if (emp._valueDisplay) {
   remBtn.addEventListener('click', () => {
     EmpireManager.removeEmpire(emp.id);
     container.removeChild(panel);
-    window.simulateAndDraw(); window.drawCurrent();
+    //window.simulateAndDraw();
+    window.drawCurrent();
   });
 }
 
@@ -605,12 +653,17 @@ const y     = Math.floor((e.clientY - rect.top ) * (canvas.height/rect.height) /
   const emp = window.currentEmpire;
   emp.capital = { x, y };
 
+  // Immediately claim the capital cell so it shows up right away
+emp.territory.clear();                // (optional: clear previous claims for this empire)
+emp.territory.add(y * grid.cols + x);
+
+
   // ← use the element reference stored on the empire
   emp._capitalDisplay.textContent = `Capital: (${x},${y})`;
 
   window.currentEmpire = null;
   window.currentMode   = null;
-  window.simulateAndDraw();
+  //window.simulateAndDraw();
   window.drawCurrent();
   return;
 }

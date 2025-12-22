@@ -15,69 +15,13 @@ const DIAGONALS = [
   [ 1,  0], [-1,  0], [ 0,  1], [ 0, -1],
   [ 1,  1], [ 1, -1], [-1,  1], [-1, -1]
 ];
-const CAPTURE_PENALTY = 1000;
+
 
 // TEMP rollout flag; set to false to disable typed arrays instantly.
 const USE_TYPED_ARRAYS = true;
 
 
 
-function computeHostileDepth(rows, cols, ownerIdFlat, empireId) {
-  const N = rows * cols;
-  const dist = new Int32Array(N);
-  dist.fill(1e9);
-
-  // outside = your empire + neutral + water (ownerId==0 or == empireId)
-  // hostile = everything else (ownerId != 0 && != empireId)
-  const q = new Int32Array(N);
-  let head = 0, tail = 0;
-
-  // Seed all "outside" cells at distance 0
-  for (let i = 0; i < N; i++) {
-    const owner = ownerIdFlat[i] | 0;
-    if (owner === 0 || owner === empireId) {
-      dist[i] = 0;
-      q[tail++] = i;
-    }
-  }
-
-  // 4-neighbor BFS that flows only into hostile cells
-  const step = (i, dx, dy) => {
-    const x = i % cols, y = (i / cols) | 0;
-    const nx = x + dx, ny = y + dy;
-    if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) return -1;
-    return ny * cols + nx;
-  };
-
-  const dirs = [1,0,-1,0, 0,1,0,-1]; // dx,dy pairs
-
-  while (head < tail) {
-    const i = q[head++];
-    const d = dist[i] + 1;
-
-    for (let k = 0; k < 8; k += 2) {
-      const j = step(i, dirs[k], dirs[k+1]);
-      if (j < 0) continue;
-      const ownerJ = ownerIdFlat[j] | 0;
-      if (ownerJ === 0 || ownerJ === empireId) continue; // don't enter "outside"
-      if (d < dist[j]) {
-        dist[j] = d;
-        q[tail++] = j;
-      }
-    }
-  }
-
-  // Convert to "depth inside hostile union": border → 0 (dist==1 → 0)
-  const depth = new Float32Array(N);
-  for (let i = 0; i < N; i++) {
-    const owner = ownerIdFlat[i] | 0;
-    if (owner !== 0 && owner !== empireId) {
-      const inner = Math.max(0, dist[i] - 1);
-      depth[i] = inner;
-    }
-  }
-  return depth;
-}
 
 
 
@@ -140,9 +84,6 @@ const {
   rows, cols,
   travelSpeeds,
   capital,
-  ownerIdFlat,
-  penaltyScale,
-  penaltyGamma
 } = data;
 const N = rows * cols;
 
@@ -179,8 +120,9 @@ for (const [name, code] of Object.entries(TERRAIN_TO_CODE)) {
   speedByCode[code] = (v > 0 && Number.isFinite(v)) ? v : 1;
 }
 
-// NEW: per-empire hostile-union depth
-const hostileDepthFlat = computeHostileDepth(rows, cols, ownerIdFlat, empireId);
+// Single per-step penalty when a move changes terrain (empire-specific)
+const switchCost = (travelSpeeds && Number.isFinite(+travelSpeeds.SWITCH)) ? +travelSpeeds.SWITCH : 0;
+
 
   // Flatten buffers
   const dist    = new Float32Array(N).fill(Infinity);
@@ -227,21 +169,17 @@ const code = terrainCodeFlat[nIdx];
 const baseRaw = speedByCode[code];
 
 const base = (baseRaw > 0 && Number.isFinite(baseRaw)) ? baseRaw : 1;
-const step = (dx && dy) ? base * Math.SQRT2 : base;
-      let newCost = cost + step;
-      
-// Depth-based territorial penalty: 0 at border, grows inward
-const owner = ownerIdFlat[nIdx] | 0;
-if (owner !== 0 && owner !== empireId) {
-  const d = hostileDepthFlat[nIdx] || 0; // 0 at hostile frontier, grows inward
-  const s = (penaltyScale > 0 ? penaltyScale : 0);
-  const g = (penaltyGamma > 0 ? penaltyGamma : 1);
-  if (d > 0 && s > 0) {
-    //newCost += step * s * Math.pow(d, g); // Change here from multiplicative to additive
-    newCost += s * Math.pow(d, g);
+let step   = (dx && dy) ? base * Math.SQRT2 : base;
+
+// NEW: add SWITCH only when terrain changes (and only if > 0)
+if (switchCost > 0) {
+  const fromCode = terrainCodeFlat[idx];  // current cell’s terrain code
+  if (fromCode !== code) {
+    step += switchCost;
   }
 }
 
+let newCost = cost + step;
 
 
 

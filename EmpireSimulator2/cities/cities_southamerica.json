@@ -1,0 +1,1098 @@
+[
+  {
+    "name": "Fort-de-France",
+    "size": 50,
+    "capital": {
+      "x": 88,
+      "y": 0
+    }
+  },
+  {
+    "name": "Saint-Laurent-du-Maroni",
+    "size": 50,
+    "capital": {
+      "x": 116,
+      "y": 34
+    }
+  },
+  {
+    "name": "Willemstad",
+    "size": 50,
+    "capital": {
+      "x": 57,
+      "y": 7
+    }
+  },
+  {
+    "name": "Oranjestad",
+    "size": 50,
+    "capital": {
+      "x": 52,
+      "y": 6
+    }
+  },
+  {
+    "name": "Durazno",
+    "size": 50,
+    "capital": {
+      "x": 106,
+      "y": 190
+    }
+  },
+  {
+    "name": "Mérida",
+    "size": 50,
+    "capital": {
+      "x": 48,
+      "y": 22
+    }
+  },
+  {
+    "name": "Puerto Ayacucho",
+    "size": 50,
+    "capital": {
+      "x": 62,
+      "y": 33
+    }
+  },
+  {
+    "name": "Port-of-Spain",
+    "size": 50,
+    "capital": {
+      "x": 86,
+      "y": 13
+    }
+  },
+  {
+    "name": "Cottica",
+    "size": 50,
+    "capital": {
+      "x": 115,
+      "y": 41
+    }
+  },
+  {
+    "name": "Piura",
+    "size": 50,
+    "capital": {
+      "x": 10,
+      "y": 77
+    }
+  },
+  {
+    "name": "Arequipa",
+    "size": 50,
+    "capital": {
+      "x": 46,
+      "y": 122
+    }
+  },
+  {
+    "name": "Chimbote",
+    "size": 50,
+    "capital": {
+      "x": 18,
+      "y": 92
+    }
+  },
+  {
+    "name": "Pucallpa",
+    "size": 50,
+    "capital": {
+      "x": 34,
+      "y": 90
+    }
+  },
+  {
+    "name": "Iquitos",
+    "size": 50,
+    "capital": {
+      "x": 39,
+      "y": 71
+    }
+  },
+  {
+    "name": "Huancayo",
+    "size": 50,
+    "capital": {
+      "x": 31,
+      "y": 105
+    }
+  },
+  {
+    "name": "Ciudad del Este",
+    "size": 50,
+    "capital": {
+      "x": 114,
+      "y": 158
+    }
+  },
+  {
+    "name": "David",
+    "size": 50,
+    "capital": {
+      "x": 3,
+      "y": 22
+    }
+  },
+  {
+    "name": "Cuenca",
+    "size": 50,
+    "capital": {
+      "x": 16,
+      "y": 68
+    }
+  },
+  {
+    "name": "Limón",
+    "size": 50,
+    "capital": {
+      "x": 0,
+      "y": 16
+    }
+  },
+  {
+    "name": "Manizales",
+    "size": 50,
+    "capital": {
+      "x": 30,
+      "y": 36
+    }
+  },
+  {
+    "name": "Pasto",
+    "size": 50,
+    "capital": {
+      "x": 23,
+      "y": 51
+    }
+  },
+  {
+    "name": "Barranquilla",
+    "size": 50,
+    "capital": {
+      "x": 33,
+      "y": 12
+    }
+  },
+  {
+    "name": "Roseau",
+    "size": 50,
+    "capital": {
+      "x": 87,
+      "y": 0
+    }
+  },
+  {
+    "name": "Coihaique",
+    "size": 50,
+    "capital": {
+      "x": 44,
+      "y": 239
+    }
+  },
+  {
+    "name": "Arica",
+    "size": 50,
+    "capital": {
+      "x": 51,
+      "y": 130
+    }
+  },
+  {
+    "name": "Copiapó",
+    "size": 50,
+    "capital": {
+      "x": 51,
+      "y": 166
+    }
+  },
+  {
+    "name": "La Serena",
+    "size": 50,
+    "capital": {
+      "x": 47,
+      "y": 176
+    }
+  },
+  {
+    "name": "Los Angeles",
+    "size": 50,
+    "capital": {
+      "x": 43,
+      "y": 206
+    }
+  },
+  {
+    "name": "Rio Branco",
+    "size": 50,
+    "capital": {
+      "x": 61,
+      "y": 96
+    }
+  },
+  {
+    "name": "São Luís",
+    "size": 50,
+    "capital": {
+      "x": 155,
+      "y": 66
+    }
+  },
+  {
+    "name": "Porto Velho",
+    "size": 50,
+    "capital": {
+      "x": 77,
+      "y": 91
+    }
+  },
+  {
+    "name": "Alvorada",
+    "size": 50,
+    "capital": {
+      "x": 136,
+      "y": 106
+    }
+  },
+  {
+    "name": "Corumbá",
+    "size": 50,
+    "capital": {
+      "x": 102,
+      "y": 132
+    }
+  },
+  {
+    "name": "Belo Horizonte",
+    "size": 50,
+    "capital": {
+      "x": 157,
+      "y": 136
+    }
+  },
+  {
+    "name": "Montes Claros",
+    "size": 50,
+    "capital": {
+      "x": 157,
+      "y": 123
+    }
+  },
+  {
+    "name": "Uberlândia",
+    "size": 50,
+    "capital": {
+      "x": 139,
+      "y": 132
+    }
+  },
+  {
+    "name": "Colíder",
+    "size": 50,
+    "capital": {
+      "x": 110,
+      "y": 99
+    }
+  },
+  {
+    "name": "Alta Floresta",
+    "size": 50,
+    "capital": {
+      "x": 109,
+      "y": 96
+    }
+  },
+  {
+    "name": "Cuiabá",
+    "size": 50,
+    "capital": {
+      "x": 108,
+      "y": 119
+    }
+  },
+  {
+    "name": "Pelotas",
+    "size": 50,
+    "capital": {
+      "x": 123,
+      "y": 183
+    }
+  },
+  {
+    "name": "Caxias do Sul",
+    "size": 50,
+    "capital": {
+      "x": 128,
+      "y": 173
+    }
+  },
+  {
+    "name": "Ponta Grossa",
+    "size": 50,
+    "capital": {
+      "x": 132,
+      "y": 157
+    }
+  },
+  {
+    "name": "Teresina",
+    "size": 50,
+    "capital": {
+      "x": 161,
+      "y": 76
+    }
+  },
+  {
+    "name": "Maceió",
+    "size": 50,
+    "capital": {
+      "x": 189,
+      "y": 95
+    }
+  },
+  {
+    "name": "Vitória da Conquista",
+    "size": 50,
+    "capital": {
+      "x": 169,
+      "y": 116
+    }
+  },
+  {
+    "name": "Barreiras",
+    "size": 50,
+    "capital": {
+      "x": 152,
+      "y": 105
+    }
+  },
+  {
+    "name": "Vila Velha",
+    "size": 50,
+    "capital": {
+      "x": 171,
+      "y": 138
+    }
+  },
+  {
+    "name": "Natal",
+    "size": 50,
+    "capital": {
+      "x": 191,
+      "y": 79
+    }
+  },
+  {
+    "name": "El Calafate",
+    "size": 50,
+    "capital": {
+      "x": 43,
+      "y": 258
+    }
+  },
+  {
+    "name": "San Juan",
+    "size": 50,
+    "capital": {
+      "x": 58,
+      "y": 183
+    }
+  },
+  {
+    "name": "Rawson",
+    "size": 50,
+    "capital": {
+      "x": 72,
+      "y": 230
+    }
+  },
+  {
+    "name": "Neuquén",
+    "size": 50,
+    "capital": {
+      "x": 60,
+      "y": 212
+    }
+  },
+  {
+    "name": "Trinidad",
+    "size": 50,
+    "capital": {
+      "x": 73,
+      "y": 116
+    }
+  },
+  {
+    "name": "Santa Rosa",
+    "size": 50,
+    "capital": {
+      "x": 75,
+      "y": 203
+    }
+  },
+  {
+    "name": "Bariloche",
+    "size": 50,
+    "capital": {
+      "x": 47,
+      "y": 221
+    }
+  },
+  {
+    "name": "Salta",
+    "size": 50,
+    "capital": {
+      "x": 71,
+      "y": 155
+    }
+  },
+  {
+    "name": "Tucumán",
+    "size": 50,
+    "capital": {
+      "x": 71,
+      "y": 164
+    }
+  },
+  {
+    "name": "Formosa",
+    "size": 50,
+    "capital": {
+      "x": 100,
+      "y": 161
+    }
+  },
+  {
+    "name": "Santa Fe",
+    "size": 50,
+    "capital": {
+      "x": 90,
+      "y": 183
+    }
+  },
+  {
+    "name": "Rosario",
+    "size": 50,
+    "capital": {
+      "x": 90,
+      "y": 188
+    }
+  },
+  {
+    "name": "Campinas",
+    "size": 50,
+    "capital": {
+      "x": 144,
+      "y": 148
+    }
+  },
+  {
+    "name": "Sorocaba",
+    "size": 50,
+    "capital": {
+      "x": 142,
+      "y": 150
+    }
+  },
+  {
+    "name": "Ribeirão Preto",
+    "size": 50,
+    "capital": {
+      "x": 141,
+      "y": 141
+    }
+  },
+  {
+    "name": "Petrolina",
+    "size": 50,
+    "capital": {
+      "x": 170,
+      "y": 94
+    }
+  },
+  {
+    "name": "Tarija",
+    "size": 50,
+    "capital": {
+      "x": 73,
+      "y": 142
+    }
+  },
+  {
+    "name": "Bridgetown",
+    "size": 50,
+    "capital": {
+      "x": 94,
+      "y": 4
+    }
+  },
+  {
+    "name": "Kingstown",
+    "size": 50,
+    "capital": {
+      "x": 87,
+      "y": 3
+    }
+  },
+  {
+    "name": "Castries",
+    "size": 50,
+    "capital": {
+      "x": 88,
+      "y": 0
+    }
+  },
+  {
+    "name": "Saint George's",
+    "size": 50,
+    "capital": {
+      "x": 85,
+      "y": 8
+    }
+  },
+  {
+    "name": "Montevideo",
+    "size": 50,
+    "capital": {
+      "x": 108,
+      "y": 196
+    }
+  },
+  {
+    "name": "San Cristóbal",
+    "size": 50,
+    "capital": {
+      "x": 43,
+      "y": 25
+    }
+  },
+  {
+    "name": "Valencia",
+    "size": 50,
+    "capital": {
+      "x": 60,
+      "y": 15
+    }
+  },
+  {
+    "name": "Ciudad Guayana",
+    "size": 50,
+    "capital": {
+      "x": 82,
+      "y": 22
+    }
+  },
+  {
+    "name": "Georgetown",
+    "size": 50,
+    "capital": {
+      "x": 100,
+      "y": 29
+    }
+  },
+  {
+    "name": "Paramaribo",
+    "size": 50,
+    "capital": {
+      "x": 112,
+      "y": 33
+    }
+  },
+  {
+    "name": "Cusco",
+    "size": 50,
+    "capital": {
+      "x": 44,
+      "y": 110
+    }
+  },
+  {
+    "name": "Tacna",
+    "size": 50,
+    "capital": {
+      "x": 51,
+      "y": 128
+    }
+  },
+  {
+    "name": "Trujillo",
+    "size": 50,
+    "capital": {
+      "x": 16,
+      "y": 89
+    }
+  },
+  {
+    "name": "Ica",
+    "size": 50,
+    "capital": {
+      "x": 29,
+      "y": 112
+    }
+  },
+  {
+    "name": "Asunción",
+    "size": 50,
+    "capital": {
+      "x": 102,
+      "y": 158
+    }
+  },
+  {
+    "name": "Panama City",
+    "size": 50,
+    "capital": {
+      "x": 14,
+      "y": 20
+    }
+  },
+  {
+    "name": "Quito",
+    "size": 50,
+    "capital": {
+      "x": 18,
+      "y": 57
+    }
+  },
+  {
+    "name": "Cartagena",
+    "size": 50,
+    "capital": {
+      "x": 30,
+      "y": 14
+    }
+  },
+  {
+    "name": "Mitú",
+    "size": 50,
+    "capital": {
+      "x": 52,
+      "y": 51
+    }
+  },
+  {
+    "name": "Cayenne",
+    "size": 50,
+    "capital": {
+      "x": 123,
+      "y": 36
+    }
+  },
+  {
+    "name": "Punta Arenas",
+    "size": 50,
+    "capital": {
+      "x": 49,
+      "y": 269
+    }
+  },
+  {
+    "name": "Iquique",
+    "size": 50,
+    "capital": {
+      "x": 52,
+      "y": 137
+    }
+  },
+  {
+    "name": "Antofagasta",
+    "size": 50,
+    "capital": {
+      "x": 51,
+      "y": 151
+    }
+  },
+  {
+    "name": "Valparaíso",
+    "size": 50,
+    "capital": {
+      "x": 46,
+      "y": 189
+    }
+  },
+  {
+    "name": "Valdivia",
+    "size": 50,
+    "capital": {
+      "x": 39,
+      "y": 216
+    }
+  },
+  {
+    "name": "Concepción",
+    "size": 50,
+    "capital": {
+      "x": 40,
+      "y": 204
+    }
+  },
+  {
+    "name": "Puerto Montt",
+    "size": 50,
+    "capital": {
+      "x": 41,
+      "y": 222
+    }
+  },
+  {
+    "name": "Cruzeiro do Sul",
+    "size": 50,
+    "capital": {
+      "x": 42,
+      "y": 87
+    }
+  },
+  {
+    "name": "Leticia",
+    "size": 50,
+    "capital": {
+      "x": 52,
+      "y": 73
+    }
+  },
+  {
+    "name": "Manaus",
+    "size": 50,
+    "capital": {
+      "x": 92,
+      "y": 68
+    }
+  },
+  {
+    "name": "Caxias",
+    "size": 50,
+    "capital": {
+      "x": 159,
+      "y": 75
+    }
+  },
+  {
+    "name": "Santarém",
+    "size": 50,
+    "capital": {
+      "x": 114,
+      "y": 66
+    }
+  },
+  {
+    "name": "Marabá",
+    "size": 50,
+    "capital": {
+      "x": 136,
+      "y": 78
+    }
+  },
+  {
+    "name": "Vilhena",
+    "size": 50,
+    "capital": {
+      "x": 92,
+      "y": 107
+    }
+  },
+  {
+    "name": "Ji-Paraná",
+    "size": 50,
+    "capital": {
+      "x": 84,
+      "y": 100
+    }
+  },
+  {
+    "name": "Campo Grande",
+    "size": 50,
+    "capital": {
+      "x": 114,
+      "y": 138
+    }
+  },
+  {
+    "name": "Florianópolis",
+    "size": 50,
+    "capital": {
+      "x": 138,
+      "y": 167
+    }
+  },
+  {
+    "name": "Feira de Santana",
+    "size": 50,
+    "capital": {
+      "x": 176,
+      "y": 105
+    }
+  },
+  {
+    "name": "Boa Vista",
+    "size": 50,
+    "capital": {
+      "x": 90,
+      "y": 45
+    }
+  },
+  {
+    "name": "Macapá",
+    "size": 50,
+    "capital": {
+      "x": 128,
+      "y": 56
+    }
+  },
+  {
+    "name": "Puerto Deseado",
+    "size": 50,
+    "capital": {
+      "x": 69,
+      "y": 248
+    }
+  },
+  {
+    "name": "Río Gallegos",
+    "size": 50,
+    "capital": {
+      "x": 55,
+      "y": 263
+    }
+  },
+  {
+    "name": "Comodoro Rivadavia",
+    "size": 50,
+    "capital": {
+      "x": 62,
+      "y": 240
+    }
+  },
+  {
+    "name": "Mendoza",
+    "size": 50,
+    "capital": {
+      "x": 57,
+      "y": 188
+    }
+  },
+  {
+    "name": "Sucre",
+    "size": 50,
+    "capital": {
+      "x": 71,
+      "y": 132
+    }
+  },
+  {
+    "name": "Riberalta",
+    "size": 50,
+    "capital": {
+      "x": 68,
+      "y": 100
+    }
+  },
+  {
+    "name": "Bahía Blanca",
+    "size": 50,
+    "capital": {
+      "x": 83,
+      "y": 211
+    }
+  },
+  {
+    "name": "Mar del Plata",
+    "size": 50,
+    "capital": {
+      "x": 102,
+      "y": 208
+    }
+  },
+  {
+    "name": "Córdoba",
+    "size": 50,
+    "capital": {
+      "x": 76,
+      "y": 182
+    }
+  },
+  {
+    "name": "Posadas",
+    "size": 50,
+    "capital": {
+      "x": 109,
+      "y": 166
+    }
+  },
+  {
+    "name": "La Paz",
+    "size": 50,
+    "capital": {
+      "x": 60,
+      "y": 122
+    }
+  },
+  {
+    "name": "Santa Cruz",
+    "size": 50,
+    "capital": {
+      "x": 79,
+      "y": 127
+    }
+  },
+  {
+    "name": "Stanley",
+    "size": 50,
+    "capital": {
+      "x": 101,
+      "y": 263
+    }
+  },
+  {
+    "name": "Maracaibo",
+    "size": 50,
+    "capital": {
+      "x": 46,
+      "y": 13
+    }
+  },
+  {
+    "name": "Guayaquil",
+    "size": 50,
+    "capital": {
+      "x": 13,
+      "y": 65
+    }
+  },
+  {
+    "name": "Medellín",
+    "size": 50,
+    "capital": {
+      "x": 30,
+      "y": 31
+    }
+  },
+  {
+    "name": "Cali",
+    "size": 50,
+    "capital": {
+      "x": 26,
+      "y": 42
+    }
+  },
+  {
+    "name": "Belém",
+    "size": 50,
+    "capital": {
+      "x": 138,
+      "y": 62
+    }
+  },
+  {
+    "name": "Brasília",
+    "size": 50,
+    "capital": {
+      "x": 141,
+      "y": 119
+    }
+  },
+  {
+    "name": "Porto Alegre",
+    "size": 50,
+    "capital": {
+      "x": 127,
+      "y": 177
+    }
+  },
+  {
+    "name": "Curitiba",
+    "size": 50,
+    "capital": {
+      "x": 135,
+      "y": 158
+    }
+  },
+  {
+    "name": "Fortaleza",
+    "size": 50,
+    "capital": {
+      "x": 178,
+      "y": 71
+    }
+  },
+  {
+    "name": "Salvador",
+    "size": 50,
+    "capital": {
+      "x": 178,
+      "y": 108
+    }
+  },
+  {
+    "name": "Goiânia",
+    "size": 50,
+    "capital": {
+      "x": 135,
+      "y": 123
+    }
+  },
+  {
+    "name": "Recife",
+    "size": 50,
+    "capital": {
+      "x": 193,
+      "y": 88
+    }
+  },
+  {
+    "name": "Caracas",
+    "size": 50,
+    "capital": {
+      "x": 65,
+      "y": 14
+    }
+  },
+  {
+    "name": "Lima",
+    "size": 50,
+    "capital": {
+      "x": 24,
+      "y": 104
+    }
+  },
+  {
+    "name": "Buenos Aires",
+    "size": 50,
+    "capital": {
+      "x": 99,
+      "y": 195
+    }
+  },
+  {
+    "name": "Bogota",
+    "size": 50,
+    "capital": {
+      "x": 36,
+      "y": 38
+    }
+  },
+  {
+    "name": "Santiago",
+    "size": 50,
+    "capital": {
+      "x": 50,
+      "y": 190
+    }
+  },
+  {
+    "name": "Rio de Janeiro",
+    "size": 50,
+    "capital": {
+      "x": 159,
+      "y": 148
+    }
+  },
+  {
+    "name": "São Paulo",
+    "size": 50,
+    "capital": {
+      "x": 146,
+      "y": 151
+    }
+  }
+]
