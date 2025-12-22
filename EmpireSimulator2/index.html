@@ -431,6 +431,29 @@ details.section > summary .help-icon {
   outline: 2px solid var(--btn); outline-offset: 2px;
 }
 
+/* Special styling for the Simulation / Run Simulation tab */
+#panel-tabs .tab-btn--run {
+  /* base (inactive) look: subtle dark red tint */
+  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+  border-color: #7f1d1d;
+}
+
+#panel-tabs .tab-btn--run .lbl {
+  /* slightly warmer label color */
+  color: #ffffff;
+}
+
+/* Active state: bright red gradient */
+#panel-tabs .tab-btn--run.active {
+  background: linear-gradient(180deg, #ef4444 100%, #b91c1c 100%);
+  border-color: #f97373;
+  color: #fff;
+}
+
+#panel-tabs .tab-btn--run:focus-visible {
+  outline-color: #ef4444;
+}
+
 /* Replace collapsible headers with our tab UI */
 details.section > summary { display: none; }
 
@@ -472,10 +495,10 @@ details.section.is-hidden{ display: none; }
 <body>
   <aside id="controls">
     <div class="sidebar-header">
-      <h1 class="app-title">Empire Simulator 2.1</h1>
+      <h1 class="app-title">Empire Simulator 2.2</h1>
       <h1 class="app-title"><a href="https://www.youtube.com/sundellviz" class="white-link">youtube.com/sundellviz</a></h1>
       <p class="app-text">
-      Choose a map in the Terrain tab and place capitals in the Empires tab. Empires build territory by taking the grid cells that are easiest to reach. Adjust travel cost to vary empire shape.
+      Choose a map in the Terrain tab and place capitals in the Empires tab. Empires build territory by taking the grid cells that are easiest to reach. Run simulation to see empires grow.
     </p>
     </div>
 
@@ -504,12 +527,6 @@ details.section.is-hidden{ display: none; }
     <span class="lbl">Land value</span>
   </button>
 
-  <button class="tab-btn" id="tab-optimization" data-tab="sec-optimization" role="tab" aria-controls="sec-optimization">
-    <span class="ico" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M4 7h16v2H4zM4 11h12v2H4zM4 15h9v2H4z"/></svg>
-    </span>
-    <span class="lbl">Optimization</span>
-  </button>
 
   <button class="tab-btn" id="tab-settings" data-tab="sec-settings" role="tab" aria-controls="sec-settings">
     <span class="ico" aria-hidden="true">
@@ -518,22 +535,27 @@ details.section.is-hidden{ display: none; }
     <span class="lbl">Settings</span>
   </button>
 
-<!-- Icon sprite (recalibrate target) -->
-<svg width="0" height="0" style="position:absolute">
-  <symbol id="icon-recalibrate" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <!-- outer ring -->
-    <circle cx="12" cy="12" r="7.5" />
-    <!-- N E S W ticks -->
-    <path d="M12 3.5v3M3.5 12h3M12 17.5v3M17.5 12h3" />
-    <!-- center dot -->
-    <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none" />
-  </symbol>
-</svg>
-
-<button id="recalibrate-btn" class="tab-btn icon-btn" type="button">
-  <svg class="icon" aria-hidden="true"><use href="#icon-recalibrate"></use></svg>
-  <span class="label">Recalibrate</span>
+<!-- Leaderboard tab (replaces the old Recalibrate button) -->
+<button class="tab-btn" id="tab-leaderboard" data-tab="sec-leaderboard" role="tab" aria-controls="sec-leaderboard">
+  <span class="ico" aria-hidden="true">
+    <!-- simple “trophy” icon -->
+    <svg viewBox="0 0 24 24" width="16" height="16">
+      <path fill="currentColor"
+        d="M9 3h6a1 1 0 0 1 1 1v2h2a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-1.2
+           A5 5 0 0 1 13 16.7V19h3v2H8v-2h3v-2.3A5 5 0 0 1 8.2 13H7
+           a4 4 0 0 1-4-4V8a2 2 0 0 1 2-2h2V4a1 1 0 0 1 1-1zm-3 5H5
+           a2 2 0 0 0 2 2h.8A6 6 0 0 1 8 10a6 6 0 0 1-.2-2zm12 0h-1
+           a6 6 0 0 1-.2 2c.3 0 .5 0 .7 0a2 2 0 0 0 2-2z" />
+    </svg>
+  </span>
+  <span class="lbl">Leaderboard</span>
 </button>
+
+    <!-- Main simulation button -->
+      <button id="combo-adjust-optimize-btn" class="tab-btn--run">
+        <span class="lbl">Run simulation</span>
+      </button>
+
 
   
       
@@ -565,6 +587,23 @@ details.section.is-hidden{ display: none; }
   <input type="file" id="import-empires-input" accept=".json" style="display:none;">
 
 <div class="section-title">Load / Export empires <span class="help-icon" data-help="empiresload">?</span></div>
+
+<div class="control">
+  <label for="cities-menu" style="grid-column: 1 / -1; color: var(--muted);">
+    Pre-generated city sets
+  </label>
+  <select id="cities-menu" style="grid-column: 1 / -1;">
+    <option value="">— choose a set —</option>
+    <option value="cities/cities_world.json">World</option>
+    <option value="cities/cities_africa.json">Africa</option>
+    <option value="cities/cities_eastasia.json">East Asia</option>
+    <option value="cities/cities_europe.json">Europe</option>
+    <option value="cities/cities_northamerica.json">North America</option>
+    <option value="cities/cities_oceania.json">Oceania</option>
+    <option value="cities/cities_southamerica.json">South America</option>
+  </select>
+</div>
+
   <div class="row" style="gap:8px; flex-wrap:wrap;">
     <button id="import-empires-btn" class="btn-secondary">Import Empires .json</button>
     <button id="export-empires-btn" class="btn-secondary">Export Empires .json</button>
@@ -817,71 +856,10 @@ details.section.is-hidden{ display: none; }
 <!-- 6) OPTIMIZATION -->
 <details class="section section--optimization" id="sec-optimization" closed>
   <summary class="help-wrap">
-    <span>Empire Optimization</span>
+    <span>Empire simulation</span>
     <span class="help-icon" data-help="optimization">?</span>
   </summary>
-  <div class="section-body stack">
-
-              <div class="row" style="gap:8px; margin-bottom:8px;">
-      <button id="auto-grow-btn" class="btn-secondary">Auto-Grow</button>
-    </div>
-    <div class="row" style="gap:8px; margin-bottom:8px;">
-      <div class="control" style="flex:1; margin:0;">
-        <label for="auto-grow-speed">Grow amount:</label>
-        <input id="auto-grow-speed" type="range" min="1" max="100" step="1" value="5" />
-        <div class="value"><span id="auto-grow-speed-val">5</span></div>
-      </div>
-    </div>
-
-    <hr>
-
-
-    <div class="stack" id="optimization-controls" style="margin-top:8px;">
-      <div style="font-weight:600; color: var(--muted);">Empire optimization <span class="help-icon" data-help="optimizationdetail">?</span></div>
-
-      <!-- Adjust Size ←→ Land Value controls -->
-<div class="row" style="gap:8px; flex-wrap:wrap; margin-top:8px;">
-
-  <button id="combo-adjust-optimize-btn" class="btn-secondary">
-    Adjust size and optimize (Value)
-  </button>
-</div>
-
-<!-- Toggles for which value-optimizers to run during the combo loop -->
-<div id="opt-toggles" class="row" style="gap:12px; flex-wrap:wrap;">
-  <label style="display:flex; align-items:center; gap:6px;">
-    <input id="run-adjust-size" type="checkbox" checked />
-    Adjust size to land value
-  </label>
-
-  <label style="display:flex; align-items:center; gap:6px;">
-    <input id="run-placement-value" type="checkbox" checked />
-    Optimize placement (value)
-  </label>
-
-  <label style="display:flex; align-items:center; gap:6px;">
-    <input id="run-sliders-value" type="checkbox" checked />
-    Optimize sliders (value)
-  </label>
-</div>
-
-
-      <div class="control">
-        <label for="opt-step">Slider Step</label>
-        <input id="opt-step" type="range" min="0.05" max="1.0" step="0.05" value="0.2" />
-        <div class="value"><span id="opt-step-val">0.20</span></div>
-
-        <label for="opt-delay">Round Delay (ms)</label>
-        <input id="opt-delay" type="range" min="0" max="200" step="10" value="0" />
-        <div class="value"><span id="opt-delay-val">0</span></div>
-
-            <label for="growth-threshold">
-      Growth threshold
-    </label>
-    <input id="growth-threshold" type="range" min="1" max="61" step="1" value="10" />
-    <div class="value"><span id="growth-threshold-val">10</span></div>
-
-</div>
+  
 
 
 
@@ -902,16 +880,42 @@ details.section.is-hidden{ display: none; }
     <span class="help-icon" data-help="settings">?</span>
   </summary>
 
-<div class="section-body stack" style="margin-top:8px;">
-  <div style="font-weight:600; color: var(--muted);">Global target size</div>
-  <div class="control stacked">
-    <label for="global-size-slider">Set all empires to:</label>
-    <div class="value"><span id="global-size-display">—</span></div>
-    <!-- Log slider: 0..1000 → 1..100000 -->
-    <input id="global-size-slider" type="range" min="0" max="1000" step="1" value="600" />
-  </div>
-  <small style="opacity:.75">Log scale (1–100,000). This sets every empire’s Target size to the chosen value.</small>
+  <div class="section-body stack">
+    <div class="row" style="gap:8px; margin-bottom:8px;">
+      <div class="control" style="flex:1; margin:0;">
+        <label for="auto-grow-speed">Grow amount:</label>
+        <input id="auto-grow-speed" type="range" min="1" max="1000" step="1" value="50" />
+        <div class="value"><span id="auto-grow-speed-val">5</span></div>
+      </div>
+    </div>
+
+    <hr>
+
+
+    <div class="stack" id="optimization-controls" style="margin-top:8px;">
+      <div style="font-weight:600; color: var(--muted);">Empire simulation <span class="help-icon" data-help="optimizationdetail">?</span></div>
+
+            <label for="growth-threshold">
+      Growth threshold
+    </label>
+    <input id="growth-threshold" type="range" min="1" max="61" step="1" value="10" />
+    <div class="value"><span id="growth-threshold-val">10</span></div>
+
+    <!-- Discrimination (δ): only bid on cells with value >= δ -->
+<label>Discrimination δ
+  <input id="discrimination-threshold" type="range" min="0" max="61" step="1" value="1">
+  <span id="discrimination-threshold-val">1</span>
+</label>
+
+<!-- Power weight μ in 0..0.3 (feel-good range); μ=0 disables power -->
+<label>Power weight μ
+  <input id="power-weight" type="range" min="0" max="5" step="0.01" value="0.15">
+  <span id="power-weight-val">0.15</span>
+</label>
+
 </div>
+
+<hr>
 
   <div class="section-body stack">
     <div style="font-weight:600; color:var(--muted);">Global travel costs</div>
@@ -921,21 +925,6 @@ details.section.is-hidden{ display: none; }
 
         <div class="section-title" id="penalty-controls" style="margin-bottom:8px; margin-top:8px">
       <div style="font-weight:600; color: var(--muted);">Hostile Territory Penalty <span class="help-icon" data-help="hostile">?</span></div>
-
-      <div class="control">
-        <label for="penalty-scale">Scale</label>
-        <input id="penalty-scale" type="range" min="0" max="5" step="0.1" value="5.0" />
-        <div class="value"><span id="penalty-scale-val">5.0</span></div>
-
-        <label for="penalty-gamma">Gamma</label>
-        <input id="penalty-gamma" type="range" min="0.2" max="3" step="0.1" value="3.0" />
-        <div class="value"><span id="penalty-gamma-val">3.0</span></div>
-      </div>
-      <div class="row">
-        
-          <input type="checkbox" id="include-enemy-heatmap">
-          <span>Include enemy territory in heatmap</span>
-      </div>
 
           <div class="row" >
         <input type="checkbox" id="info-mode-checkbox" />
@@ -948,6 +937,35 @@ details.section.is-hidden{ display: none; }
 
     </div>
 
+</details>
+
+
+
+
+<!-- LEADERBOARD -->
+<details class="section section--leaderboard" id="sec-leaderboard" open>
+  <summary class="help-wrap">
+    <span>Leaderboard</span>
+    <span class="help-icon" data-help="leaderboard">?</span>
+  </summary>
+
+  <div class="section-body stack" style="margin-top:8px; gap:8px;">
+    <table id="leaderboard-table" style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="text-align:left; padding:4px 6px;">#</th>
+          <th style="text-align:left; padding:4px 6px;">Empire</th>
+          <th style="text-align:right; padding:4px 6px;">Cells</th>
+          <th style="text-align:right; padding:4px 6px;">Power</th>
+        </tr>
+      </thead>
+      <tbody><!-- rows are filled by JS --></tbody>
+    </table>
+
+    <div class="row" style="gap:8px;">
+      <button id="export-leaderboard-btn" class="btn-secondary">Export Leaderboard .csv</button>
+    </div>
+  </div>
 </details>
 
   </aside>
@@ -966,9 +984,11 @@ details.section.is-hidden{ display: none; }
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const tabButtons = Array.from(document.querySelectorAll('#panel-tabs [data-tab]'));
-  const sectionIds = ['sec-empires','sec-terrain','sec-value','sec-optimization','sec-settings'];
+  const sectionIds = ['sec-empires','sec-terrain','sec-value','sec-optimization','sec-settings','sec-leaderboard'];
   const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
   const hintEl = document.getElementById('panel-hint');
+
+document.getElementById('tab-leaderboard')?.addEventListener('click', () => window.renderLeaderboard?.());
 
   // Keep <details> open; we hide via class so controls stay interactive.
   sections.forEach(sec => sec && sec.setAttribute('open', ''));
@@ -1000,6 +1020,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Hint line
     if (hintEl) hintEl.textContent = HINTS[id] || '';
+
+      // If we just opened Leaderboard, (re)build it now
+  if (id === 'sec-leaderboard') { window.renderLeaderboard?.(); }
 
     // Remember
     try { localStorage.setItem('activePanel', id); } catch {}

@@ -112,7 +112,7 @@ window.renderMode = window.RenderMode.TERRAIN; // default
  * Optionally overlays the value character when zoomed in.
  */
 function drawValueGrid(ctx, grid, cellSize, showGrid = false, drawGlyphs = true) {
-  const rows = grid.rows, cols = grid.cols;
+  const rows = window.grid.rows, cols = window.grid.cols;
   if (!grid.valueLayer) {
     // no layer yet → fall back to terrain
     return drawGrid(ctx, grid, cellSize, showGrid);
@@ -426,7 +426,7 @@ function drawHeatmap(emp) {
   const canvas = document.getElementById('mapCanvas');
   const ctx    = canvas.getContext('2d');
 
-  const rows = grid.rows, cols = grid.cols, N = rows * cols;
+  const rows = window.grid.rows, cols = window.grid.cols, N = rows * cols;
 
   // --- snap to integer pixel edges to avoid seams ---
   const xEdge = new Int32Array(cols + 1);
@@ -451,22 +451,39 @@ function drawHeatmap(emp) {
     for (const idx of e.territory) ownerId[idx] = e.id;
   }
 
-// Whether to include enemy territory in the heatmap calculation & display
-const includeEnemy = !!window.includeEnemyHeatmap;
+// Cost accessor (flat or 2D)
+  //const N = rows * cols;
 
-  // Cost accessor (flat or 2D)
-  const flat = (emp.costMapFlat instanceof Float32Array) ? emp.costMapFlat : null;
-  const getCost = (x, y) => flat ? flat[y * cols + x]
-                                 : (emp.costMap ? emp.costMap[y][x] : Infinity);
+  const flat =
+    (emp.costMapFlat instanceof Float32Array && emp.costMapFlat.length === N)
+      ? emp.costMapFlat
+      : null;
+
+  const has2D =
+    Array.isArray(emp.costMap) &&
+    emp.costMap.length === rows &&
+    Array.isArray(emp.costMap[0]) &&
+    emp.costMap[0].length === cols;
+
+  // If there is no usable cost map yet, don't try to draw a heatmap
+  if (!flat && !has2D) {
+    console.warn('drawHeatmap: no cost map for empire', emp.name);
+    return;
+  }
+
+  const getCost = (x, y) => {
+    if (flat) {
+      return flat[y * cols + x];
+    }
+    const row = emp.costMap[y];
+    return row ? row[x] : Infinity;
+  };
 
 // Collect reachable cells for ranking; optionally include enemy territory
 const vals = [];
 for (let y = 0; y < rows; y++) {
   for (let x = 0; x < cols; x++) {
     const idx = y * cols + x;
-
-    // Exclude enemy cells from ranking unless checkbox is ON
-    if (!includeEnemy && ownerId[idx] !== 0 && ownerId[idx] !== emp.id) continue;
 
     const c = getCost(x, y);
     if (isFinite(c)) vals.push([c, idx]);
@@ -490,35 +507,69 @@ for (let y = 0; y < rows; y++) {
   window.__heatRank = { empId: emp.id, rank };
   window.currentHeatEmpire = emp;
 
-  // Draw overlay: hostile = black, non-hostile = viridis(rank)
-  ctx.save();
-  ctx.globalAlpha = 1; // you mentioned removing transparency
+// Draw overlay: use viridis for ranked cells; hostile cells are left
+// unfilled (terrain shows through) when includeEnemy is false.
+ctx.save();
+ctx.globalAlpha = 1; // solid overlay where we draw it
+for (let y = 0; y < rows; y++) {
+  for (let x = 0; x < cols; x++) {
+    const idx = y * cols + x;
+    const [rx, ry, rw, rh] = cellRect(x, y);
+
+    const t = rank[idx];
+    if (t < 0) continue; // unreachable / not in ranking
+
+    if (rw > 0 && rh > 0) {
+      ctx.fillStyle = viridis(t);
+      ctx.fillRect(rx, ry, rw, rh);
+    }
+  }
+}
+
+
+  // --- Empire borders in black ---
+  const borderWidth =
+    Math.max(1, Math.min(canvas.width / cols, canvas.height / rows) * 0.08);
+
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth   = borderWidth;
+  ctx.beginPath();
+
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       const idx = y * cols + x;
-      const [rx, ry, rw, rh] = cellRect(x, y);
+      const id  = ownerId[idx];
 
-      // Hostile (any terrain): black only when the checkbox is OFF.
-// When ON, we color them via Viridis like everything else.
-if (!includeEnemy && ownerId[idx] !== 0 && ownerId[idx] !== emp.id) {
-  if (rw > 0 && rh > 0) {
-    ctx.fillStyle = '#000';
-    ctx.fillRect(rx, ry, rw, rh);
-  }
-  continue;
-}
+      if (x < cols - 1) {
+        const idxR = idx + 1;
+        const idR  = ownerId[idxR];
+        if (id !== idR) {
+          const xBorder = xEdge[x + 1] + 0.5;
+          const y0 = yEdge[y];
+          const y1 = yEdge[y + 1];
+          ctx.moveTo(xBorder, y0);
+          ctx.lineTo(xBorder, y1);
+        }
+      }
 
-      const t = rank[idx];
-      if (t < 0) continue; // unreachable
-
-      if (rw > 0 && rh > 0) {
-        ctx.fillStyle = viridis(t);
-        ctx.fillRect(rx, ry, rw, rh);
+      if (y < rows - 1) {
+        const idxD = (y + 1) * cols + x;
+        const idD  = ownerId[idxD];
+        if (id !== idD) {
+          const yBorder = yEdge[y + 1] + 0.5;
+          const x0 = xEdge[x];
+          const x1 = xEdge[x + 1];
+          ctx.moveTo(x0, yBorder);
+          ctx.lineTo(x1, yBorder);
+        }
       }
     }
   }
+
+  ctx.stroke();
   ctx.restore();
 }
+
 
 /**
  * Backtracks along Dijkstra parent pointers and draws a red route.
@@ -532,10 +583,37 @@ function drawRoute(emp, tx, ty, markerStep = (window.routeMarkerStep || 50)) {
   const cellW  = canvas.width  / cols;
   const cellH  = canvas.height / rows;
 
-  // --- helpers ---
-  const flat = (emp.costMapFlat instanceof Float32Array) ? emp.costMapFlat : null;
-  const getCost = (x, y) => flat ? flat[y * cols + x]
-                                 : (emp.costMap ? emp.costMap[y][x] : Infinity);
+  // --- cost-map presence (create if missing) ---
+  const N = rows * cols;
+  let flat =
+    (emp.costMapFlat instanceof Float32Array && emp.costMapFlat.length === N)
+      ? emp.costMapFlat
+      : null;
+
+  const has2D =
+    Array.isArray(emp.costMap) &&
+    emp.costMap.length === rows &&
+    Array.isArray(emp.costMap[0]) &&
+    emp.costMap[0].length === cols;
+
+  if (!flat && !has2D) {
+    // Kick off a cost-map build, then redraw when done.
+    if (typeof window.recomputeCostMapsOnly === 'function') {
+      (async () => { 
+        await window.recomputeCostMapsOnly();
+        window.drawCurrent?.();   // re-renders, which calls drawRoute again
+      })();
+    }
+    console.warn('drawRoute: no cost map yet; building one…');
+    return;
+  }
+
+  // Use whichever is available (flat preferred)
+  const getCost = (x, y) => {
+    if (flat) return flat[y * cols + x];
+    const row = emp.costMap[y];
+    return row ? row[x] : Infinity;
+  };
 
   // Build path using either typed parentIdx or legacy parentMap
   const path = []; // [{x,y}]

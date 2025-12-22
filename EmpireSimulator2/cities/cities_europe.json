@@ -1,0 +1,1858 @@
+[
+  {
+    "name": "Potenza",
+    "size": 50,
+    "capital": {
+      "x": 115,
+      "y": 141
+    }
+  },
+  {
+    "name": "Campobasso",
+    "size": 50,
+    "capital": {
+      "x": 110,
+      "y": 137
+    }
+  },
+  {
+    "name": "Aosta",
+    "size": 50,
+    "capital": {
+      "x": 81,
+      "y": 121
+    }
+  },
+  {
+    "name": "Mariehamn",
+    "size": 50,
+    "capital": {
+      "x": 131,
+      "y": 63
+    }
+  },
+  {
+    "name": "Ramallah",
+    "size": 50,
+    "capital": {
+      "x": 192,
+      "y": 176
+    }
+  },
+  {
+    "name": "Vatican City",
+    "size": 50,
+    "capital": {
+      "x": 101,
+      "y": 136
+    }
+  },
+  {
+    "name": "Poitier",
+    "size": 50,
+    "capital": {
+      "x": 53,
+      "y": 117
+    }
+  },
+  {
+    "name": "Clermont-Ferrand",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 120
+    }
+  },
+  {
+    "name": "Besançon",
+    "size": 50,
+    "capital": {
+      "x": 76,
+      "y": 115
+    }
+  },
+  {
+    "name": "Bologna",
+    "size": 50,
+    "capital": {
+      "x": 97,
+      "y": 125
+    }
+  },
+  {
+    "name": "Cagliari",
+    "size": 50,
+    "capital": {
+      "x": 88,
+      "y": 147
+    }
+  },
+  {
+    "name": "Catanzaro",
+    "size": 50,
+    "capital": {
+      "x": 118,
+      "y": 148
+    }
+  },
+  {
+    "name": "Bari",
+    "size": 50,
+    "capital": {
+      "x": 119,
+      "y": 139
+    }
+  },
+  {
+    "name": "L'Aquila",
+    "size": 50,
+    "capital": {
+      "x": 105,
+      "y": 134
+    }
+  },
+  {
+    "name": "Ancona",
+    "size": 50,
+    "capital": {
+      "x": 105,
+      "y": 129
+    }
+  },
+  {
+    "name": "Perugia",
+    "size": 50,
+    "capital": {
+      "x": 101,
+      "y": 131
+    }
+  },
+  {
+    "name": "Trieste",
+    "size": 50,
+    "capital": {
+      "x": 107,
+      "y": 121
+    }
+  },
+  {
+    "name": "Trento",
+    "size": 50,
+    "capital": {
+      "x": 96,
+      "y": 119
+    }
+  },
+  {
+    "name": "Caen",
+    "size": 50,
+    "capital": {
+      "x": 50,
+      "y": 107
+    }
+  },
+  {
+    "name": "Nantes",
+    "size": 50,
+    "capital": {
+      "x": 45,
+      "y": 115
+    }
+  },
+  {
+    "name": "Ajaccio",
+    "size": 50,
+    "capital": {
+      "x": 86,
+      "y": 136
+    }
+  },
+  {
+    "name": "Montpellier",
+    "size": 50,
+    "capital": {
+      "x": 67,
+      "y": 129
+    }
+  },
+  {
+    "name": "Dijon",
+    "size": 50,
+    "capital": {
+      "x": 72,
+      "y": 114
+    }
+  },
+  {
+    "name": "Orléans",
+    "size": 50,
+    "capital": {
+      "x": 59,
+      "y": 112
+    }
+  },
+  {
+    "name": "Rouen",
+    "size": 50,
+    "capital": {
+      "x": 56,
+      "y": 106
+    }
+  },
+  {
+    "name": "Reims",
+    "size": 50,
+    "capital": {
+      "x": 68,
+      "y": 106
+    }
+  },
+  {
+    "name": "Amiens",
+    "size": 50,
+    "capital": {
+      "x": 61,
+      "y": 104
+    }
+  },
+  {
+    "name": "Nancy",
+    "size": 50,
+    "capital": {
+      "x": 76,
+      "y": 109
+    }
+  },
+  {
+    "name": "Novi Sad",
+    "size": 50,
+    "capital": {
+      "x": 131,
+      "y": 122
+    }
+  },
+  {
+    "name": "Banja Luka",
+    "size": 50,
+    "capital": {
+      "x": 120,
+      "y": 124
+    }
+  },
+  {
+    "name": "Douglas",
+    "size": 50,
+    "capital": {
+      "x": 34,
+      "y": 87
+    }
+  },
+  {
+    "name": "San Marino",
+    "size": 50,
+    "capital": {
+      "x": 101,
+      "y": 128
+    }
+  },
+  {
+    "name": "Vaduz",
+    "size": 50,
+    "capital": {
+      "x": 90,
+      "y": 115
+    }
+  },
+  {
+    "name": "Gibraltar",
+    "size": 50,
+    "capital": {
+      "x": 30,
+      "y": 159
+    }
+  },
+  {
+    "name": "Edinburgh",
+    "size": 50,
+    "capital": {
+      "x": 39,
+      "y": 80
+    }
+  },
+  {
+    "name": "Cardiff",
+    "size": 50,
+    "capital": {
+      "x": 39,
+      "y": 98
+    }
+  },
+  {
+    "name": "Longyearbyen",
+    "size": 50,
+    "capital": {
+      "x": 114,
+      "y": 0
+    }
+  },
+  {
+    "name": "Luxembourg",
+    "size": 50,
+    "capital": {
+      "x": 76,
+      "y": 105
+    }
+  },
+  {
+    "name": "Turin",
+    "size": 50,
+    "capital": {
+      "x": 82,
+      "y": 123
+    }
+  },
+  {
+    "name": "Rennes",
+    "size": 50,
+    "capital": {
+      "x": 45,
+      "y": 111
+    }
+  },
+  {
+    "name": "Toulouse",
+    "size": 50,
+    "capital": {
+      "x": 57,
+      "y": 129
+    }
+  },
+  {
+    "name": "Limoges",
+    "size": 50,
+    "capital": {
+      "x": 56,
+      "y": 120
+    }
+  },
+  {
+    "name": "Lille",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 101
+    }
+  },
+  {
+    "name": "Strasbourg",
+    "size": 50,
+    "capital": {
+      "x": 83,
+      "y": 109
+    }
+  },
+  {
+    "name": "Batumi",
+    "size": 50,
+    "capital": {
+      "x": 218,
+      "y": 137
+    }
+  },
+  {
+    "name": "Genoa",
+    "size": 50,
+    "capital": {
+      "x": 87,
+      "y": 126
+    }
+  },
+  {
+    "name": "Sukhumi",
+    "size": 50,
+    "capital": {
+      "x": 216,
+      "y": 131
+    }
+  },
+  {
+    "name": "Bir Lehlou",
+    "size": 50,
+    "capital": {
+      "x": 13,
+      "y": 199
+    }
+  },
+  {
+    "name": "Monaco",
+    "size": 50,
+    "capital": {
+      "x": 81,
+      "y": 129
+    }
+  },
+  {
+    "name": "Andorra",
+    "size": 50,
+    "capital": {
+      "x": 58,
+      "y": 133
+    }
+  },
+  {
+    "name": "Manchester",
+    "size": 50,
+    "capital": {
+      "x": 43,
+      "y": 90
+    }
+  },
+  {
+    "name": "Sousse",
+    "size": 50,
+    "capital": {
+      "x": 94,
+      "y": 160
+    }
+  },
+  {
+    "name": "Lviv",
+    "size": 50,
+    "capital": {
+      "x": 148,
+      "y": 104
+    }
+  },
+  {
+    "name": "Odessa",
+    "size": 50,
+    "capital": {
+      "x": 174,
+      "y": 118
+    }
+  },
+  {
+    "name": "Zhytomyr",
+    "size": 50,
+    "capital": {
+      "x": 166,
+      "y": 103
+    }
+  },
+  {
+    "name": "Dnipro",
+    "size": 50,
+    "capital": {
+      "x": 191,
+      "y": 110
+    }
+  },
+  {
+    "name": "Donetsk",
+    "size": 50,
+    "capital": {
+      "x": 203,
+      "y": 111
+    }
+  },
+  {
+    "name": "Kharkiv",
+    "size": 50,
+    "capital": {
+      "x": 196,
+      "y": 103
+    }
+  },
+  {
+    "name": "Türkmenbaşy",
+    "size": 50,
+    "capital": {
+      "x": 263,
+      "y": 143
+    }
+  },
+  {
+    "name": "Birmingham",
+    "size": 50,
+    "capital": {
+      "x": 44,
+      "y": 94
+    }
+  },
+  {
+    "name": "Belfast",
+    "size": 50,
+    "capital": {
+      "x": 28,
+      "y": 85
+    }
+  },
+  {
+    "name": "İzmir",
+    "size": 50,
+    "capital": {
+      "x": 160,
+      "y": 150
+    }
+  },
+  {
+    "name": "Bursa",
+    "size": 50,
+    "capital": {
+      "x": 168,
+      "y": 143
+    }
+  },
+  {
+    "name": "Samsun",
+    "size": 50,
+    "capital": {
+      "x": 197,
+      "y": 138
+    }
+  },
+  {
+    "name": "Konya",
+    "size": 50,
+    "capital": {
+      "x": 181,
+      "y": 152
+    }
+  },
+  {
+    "name": "Adana",
+    "size": 50,
+    "capital": {
+      "x": 193,
+      "y": 156
+    }
+  },
+  {
+    "name": "Córdoba",
+    "size": 50,
+    "capital": {
+      "x": 32,
+      "y": 152
+    }
+  },
+  {
+    "name": "Constanța",
+    "size": 50,
+    "capital": {
+      "x": 166,
+      "y": 127
+    }
+  },
+  {
+    "name": "Luleå",
+    "size": 50,
+    "capital": {
+      "x": 140,
+      "y": 41
+    }
+  },
+  {
+    "name": "Sundsvall",
+    "size": 50,
+    "capital": {
+      "x": 121,
+      "y": 54
+    }
+  },
+  {
+    "name": "Iași",
+    "size": 50,
+    "capital": {
+      "x": 162,
+      "y": 115
+    }
+  },
+  {
+    "name": "Vigo",
+    "size": 50,
+    "capital": {
+      "x": 17,
+      "y": 135
+    }
+  },
+  {
+    "name": "Bilbao",
+    "size": 50,
+    "capital": {
+      "x": 40,
+      "y": 131
+    }
+  },
+  {
+    "name": "Tabuk",
+    "size": 50,
+    "capital": {
+      "x": 198,
+      "y": 190
+    }
+  },
+  {
+    "name": "The Hague",
+    "size": 50,
+    "capital": {
+      "x": 69,
+      "y": 95
+    }
+  },
+  {
+    "name": "Kristiansand",
+    "size": 50,
+    "capital": {
+      "x": 83,
+      "y": 71
+    }
+  },
+  {
+    "name": "Ljubljana",
+    "size": 50,
+    "capital": {
+      "x": 110,
+      "y": 119
+    }
+  },
+  {
+    "name": "Bratislava",
+    "size": 50,
+    "capital": {
+      "x": 120,
+      "y": 111
+    }
+  },
+  {
+    "name": "Hammerfest",
+    "size": 50,
+    "capital": {
+      "x": 146,
+      "y": 21
+    }
+  },
+  {
+    "name": "Doha",
+    "size": 50,
+    "capital": {
+      "x": 258,
+      "y": 202
+    }
+  },
+  {
+    "name": "Oujda",
+    "size": 50,
+    "capital": {
+      "x": 44,
+      "y": 165
+    }
+  },
+  {
+    "name": "Safi",
+    "size": 50,
+    "capital": {
+      "x": 15,
+      "y": 174
+    }
+  },
+  {
+    "name": "Podgorica",
+    "size": 50,
+    "capital": {
+      "x": 129,
+      "y": 134
+    }
+  },
+  {
+    "name": "Nalchik",
+    "size": 50,
+    "capital": {
+      "x": 226,
+      "y": 130
+    }
+  },
+  {
+    "name": "Stavropol",
+    "size": 50,
+    "capital": {
+      "x": 219,
+      "y": 123
+    }
+  },
+  {
+    "name": "Kaliningrad",
+    "size": 50,
+    "capital": {
+      "x": 133,
+      "y": 85
+    }
+  },
+  {
+    "name": "Pskov",
+    "size": 50,
+    "capital": {
+      "x": 165,
+      "y": 72
+    }
+  },
+  {
+    "name": "Bryansk",
+    "size": 50,
+    "capital": {
+      "x": 189,
+      "y": 90
+    }
+  },
+  {
+    "name": "Smolensk",
+    "size": 50,
+    "capital": {
+      "x": 180,
+      "y": 84
+    }
+  },
+  {
+    "name": "Petrozavodsk",
+    "size": 50,
+    "capital": {
+      "x": 189,
+      "y": 56
+    }
+  },
+  {
+    "name": "Tver",
+    "size": 50,
+    "capital": {
+      "x": 195,
+      "y": 76
+    }
+  },
+  {
+    "name": "Vologda",
+    "size": 50,
+    "capital": {
+      "x": 211,
+      "y": 67
+    }
+  },
+  {
+    "name": "Yaroslavl",
+    "size": 50,
+    "capital": {
+      "x": 211,
+      "y": 73
+    }
+  },
+  {
+    "name": "Rostov",
+    "size": 50,
+    "capital": {
+      "x": 210,
+      "y": 115
+    }
+  },
+  {
+    "name": "Sochi",
+    "size": 50,
+    "capital": {
+      "x": 210,
+      "y": 129
+    }
+  },
+  {
+    "name": "Krasnodar",
+    "size": 50,
+    "capital": {
+      "x": 208,
+      "y": 123
+    }
+  },
+  {
+    "name": "Penza",
+    "size": 50,
+    "capital": {
+      "x": 231,
+      "y": 91
+    }
+  },
+  {
+    "name": "Ryazan",
+    "size": 50,
+    "capital": {
+      "x": 210,
+      "y": 85
+    }
+  },
+  {
+    "name": "Voronezh",
+    "size": 50,
+    "capital": {
+      "x": 208,
+      "y": 97
+    }
+  },
+  {
+    "name": "Kirov",
+    "size": 50,
+    "capital": {
+      "x": 250,
+      "y": 69
+    }
+  },
+  {
+    "name": "Astrakhan",
+    "size": 50,
+    "capital": {
+      "x": 244,
+      "y": 118
+    }
+  },
+  {
+    "name": "Orenburg",
+    "size": 50,
+    "capital": {
+      "x": 272,
+      "y": 96
+    }
+  },
+  {
+    "name": "Saratov",
+    "size": 50,
+    "capital": {
+      "x": 236,
+      "y": 97
+    }
+  },
+  {
+    "name": "Ulyanovsk",
+    "size": 50,
+    "capital": {
+      "x": 245,
+      "y": 86
+    }
+  },
+  {
+    "name": "Grozny",
+    "size": 50,
+    "capital": {
+      "x": 234,
+      "y": 130
+    }
+  },
+  {
+    "name": "Gdańsk",
+    "size": 50,
+    "capital": {
+      "x": 126,
+      "y": 86
+    }
+  },
+  {
+    "name": "Kraków",
+    "size": 50,
+    "capital": {
+      "x": 131,
+      "y": 103
+    }
+  },
+  {
+    "name": "Bern",
+    "size": 50,
+    "capital": {
+      "x": 81,
+      "y": 116
+    }
+  },
+  {
+    "name": "Malmö",
+    "size": 50,
+    "capital": {
+      "x": 104,
+      "y": 81
+    }
+  },
+  {
+    "name": "Florence",
+    "size": 50,
+    "capital": {
+      "x": 97,
+      "y": 128
+    }
+  },
+  {
+    "name": "Catania",
+    "size": 50,
+    "capital": {
+      "x": 112,
+      "y": 154
+    }
+  },
+  {
+    "name": "Pristina",
+    "size": 50,
+    "capital": {
+      "x": 136,
+      "y": 133
+    }
+  },
+  {
+    "name": "Suez",
+    "size": 50,
+    "capital": {
+      "x": 182,
+      "y": 183
+    }
+  },
+  {
+    "name": "Bur Said",
+    "size": 50,
+    "capital": {
+      "x": 181,
+      "y": 178
+    }
+  },
+  {
+    "name": "El Faiyum",
+    "size": 50,
+    "capital": {
+      "x": 175,
+      "y": 186
+    }
+  },
+  {
+    "name": "Dresden",
+    "size": 50,
+    "capital": {
+      "x": 107,
+      "y": 99
+    }
+  },
+  {
+    "name": "Bordeaux",
+    "size": 50,
+    "capital": {
+      "x": 49,
+      "y": 124
+    }
+  },
+  {
+    "name": "Marseille",
+    "size": 50,
+    "capital": {
+      "x": 73,
+      "y": 130
+    }
+  },
+  {
+    "name": "Le Havre",
+    "size": 50,
+    "capital": {
+      "x": 52,
+      "y": 105
+    }
+  },
+  {
+    "name": "Skopje",
+    "size": 50,
+    "capital": {
+      "x": 137,
+      "y": 135
+    }
+  },
+  {
+    "name": "Misrata",
+    "size": 50,
+    "capital": {
+      "x": 112,
+      "y": 174
+    }
+  },
+  {
+    "name": "Zuwara",
+    "size": 50,
+    "capital": {
+      "x": 100,
+      "y": 172
+    }
+  },
+  {
+    "name": "Kirkuk",
+    "size": 50,
+    "capital": {
+      "x": 229,
+      "y": 162
+    }
+  },
+  {
+    "name": "Mosul",
+    "size": 50,
+    "capital": {
+      "x": 224,
+      "y": 158
+    }
+  },
+  {
+    "name": "Najaf",
+    "size": 50,
+    "capital": {
+      "x": 229,
+      "y": 175
+    }
+  },
+  {
+    "name": "Rovaniemi",
+    "size": 50,
+    "capital": {
+      "x": 154,
+      "y": 37
+    }
+  },
+  {
+    "name": "Vaasa",
+    "size": 50,
+    "capital": {
+      "x": 138,
+      "y": 51
+    }
+  },
+  {
+    "name": "Tampere",
+    "size": 50,
+    "capital": {
+      "x": 147,
+      "y": 57
+    }
+  },
+  {
+    "name": "Aqtobe",
+    "size": 50,
+    "capital": {
+      "x": 280,
+      "y": 102
+    }
+  },
+  {
+    "name": "Atyrau",
+    "size": 50,
+    "capital": {
+      "x": 259,
+      "y": 115
+    }
+  },
+  {
+    "name": "Yazd",
+    "size": 50,
+    "capital": {
+      "x": 269,
+      "y": 176
+    }
+  },
+  {
+    "name": "Ahvaz",
+    "size": 50,
+    "capital": {
+      "x": 246,
+      "y": 178
+    }
+  },
+  {
+    "name": "Basra",
+    "size": 50,
+    "capital": {
+      "x": 243,
+      "y": 181
+    }
+  },
+  {
+    "name": "Bandar-e-Abbas",
+    "size": 50,
+    "capital": {
+      "x": 277,
+      "y": 195
+    }
+  },
+  {
+    "name": "Hamadan",
+    "size": 50,
+    "capital": {
+      "x": 246,
+      "y": 164
+    }
+  },
+  {
+    "name": "Tabriz",
+    "size": 50,
+    "capital": {
+      "x": 237,
+      "y": 151
+    }
+  },
+  {
+    "name": "Venice",
+    "size": 50,
+    "capital": {
+      "x": 101,
+      "y": 122
+    }
+  },
+  {
+    "name": "Annaba",
+    "size": 50,
+    "capital": {
+      "x": 83,
+      "y": 156
+    }
+  },
+  {
+    "name": "Constantine",
+    "size": 50,
+    "capital": {
+      "x": 78,
+      "y": 158
+    }
+  },
+  {
+    "name": "Brest",
+    "size": 50,
+    "capital": {
+      "x": 146,
+      "y": 95
+    }
+  },
+  {
+    "name": "Gaza City",
+    "size": 50,
+    "capital": {
+      "x": 189,
+      "y": 177
+    }
+  },
+  {
+    "name": "Manama",
+    "size": 50,
+    "capital": {
+      "x": 254,
+      "y": 199
+    }
+  },
+  {
+    "name": "Tunis",
+    "size": 50,
+    "capital": {
+      "x": 92,
+      "y": 156
+    }
+  },
+  {
+    "name": "Sevastopol",
+    "size": 50,
+    "capital": {
+      "x": 186,
+      "y": 125
+    }
+  },
+  {
+    "name": "Abu Dhabi",
+    "size": 50,
+    "capital": {
+      "x": 269,
+      "y": 206
+    }
+  },
+  {
+    "name": "Glasgow",
+    "size": 50,
+    "capital": {
+      "x": 35,
+      "y": 80
+    }
+  },
+  {
+    "name": "Seville",
+    "size": 50,
+    "capital": {
+      "x": 28,
+      "y": 154
+    }
+  },
+  {
+    "name": "Tromsø",
+    "size": 50,
+    "capital": {
+      "x": 127,
+      "y": 25
+    }
+  },
+  {
+    "name": "Trondheim",
+    "size": 50,
+    "capital": {
+      "x": 93,
+      "y": 50
+    }
+  },
+  {
+    "name": "Bergen",
+    "size": 50,
+    "capital": {
+      "x": 73,
+      "y": 62
+    }
+  },
+  {
+    "name": "Fez",
+    "size": 50,
+    "capital": {
+      "x": 31,
+      "y": 167
+    }
+  },
+  {
+    "name": "Rabat",
+    "size": 50,
+    "capital": {
+      "x": 24,
+      "y": 167
+    }
+  },
+  {
+    "name": "Marrakesh",
+    "size": 50,
+    "capital": {
+      "x": 19,
+      "y": 177
+    }
+  },
+  {
+    "name": "Chișinău",
+    "size": 50,
+    "capital": {
+      "x": 167,
+      "y": 115
+    }
+  },
+  {
+    "name": "Murmansk",
+    "size": 50,
+    "capital": {
+      "x": 184,
+      "y": 28
+    }
+  },
+  {
+    "name": "Archangel",
+    "size": 50,
+    "capital": {
+      "x": 214,
+      "y": 45
+    }
+  },
+  {
+    "name": "Nizhny Novgorod",
+    "size": 50,
+    "capital": {
+      "x": 227,
+      "y": 78
+    }
+  },
+  {
+    "name": "Volgograd",
+    "size": 50,
+    "capital": {
+      "x": 229,
+      "y": 109
+    }
+  },
+  {
+    "name": "Ufa",
+    "size": 50,
+    "capital": {
+      "x": 276,
+      "y": 84
+    }
+  },
+  {
+    "name": "Samara",
+    "size": 50,
+    "capital": {
+      "x": 252,
+      "y": 91
+    }
+  },
+  {
+    "name": "Kazan",
+    "size": 50,
+    "capital": {
+      "x": 248,
+      "y": 80
+    }
+  },
+  {
+    "name": "Perm",
+    "size": 50,
+    "capital": {
+      "x": 276,
+      "y": 71
+    }
+  },
+  {
+    "name": "Valencia",
+    "size": 50,
+    "capital": {
+      "x": 50,
+      "y": 146
+    }
+  },
+  {
+    "name": "Palermo",
+    "size": 50,
+    "capital": {
+      "x": 105,
+      "y": 151
+    }
+  },
+  {
+    "name": "Amman",
+    "size": 50,
+    "capital": {
+      "x": 195,
+      "y": 176
+    }
+  },
+  {
+    "name": "Vilnius",
+    "size": 50,
+    "capital": {
+      "x": 153,
+      "y": 85
+    }
+  },
+  {
+    "name": "Riga",
+    "size": 50,
+    "capital": {
+      "x": 148,
+      "y": 76
+    }
+  },
+  {
+    "name": "Lyon",
+    "size": 50,
+    "capital": {
+      "x": 71,
+      "y": 120
+    }
+  },
+  {
+    "name": "Zagreb",
+    "size": 50,
+    "capital": {
+      "x": 115,
+      "y": 120
+    }
+  },
+  {
+    "name": "Tallinn",
+    "size": 50,
+    "capital": {
+      "x": 150,
+      "y": 66
+    }
+  },
+  {
+    "name": "Banghazi",
+    "size": 50,
+    "capital": {
+      "x": 132,
+      "y": 175
+    }
+  },
+  {
+    "name": "Thessaloniki",
+    "size": 50,
+    "capital": {
+      "x": 143,
+      "y": 141
+    }
+  },
+  {
+    "name": "Beirut",
+    "size": 50,
+    "capital": {
+      "x": 194,
+      "y": 168
+    }
+  },
+  {
+    "name": "Tbilisi",
+    "size": 50,
+    "capital": {
+      "x": 231,
+      "y": 137
+    }
+  },
+  {
+    "name": "Isfahan",
+    "size": 50,
+    "capital": {
+      "x": 258,
+      "y": 173
+    }
+  },
+  {
+    "name": "Shiraz",
+    "size": 50,
+    "capital": {
+      "x": 262,
+      "y": 185
+    }
+  },
+  {
+    "name": "Belgrade",
+    "size": 50,
+    "capital": {
+      "x": 133,
+      "y": 124
+    }
+  },
+  {
+    "name": "Tirana",
+    "size": 50,
+    "capital": {
+      "x": 131,
+      "y": 138
+    }
+  },
+  {
+    "name": "Yerevan",
+    "size": 50,
+    "capital": {
+      "x": 230,
+      "y": 143
+    }
+  },
+  {
+    "name": "Baku",
+    "size": 50,
+    "capital": {
+      "x": 251,
+      "y": 142
+    }
+  },
+  {
+    "name": "Oran",
+    "size": 50,
+    "capital": {
+      "x": 49,
+      "y": 161
+    }
+  },
+  {
+    "name": "Ghardaia",
+    "size": 50,
+    "capital": {
+      "x": 66,
+      "y": 174
+    }
+  },
+  {
+    "name": "Sofia",
+    "size": 50,
+    "capital": {
+      "x": 145,
+      "y": 133
+    }
+  },
+  {
+    "name": "Minsk",
+    "size": 50,
+    "capital": {
+      "x": 162,
+      "y": 88
+    }
+  },
+  {
+    "name": "Sarajevo",
+    "size": 50,
+    "capital": {
+      "x": 125,
+      "y": 128
+    }
+  },
+  {
+    "name": "Valletta",
+    "size": 50,
+    "capital": {
+      "x": 110,
+      "y": 160
+    }
+  },
+  {
+    "name": "Jerusalem",
+    "size": 50,
+    "capital": {
+      "x": 192,
+      "y": 176
+    }
+  },
+  {
+    "name": "Nicosia",
+    "size": 50,
+    "capital": {
+      "x": 185,
+      "y": 163
+    }
+  },
+  {
+    "name": "Ankara",
+    "size": 50,
+    "capital": {
+      "x": 183,
+      "y": 144
+    }
+  },
+  {
+    "name": "Budapest",
+    "size": 50,
+    "capital": {
+      "x": 128,
+      "y": 113
+    }
+  },
+  {
+    "name": "Barcelona",
+    "size": 50,
+    "capital": {
+      "x": 60,
+      "y": 138
+    }
+  },
+  {
+    "name": "Bucharest",
+    "size": 50,
+    "capital": {
+      "x": 156,
+      "y": 126
+    }
+  },
+  {
+    "name": "Aleppo",
+    "size": 50,
+    "capital": {
+      "x": 200,
+      "y": 159
+    }
+  },
+  {
+    "name": "Damascus",
+    "size": 50,
+    "capital": {
+      "x": 197,
+      "y": 169
+    }
+  },
+  {
+    "name": "Zürich",
+    "size": 50,
+    "capital": {
+      "x": 86,
+      "y": 114
+    }
+  },
+  {
+    "name": "Lisbon",
+    "size": 50,
+    "capital": {
+      "x": 15,
+      "y": 149
+    }
+  },
+  {
+    "name": "Oslo",
+    "size": 50,
+    "capital": {
+      "x": 94,
+      "y": 64
+    }
+  },
+  {
+    "name": "St.  Petersburg",
+    "size": 50,
+    "capital": {
+      "x": 173,
+      "y": 64
+    }
+  },
+  {
+    "name": "Warsaw",
+    "size": 50,
+    "capital": {
+      "x": 136,
+      "y": 95
+    }
+  },
+  {
+    "name": "Dublin",
+    "size": 50,
+    "capital": {
+      "x": 26,
+      "y": 90
+    }
+  },
+  {
+    "name": "Naples",
+    "size": 50,
+    "capital": {
+      "x": 108,
+      "y": 140
+    }
+  },
+  {
+    "name": "Milan",
+    "size": 50,
+    "capital": {
+      "x": 88,
+      "y": 122
+    }
+  },
+  {
+    "name": "Alexandria",
+    "size": 50,
+    "capital": {
+      "x": 171,
+      "y": 179
+    }
+  },
+  {
+    "name": "Frankfurt",
+    "size": 50,
+    "capital": {
+      "x": 86,
+      "y": 103
+    }
+  },
+  {
+    "name": "Hamburg",
+    "size": 50,
+    "capital": {
+      "x": 91,
+      "y": 89
+    }
+  },
+  {
+    "name": "Munich",
+    "size": 50,
+    "capital": {
+      "x": 98,
+      "y": 111
+    }
+  },
+  {
+    "name": "Prague",
+    "size": 50,
+    "capital": {
+      "x": 109,
+      "y": 103
+    }
+  },
+  {
+    "name": "Kuwait City",
+    "size": 50,
+    "capital": {
+      "x": 243,
+      "y": 186
+    }
+  },
+  {
+    "name": "Tripoli",
+    "size": 50,
+    "capital": {
+      "x": 104,
+      "y": 172
+    }
+  },
+  {
+    "name": "Tel Aviv",
+    "size": 50,
+    "capital": {
+      "x": 191,
+      "y": 175
+    }
+  },
+  {
+    "name": "Helsinki",
+    "size": 50,
+    "capital": {
+      "x": 151,
+      "y": 63
+    }
+  },
+  {
+    "name": "København",
+    "size": 50,
+    "capital": {
+      "x": 102,
+      "y": 81
+    }
+  },
+  {
+    "name": "Brussels",
+    "size": 50,
+    "capital": {
+      "x": 69,
+      "y": 100
+    }
+  },
+  {
+    "name": "Algiers",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 156
+    }
+  },
+  {
+    "name": "Kyiv",
+    "size": 50,
+    "capital": {
+      "x": 174,
+      "y": 102
+    }
+  },
+  {
+    "name": "Dubai",
+    "size": 50,
+    "capital": {
+      "x": 273,
+      "y": 203
+    }
+  },
+  {
+    "name": "Madrid",
+    "size": 50,
+    "capital": {
+      "x": 37,
+      "y": 142
+    }
+  },
+  {
+    "name": "Geneva",
+    "size": 50,
+    "capital": {
+      "x": 76,
+      "y": 119
+    }
+  },
+  {
+    "name": "Stockholm",
+    "size": 50,
+    "capital": {
+      "x": 124,
+      "y": 66
+    }
+  },
+  {
+    "name": "Amsterdam",
+    "size": 50,
+    "capital": {
+      "x": 71,
+      "y": 94
+    }
+  },
+  {
+    "name": "Casablanca",
+    "size": 50,
+    "capital": {
+      "x": 21,
+      "y": 169
+    }
+  },
+  {
+    "name": "Berlin",
+    "size": 50,
+    "capital": {
+      "x": 105,
+      "y": 93
+    }
+  },
+  {
+    "name": "Athens",
+    "size": 50,
+    "capital": {
+      "x": 146,
+      "y": 152
+    }
+  },
+  {
+    "name": "Baghdad",
+    "size": 50,
+    "capital": {
+      "x": 229,
+      "y": 170
+    }
+  },
+  {
+    "name": "Tehran",
+    "size": 50,
+    "capital": {
+      "x": 257,
+      "y": 161
+    }
+  },
+  {
+    "name": "Vienna",
+    "size": 50,
+    "capital": {
+      "x": 117,
+      "y": 111
+    }
+  },
+  {
+    "name": "London",
+    "size": 50,
+    "capital": {
+      "x": 51,
+      "y": 97
+    }
+  },
+  {
+    "name": "Istanbul",
+    "size": 50,
+    "capital": {
+      "x": 167,
+      "y": 139
+    }
+  },
+  {
+    "name": "Moscow",
+    "size": 50,
+    "capital": {
+      "x": 202,
+      "y": 80
+    }
+  },
+  {
+    "name": "Rome",
+    "size": 50,
+    "capital": {
+      "x": 101,
+      "y": 136
+    }
+  },
+  {
+    "name": "Cairo",
+    "size": 50,
+    "capital": {
+      "x": 176,
+      "y": 183
+    }
+  },
+  {
+    "name": "Paris",
+    "size": 50,
+    "capital": {
+      "x": 61,
+      "y": 108
+    }
+  }
+]

@@ -1,0 +1,1234 @@
+[
+  {
+    "name": "George Town",
+    "size": 50,
+    "capital": {
+      "x": 187,
+      "y": 125
+    }
+  },
+  {
+    "name": "Grand Turk",
+    "size": 50,
+    "capital": {
+      "x": 228,
+      "y": 117
+    }
+  },
+  {
+    "name": "San Bernardino",
+    "size": 50,
+    "capital": {
+      "x": 43,
+      "y": 66
+    }
+  },
+  {
+    "name": "Bridgeport",
+    "size": 50,
+    "capital": {
+      "x": 220,
+      "y": 37
+    }
+  },
+  {
+    "name": "Rochester",
+    "size": 50,
+    "capital": {
+      "x": 202,
+      "y": 29
+    }
+  },
+  {
+    "name": "International Falls",
+    "size": 50,
+    "capital": {
+      "x": 139,
+      "y": 8
+    }
+  },
+  {
+    "name": "St.  Paul",
+    "size": 50,
+    "capital": {
+      "x": 140,
+      "y": 22
+    }
+  },
+  {
+    "name": "Billings",
+    "size": 50,
+    "capital": {
+      "x": 78,
+      "y": 19
+    }
+  },
+  {
+    "name": "Great Falls",
+    "size": 50,
+    "capital": {
+      "x": 67,
+      "y": 12
+    }
+  },
+  {
+    "name": "Missoula",
+    "size": 50,
+    "capital": {
+      "x": 56,
+      "y": 14
+    }
+  },
+  {
+    "name": "Minot",
+    "size": 50,
+    "capital": {
+      "x": 107,
+      "y": 9
+    }
+  },
+  {
+    "name": "Fargo",
+    "size": 50,
+    "capital": {
+      "x": 125,
+      "y": 14
+    }
+  },
+  {
+    "name": "Olympia",
+    "size": 50,
+    "capital": {
+      "x": 21,
+      "y": 14
+    }
+  },
+  {
+    "name": "Spokane",
+    "size": 50,
+    "capital": {
+      "x": 43,
+      "y": 11
+    }
+  },
+  {
+    "name": "Vancouver",
+    "size": 50,
+    "capital": {
+      "x": 22,
+      "y": 19
+    }
+  },
+  {
+    "name": "Flagstaff",
+    "size": 50,
+    "capital": {
+      "x": 66,
+      "y": 61
+    }
+  },
+  {
+    "name": "Tucson",
+    "size": 50,
+    "capital": {
+      "x": 69,
+      "y": 73
+    }
+  },
+  {
+    "name": "Santa Barbara",
+    "size": 50,
+    "capital": {
+      "x": 33,
+      "y": 65
+    }
+  },
+  {
+    "name": "Fresno",
+    "size": 50,
+    "capital": {
+      "x": 33,
+      "y": 55
+    }
+  },
+  {
+    "name": "Eureka",
+    "size": 50,
+    "capital": {
+      "x": 16,
+      "y": 39
+    }
+  },
+  {
+    "name": "Colorado Springs",
+    "size": 50,
+    "capital": {
+      "x": 93,
+      "y": 47
+    }
+  },
+  {
+    "name": "Reno",
+    "size": 50,
+    "capital": {
+      "x": 33,
+      "y": 44
+    }
+  },
+  {
+    "name": "Elko",
+    "size": 50,
+    "capital": {
+      "x": 49,
+      "y": 39
+    }
+  },
+  {
+    "name": "Albuquerque",
+    "size": 50,
+    "capital": {
+      "x": 86,
+      "y": 62
+    }
+  },
+  {
+    "name": "Salem",
+    "size": 50,
+    "capital": {
+      "x": 20,
+      "y": 22
+    }
+  },
+  {
+    "name": "Casper",
+    "size": 50,
+    "capital": {
+      "x": 87,
+      "y": 31
+    }
+  },
+  {
+    "name": "Topeka",
+    "size": 50,
+    "capital": {
+      "x": 130,
+      "y": 46
+    }
+  },
+  {
+    "name": "Kansas City",
+    "size": 50,
+    "capital": {
+      "x": 134,
+      "y": 46
+    }
+  },
+  {
+    "name": "Tulsa",
+    "size": 50,
+    "capital": {
+      "x": 129,
+      "y": 58
+    }
+  },
+  {
+    "name": "Sioux Falls",
+    "size": 50,
+    "capital": {
+      "x": 126,
+      "y": 28
+    }
+  },
+  {
+    "name": "Shreveport",
+    "size": 50,
+    "capital": {
+      "x": 137,
+      "y": 72
+    }
+  },
+  {
+    "name": "Baton Rouge",
+    "size": 50,
+    "capital": {
+      "x": 148,
+      "y": 81
+    }
+  },
+  {
+    "name": "Ft.  Worth",
+    "size": 50,
+    "capital": {
+      "x": 123,
+      "y": 71
+    }
+  },
+  {
+    "name": "Corpus Christi",
+    "size": 50,
+    "capital": {
+      "x": 123,
+      "y": 91
+    }
+  },
+  {
+    "name": "Austin",
+    "size": 50,
+    "capital": {
+      "x": 122,
+      "y": 81
+    }
+  },
+  {
+    "name": "Amarillo",
+    "size": 50,
+    "capital": {
+      "x": 105,
+      "y": 61
+    }
+  },
+  {
+    "name": "El Paso",
+    "size": 50,
+    "capital": {
+      "x": 86,
+      "y": 75
+    }
+  },
+  {
+    "name": "Laredo",
+    "size": 50,
+    "capital": {
+      "x": 114,
+      "y": 92
+    }
+  },
+  {
+    "name": "Burlington",
+    "size": 50,
+    "capital": {
+      "x": 220,
+      "y": 24
+    }
+  },
+  {
+    "name": "Montgomery",
+    "size": 50,
+    "capital": {
+      "x": 167,
+      "y": 73
+    }
+  },
+  {
+    "name": "Tallahassee",
+    "size": 50,
+    "capital": {
+      "x": 175,
+      "y": 81
+    }
+  },
+  {
+    "name": "Orlando",
+    "size": 50,
+    "capital": {
+      "x": 187,
+      "y": 88
+    }
+  },
+  {
+    "name": "Jacksonville",
+    "size": 50,
+    "capital": {
+      "x": 186,
+      "y": 81
+    }
+  },
+  {
+    "name": "Savannah",
+    "size": 50,
+    "capital": {
+      "x": 188,
+      "y": 74
+    }
+  },
+  {
+    "name": "Columbia",
+    "size": 50,
+    "capital": {
+      "x": 188,
+      "y": 66
+    }
+  },
+  {
+    "name": "Indianapolis",
+    "size": 50,
+    "capital": {
+      "x": 168,
+      "y": 43
+    }
+  },
+  {
+    "name": "Wilmington",
+    "size": 50,
+    "capital": {
+      "x": 201,
+      "y": 65
+    }
+  },
+  {
+    "name": "Knoxville",
+    "size": 50,
+    "capital": {
+      "x": 177,
+      "y": 58
+    }
+  },
+  {
+    "name": "Richmond",
+    "size": 50,
+    "capital": {
+      "x": 203,
+      "y": 52
+    }
+  },
+  {
+    "name": "Charleston",
+    "size": 50,
+    "capital": {
+      "x": 186,
+      "y": 49
+    }
+  },
+  {
+    "name": "Baltimore",
+    "size": 50,
+    "capital": {
+      "x": 206,
+      "y": 45
+    }
+  },
+  {
+    "name": "Syracuse",
+    "size": 50,
+    "capital": {
+      "x": 208,
+      "y": 30
+    }
+  },
+  {
+    "name": "Augusta",
+    "size": 50,
+    "capital": {
+      "x": 234,
+      "y": 25
+    }
+  },
+  {
+    "name": "Sault Ste. Marie",
+    "size": 50,
+    "capital": {
+      "x": 175,
+      "y": 16
+    }
+  },
+  {
+    "name": "Mexicali",
+    "size": 50,
+    "capital": {
+      "x": 50,
+      "y": 72
+    }
+  },
+  {
+    "name": "La Paz",
+    "size": 50,
+    "capital": {
+      "x": 71,
+      "y": 106
+    }
+  },
+  {
+    "name": "Torreón",
+    "size": 50,
+    "capital": {
+      "x": 99,
+      "y": 100
+    }
+  },
+  {
+    "name": "Culiacán",
+    "size": 50,
+    "capital": {
+      "x": 83,
+      "y": 103
+    }
+  },
+  {
+    "name": "Nogales",
+    "size": 50,
+    "capital": {
+      "x": 69,
+      "y": 77
+    }
+  },
+  {
+    "name": "Hermosillo",
+    "size": 50,
+    "capital": {
+      "x": 69,
+      "y": 86
+    }
+  },
+  {
+    "name": "Guaymas",
+    "size": 50,
+    "capital": {
+      "x": 69,
+      "y": 91
+    }
+  },
+  {
+    "name": "San Luis Potosí",
+    "size": 50,
+    "capital": {
+      "x": 108,
+      "y": 114
+    }
+  },
+  {
+    "name": "Matamoros",
+    "size": 50,
+    "capital": {
+      "x": 122,
+      "y": 99
+    }
+  },
+  {
+    "name": "Nuevo Laredo",
+    "size": 50,
+    "capital": {
+      "x": 114,
+      "y": 92
+    }
+  },
+  {
+    "name": "Colima",
+    "size": 50,
+    "capital": {
+      "x": 98,
+      "y": 126
+    }
+  },
+  {
+    "name": "Campeche",
+    "size": 50,
+    "capital": {
+      "x": 151,
+      "y": 123
+    }
+  },
+  {
+    "name": "Oaxaca",
+    "size": 50,
+    "capital": {
+      "x": 126,
+      "y": 134
+    }
+  },
+  {
+    "name": "León",
+    "size": 50,
+    "capital": {
+      "x": 106,
+      "y": 118
+    }
+  },
+  {
+    "name": "Santiago de Cuba",
+    "size": 50,
+    "capital": {
+      "x": 209,
+      "y": 122
+    }
+  },
+  {
+    "name": "Santiago",
+    "size": 50,
+    "capital": {
+      "x": 230,
+      "y": 125
+    }
+  },
+  {
+    "name": "Brandon",
+    "size": 50,
+    "capital": {
+      "x": 113,
+      "y": 3
+    }
+  },
+  {
+    "name": "Timmins",
+    "size": 50,
+    "capital": {
+      "x": 187,
+      "y": 8
+    }
+  },
+  {
+    "name": "North Bay",
+    "size": 50,
+    "capital": {
+      "x": 195,
+      "y": 17
+    }
+  },
+  {
+    "name": "Freeport",
+    "size": 50,
+    "capital": {
+      "x": 198,
+      "y": 96
+    }
+  },
+  {
+    "name": "Helena",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 16
+    }
+  },
+  {
+    "name": "Bismarck",
+    "size": 50,
+    "capital": {
+      "x": 109,
+      "y": 15
+    }
+  },
+  {
+    "name": "Boise",
+    "size": 50,
+    "capital": {
+      "x": 47,
+      "y": 28
+    }
+  },
+  {
+    "name": "San Jose",
+    "size": 50,
+    "capital": {
+      "x": 25,
+      "y": 53
+    }
+  },
+  {
+    "name": "Sacramento",
+    "size": 50,
+    "capital": {
+      "x": 26,
+      "y": 48
+    }
+  },
+  {
+    "name": "Las Vegas",
+    "size": 50,
+    "capital": {
+      "x": 52,
+      "y": 58
+    }
+  },
+  {
+    "name": "Santa Fe",
+    "size": 50,
+    "capital": {
+      "x": 89,
+      "y": 59
+    }
+  },
+  {
+    "name": "Portland",
+    "size": 50,
+    "capital": {
+      "x": 22,
+      "y": 20
+    }
+  },
+  {
+    "name": "Salt Lake City",
+    "size": 50,
+    "capital": {
+      "x": 65,
+      "y": 39
+    }
+  },
+  {
+    "name": "Cheyenne",
+    "size": 50,
+    "capital": {
+      "x": 93,
+      "y": 38
+    }
+  },
+  {
+    "name": "Des Moines",
+    "size": 50,
+    "capital": {
+      "x": 138,
+      "y": 36
+    }
+  },
+  {
+    "name": "Omaha",
+    "size": 50,
+    "capital": {
+      "x": 128,
+      "y": 37
+    }
+  },
+  {
+    "name": "Oklahoma City",
+    "size": 50,
+    "capital": {
+      "x": 122,
+      "y": 60
+    }
+  },
+  {
+    "name": "Pierre",
+    "size": 50,
+    "capital": {
+      "x": 111,
+      "y": 25
+    }
+  },
+  {
+    "name": "San Antonio",
+    "size": 50,
+    "capital": {
+      "x": 119,
+      "y": 85
+    }
+  },
+  {
+    "name": "Jackson",
+    "size": 50,
+    "capital": {
+      "x": 152,
+      "y": 73
+    }
+  },
+  {
+    "name": "Raleigh",
+    "size": 50,
+    "capital": {
+      "x": 198,
+      "y": 59
+    }
+  },
+  {
+    "name": "Cleveland",
+    "size": 50,
+    "capital": {
+      "x": 186,
+      "y": 36
+    }
+  },
+  {
+    "name": "Cincinnati",
+    "size": 50,
+    "capital": {
+      "x": 175,
+      "y": 45
+    }
+  },
+  {
+    "name": "Nashville",
+    "size": 50,
+    "capital": {
+      "x": 165,
+      "y": 58
+    }
+  },
+  {
+    "name": "Memphis",
+    "size": 50,
+    "capital": {
+      "x": 152,
+      "y": 62
+    }
+  },
+  {
+    "name": "Norfolk",
+    "size": 50,
+    "capital": {
+      "x": 207,
+      "y": 55
+    }
+  },
+  {
+    "name": "Milwaukee",
+    "size": 50,
+    "capital": {
+      "x": 161,
+      "y": 30
+    }
+  },
+  {
+    "name": "Buffalo",
+    "size": 50,
+    "capital": {
+      "x": 197,
+      "y": 31
+    }
+  },
+  {
+    "name": "Pittsburgh",
+    "size": 50,
+    "capital": {
+      "x": 193,
+      "y": 40
+    }
+  },
+  {
+    "name": "Port-au-Prince",
+    "size": 50,
+    "capital": {
+      "x": 223,
+      "y": 128
+    }
+  },
+  {
+    "name": "Tijuana",
+    "size": 50,
+    "capital": {
+      "x": 44,
+      "y": 72
+    }
+  },
+  {
+    "name": "Chihuahua",
+    "size": 50,
+    "capital": {
+      "x": 88,
+      "y": 88
+    }
+  },
+  {
+    "name": "Mazatlán",
+    "size": 50,
+    "capital": {
+      "x": 87,
+      "y": 110
+    }
+  },
+  {
+    "name": "Tampico",
+    "size": 50,
+    "capital": {
+      "x": 121,
+      "y": 113
+    }
+  },
+  {
+    "name": "Acapulco",
+    "size": 50,
+    "capital": {
+      "x": 113,
+      "y": 135
+    }
+  },
+  {
+    "name": "Veracruz",
+    "size": 50,
+    "capital": {
+      "x": 128,
+      "y": 126
+    }
+  },
+  {
+    "name": "Tuxtla Gutiérrez",
+    "size": 50,
+    "capital": {
+      "x": 140,
+      "y": 136
+    }
+  },
+  {
+    "name": "Cancún",
+    "size": 50,
+    "capital": {
+      "x": 165,
+      "y": 118
+    }
+  },
+  {
+    "name": "Mérida",
+    "size": 50,
+    "capital": {
+      "x": 154,
+      "y": 119
+    }
+  },
+  {
+    "name": "Kingston",
+    "size": 50,
+    "capital": {
+      "x": 206,
+      "y": 131
+    }
+  },
+  {
+    "name": "Winnipeg",
+    "size": 50,
+    "capital": {
+      "x": 124,
+      "y": 2
+    }
+  },
+  {
+    "name": "Regina",
+    "size": 50,
+    "capital": {
+      "x": 94,
+      "y": 0
+    }
+  },
+  {
+    "name": "Saskatoon",
+    "size": 50,
+    "capital": {
+      "x": 86,
+      "y": 0
+    }
+  },
+  {
+    "name": "Calgary",
+    "size": 50,
+    "capital": {
+      "x": 56,
+      "y": 0
+    }
+  },
+  {
+    "name": "Victoria",
+    "size": 50,
+    "capital": {
+      "x": 19,
+      "y": 8
+    }
+  },
+  {
+    "name": "Ottawa",
+    "size": 50,
+    "capital": {
+      "x": 210,
+      "y": 20
+    }
+  },
+  {
+    "name": "Thunder Bay",
+    "size": 50,
+    "capital": {
+      "x": 155,
+      "y": 8
+    }
+  },
+  {
+    "name": "Québec",
+    "size": 50,
+    "capital": {
+      "x": 228,
+      "y": 15
+    }
+  },
+  {
+    "name": "Halifax",
+    "size": 50,
+    "capital": {
+      "x": 258,
+      "y": 23
+    }
+  },
+  {
+    "name": "Charlottetown",
+    "size": 50,
+    "capital": {
+      "x": 260,
+      "y": 17
+    }
+  },
+  {
+    "name": "Belmopan",
+    "size": 50,
+    "capital": {
+      "x": 157,
+      "y": 134
+    }
+  },
+  {
+    "name": "San Juan",
+    "size": 50,
+    "capital": {
+      "x": 248,
+      "y": 129
+    }
+  },
+  {
+    "name": "Hamilton",
+    "size": 50,
+    "capital": {
+      "x": 254,
+      "y": 73
+    }
+  },
+  {
+    "name": "Nassau",
+    "size": 50,
+    "capital": {
+      "x": 203,
+      "y": 102
+    }
+  },
+  {
+    "name": "Minneapolis",
+    "size": 50,
+    "capital": {
+      "x": 139,
+      "y": 22
+    }
+  },
+  {
+    "name": "Seattle",
+    "size": 50,
+    "capital": {
+      "x": 23,
+      "y": 12
+    }
+  },
+  {
+    "name": "Phoenix",
+    "size": 50,
+    "capital": {
+      "x": 64,
+      "y": 68
+    }
+  },
+  {
+    "name": "San Diego",
+    "size": 50,
+    "capital": {
+      "x": 44,
+      "y": 71
+    }
+  },
+  {
+    "name": "St. Louis",
+    "size": 50,
+    "capital": {
+      "x": 152,
+      "y": 48
+    }
+  },
+  {
+    "name": "New Orleans",
+    "size": 50,
+    "capital": {
+      "x": 152,
+      "y": 82
+    }
+  },
+  {
+    "name": "Dallas",
+    "size": 50,
+    "capital": {
+      "x": 125,
+      "y": 71
+    }
+  },
+  {
+    "name": "Boston",
+    "size": 50,
+    "capital": {
+      "x": 228,
+      "y": 33
+    }
+  },
+  {
+    "name": "Tampa",
+    "size": 50,
+    "capital": {
+      "x": 183,
+      "y": 91
+    }
+  },
+  {
+    "name": "Philadelphia",
+    "size": 50,
+    "capital": {
+      "x": 212,
+      "y": 42
+    }
+  },
+  {
+    "name": "Detroit",
+    "size": 50,
+    "capital": {
+      "x": 180,
+      "y": 33
+    }
+  },
+  {
+    "name": "Guadalajara",
+    "size": 50,
+    "capital": {
+      "x": 99,
+      "y": 120
+    }
+  },
+  {
+    "name": "Puebla",
+    "size": 50,
+    "capital": {
+      "x": 120,
+      "y": 126
+    }
+  },
+  {
+    "name": "Havana",
+    "size": 50,
+    "capital": {
+      "x": 183,
+      "y": 110
+    }
+  },
+  {
+    "name": "Santo Domingo",
+    "size": 50,
+    "capital": {
+      "x": 233,
+      "y": 129
+    }
+  },
+  {
+    "name": "Edmonton",
+    "size": 50,
+    "capital": {
+      "x": 58,
+      "y": 0
+    }
+  },
+  {
+    "name": "Montréal",
+    "size": 50,
+    "capital": {
+      "x": 218,
+      "y": 20
+    }
+  },
+  {
+    "name": "San Francisco",
+    "size": 50,
+    "capital": {
+      "x": 23,
+      "y": 51
+    }
+  },
+  {
+    "name": "Denver",
+    "size": 50,
+    "capital": {
+      "x": 92,
+      "y": 43
+    }
+  },
+  {
+    "name": "Houston",
+    "size": 50,
+    "capital": {
+      "x": 131,
+      "y": 83
+    }
+  },
+  {
+    "name": "Miami",
+    "size": 50,
+    "capital": {
+      "x": 192,
+      "y": 99
+    }
+  },
+  {
+    "name": "Atlanta",
+    "size": 50,
+    "capital": {
+      "x": 175,
+      "y": 67
+    }
+  },
+  {
+    "name": "Chicago",
+    "size": 50,
+    "capital": {
+      "x": 162,
+      "y": 35
+    }
+  },
+  {
+    "name": "Monterrey",
+    "size": 50,
+    "capital": {
+      "x": 111,
+      "y": 100
+    }
+  },
+  {
+    "name": "Vancouver",
+    "size": 50,
+    "capital": {
+      "x": 20,
+      "y": 5
+    }
+  },
+  {
+    "name": "Toronto",
+    "size": 50,
+    "capital": {
+      "x": 195,
+      "y": 27
+    }
+  },
+  {
+    "name": "Los Angeles",
+    "size": 50,
+    "capital": {
+      "x": 39,
+      "y": 66
+    }
+  },
+  {
+    "name": "Washington,  D.C.",
+    "size": 50,
+    "capital": {
+      "x": 205,
+      "y": 47
+    }
+  },
+  {
+    "name": "New York",
+    "size": 50,
+    "capital": {
+      "x": 217,
+      "y": 39
+    }
+  },
+  {
+    "name": "Mexico City",
+    "size": 50,
+    "capital": {
+      "x": 116,
+      "y": 125
+    }
+  }
+]

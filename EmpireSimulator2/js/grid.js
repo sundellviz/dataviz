@@ -11,9 +11,9 @@ const TERRAIN = {
   WATER:    { id: 2, color: '#4A90E2', speed: 0.4 },
   MOUNTAIN: { id: 3, color: '#6E6E6E', speed: 1.0 },
   FOREST:   { id: 4, color: '#2E8B57', speed: 0.8 },
-  SHRUB:    { id: 4, color: '#9c8d62', speed: 1.0 },
-  RIVER:    { id: 5, color: '#5BC0EB', speed: 0.2 },
-  ICE:      { id: 6, color: '#EEEEEE', speed: 1.0 }
+  SHRUB:    { id: 5, color: '#9c8d62', speed: 1.0 },
+  RIVER:    { id: 6, color: '#5BC0EB', speed: 0.2 },
+  ICE:      { id: 7, color: '#EEEEEE', speed: 1.0 }
 };
 
 // Insert this right below:
