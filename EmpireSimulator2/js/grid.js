@@ -234,7 +234,7 @@ function valToChar(v) {
 }
 
 // Create / reset the layer with a default value (0..61)
-Grid.prototype.initValueLayer = function(defaultVal = 1) {
+Grid.prototype.initValueLayer = function(defaultVal = 11) {
   this.valueLayer = Array.from({ length: this.rows }, () =>
     new Array(this.cols).fill(Math.max(0, Math.min(61, Math.floor(defaultVal))))
   );
@@ -242,7 +242,7 @@ Grid.prototype.initValueLayer = function(defaultVal = 1) {
 
 // Safe accessors
 Grid.prototype.getValueAt = function(x, y) {
-  if (!this.valueLayer) return 0;
+  if (!this.valueLayer) return 11;
   if (y < 0 || y >= this.rows || x < 0 || x >= this.cols) return 0;
   return this.valueLayer[y][x] ?? 0;
 };
