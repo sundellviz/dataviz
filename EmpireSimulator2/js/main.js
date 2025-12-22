@@ -1146,7 +1146,7 @@ function rebuildGrid() {
   // create new grid with width × height
   grid = new Grid(gridWidth, gridHeight);
   window.grid = grid;
-  grid.initValueLayer(1);   // ← add this right after the Grid is created
+  grid.initValueLayer(11);   // ← add this right after the Grid is created
 window.applyAllTerrainValues();   // apply sliders to the new grid
 
 // Keep canvas height locked to the new aspect, using current wrapper width
@@ -1168,7 +1168,7 @@ if (window.__resizerSnapToCurrent) { window.__resizerSnapToCurrent(); }
   let grid     = new Grid(gridWidth, gridHeight);
  window.grid  = grid;
  // add this line:
-grid.initValueLayer(1);
+grid.initValueLayer(11);
 
 
 
@@ -2036,7 +2036,7 @@ gridHeightDisplay.textContent = rows;
 
   grid = new Grid(cols, rows);
   window.grid     = grid;
-  grid.initValueLayer(1);   // ← add this right after the Grid is created
+  grid.initValueLayer(11);   // ← add this right after the Grid is created
   window.applyAllTerrainValues();   // apply the terrain->value sliders
 
 
