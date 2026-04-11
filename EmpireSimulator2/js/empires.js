@@ -6,10 +6,14 @@ class Empire {
     this.name         = name || `Empire ${id}`;
     this.color        = color || '#ff000080';
     this.capital      = null;      // { x, y }
+    this._costMapDirty = false;
+    this._borderPath = null;       // ← ADD THIS LINE
+    this._borderVersion = -1;      // ← ADD THIS LINE
 this.travelSpeeds = {
   PLAIN:    2.0,
   DESERT:   4.0,
-  WATER:    1.0,
+  WATER:    1.5,
+  OCEAN:    3.0,
   MOUNTAIN: 6.0,
   FOREST:   3.0,
   SHRUB:    3.0,
@@ -24,121 +28,6 @@ this.costMap    = [];           // (kept for UI/heatmap compatibility; not used 
 this.parentMap  = [];
   }
 }
-
-// ── Log slider helpers for Target size ─────────────────────────────
-const SIZE_MIN = 1;
-const SIZE_MAX = 100000;
-
-// slider positions use 0..1000; visually smooth and precise at small sizes
-function sizeToSlider(n) {
-  const a = Math.log(SIZE_MIN), b = Math.log(SIZE_MAX);
-  const t = (Math.log(Math.max(SIZE_MIN, Math.min(SIZE_MAX, n))) - a) / (b - a);
-  return Math.round(t * 1000);
-}
-function sliderToSize(pos) {
-  const a = Math.log(SIZE_MIN), b = Math.log(SIZE_MAX);
-  const t = Math.max(0, Math.min(1, (Number(pos) || 0) / 1000));
-  return Math.round(Math.exp(a + t * (b - a)));
-}
-
-// expose so main.js can sync UI
-window.SIZE_MIN = SIZE_MIN;
-window.SIZE_MAX = SIZE_MAX;
-window.sizeToSlider = sizeToSlider;
-window.sliderToSize = sliderToSize;
-
-
-
-//// NEW SECTION
-
-// Build flat ownerId array from current territories
-// Reuse a single Int32Array buffer to avoid re-allocating each tick
-let _ownerIdBuf = null;
-
-// Build flat ownerId array from current territories (same contents as before)
-function buildOwnerIdFlat(rows, cols, empires) {
-  const N = rows * cols;
-
-  // (Re)allocate only if size changed; otherwise zero and reuse
-  if (!_ownerIdBuf || _ownerIdBuf.length !== N) {
-    _ownerIdBuf = new Int32Array(N);
-  } else {
-    _ownerIdBuf.fill(0);
-  }
-
-  const owner = _ownerIdBuf; // alias for clarity
-
-  for (const e of empires) {
-    if (!e.territory) continue;
-    for (const idx of e.territory) owner[idx] = e.id; // identical assignment logic
-  }
-
-  return owner; // same return shape & values as before
-}
-
-
-// Compute per-cell depth for the owner of each cell (0 at border, higher inward).
-// We do a per-empire 4-neighbor BFS seeded from "outside" (non-owner cells at 0).
-function computeOwnerDepthFlat(rows, cols, ownerIdFlat) {
-  const N = rows * cols;
-  const depth = new Float32Array(N); // default 0 (neutral/water/unowned)
-
-  const dirs4 = [ [1,0], [-1,0], [0,1], [0,-1] ];
-
-  // Get unique empire ids present
-  const ids = new Set(ownerIdFlat);
-  ids.delete(0);
-
-  for (const empId of ids) {
-    // dist only matters inside empId's territory
-    const dist = new Int32Array(N);
-    dist.fill(1e9);
-
-    // queue seeded by all "non-owner" cells (distance 0)
-    const q = new Int32Array(N);
-    let head = 0, tail = 0;
-
-    // Seed: every cell that is NOT owned by empId
-    for (let i = 0; i < N; i++) {
-      if (ownerIdFlat[i] !== empId) {
-        dist[i] = 0;
-        q[tail++] = i;
-      }
-    }
-
-    // 4-neighbor BFS into empId cells only
-    while (head < tail) {
-      const i = q[head++];
-      const x = i % cols, y = (i / cols) | 0;
-      const d = dist[i] + 1;
-
-      for (const [dx, dy] of dirs4) {
-        const nx = x + dx, ny = y + dy;
-        if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) continue;
-        const j = ny * cols + nx;
-        if (ownerIdFlat[j] !== empId) continue;  // only flow inside this empire
-        if (d < dist[j]) {
-          dist[j] = d;
-          q[tail++] = j;
-        }
-      }
-    }
-
-    // Convert to "depth inside": border cells become 0 (dist==1 → 0)
-    for (let i = 0; i < N; i++) {
-      if (ownerIdFlat[i] === empId) {
-        const inner = Math.max(0, dist[i] - 1);
-        // (No need to max with previous; each cell has exactly one owner here)
-        depth[i] = inner;
-      }
-    }
-  }
-
-  return depth;
-}
-
-
-/// END OF NEW SECTION
 
 // 10-cycle default colors (opaque #RRGGBB; we append '80' alpha when used)
 const DEFAULT_EMPIRE_COLORS = [
@@ -167,44 +56,72 @@ const EmpireManager = {
 
    // async now returns after *all* worker jobs finish
    // async now returns after *all* worker jobs finish
-async updateAllCostMaps(grid) {
+async updateAllCostMaps(grid, options = {}) {
   const rows = grid.rows, cols = grid.cols;
 
-  // 1) Build owner arrays from last ring’s territory
-  //const ownerIdFlat    = buildOwnerIdFlat(rows, cols, EmpireManager.empires);
+  // Option to skip ghost empires for performance during auction bidding
+  // Ghost empires still need cost maps for trade route computation
+  const skipGhosts = options.skipGhosts ?? false;
+  const ghostCitiesEnabled = window.ghostCitiesEnabled !== false;
 
-  // 2) Kick off one worker job per empire with shared owner arrays
-const jobs = EmpireManager.empires.map(emp =>
-  computeCostMapOffload(emp, grid).then((msg) => {
-  // Accept any of the shapes we might get back:
-  // - { dist, parentIdx }     // Float32 (new)
-  // - { dist64, parentIdx }   // Float64 (older)
-  // - { costMap, parentMap }  // legacy 2D arrays (fallback)
-  const { dist, dist64, parentIdx, costMap, parentMap } = msg || {};
-  const flat = dist || dist64;
+  // Filter empires to compute cost maps for
+  const empiresToProcess = EmpireManager.empires.filter(emp => {
+    // Must have a capital to compute cost map from
+    if (!emp.capital) return false;
 
-  if (flat && parentIdx instanceof Int32Array) {
-    // Prefer compact typed arrays
-    // Normalize to Float32 once (saves RAM if worker ever sends Float64)
-    emp.costMapFlat = (flat instanceof Float64Array) ? new Float32Array(flat) : flat;
-    emp.parentIdx   = parentIdx;
+    // Always process empires with territory (active empires)
+    if (emp.territory && emp.territory.size > 0) return true;
 
-    // Free legacy structures so downstream always prefers the flat buffers
-    emp.costMap   = null;
-    emp.parentMap = null;
-  } else {
-    // Legacy path unchanged
-    emp.costMap     = costMap || null;
-    emp.parentMap   = parentMap || null;
-    emp.costMapFlat = null;
-    emp.parentIdx   = null;
-  }
-})
+    // Ghost empire (no territory) - check if we should skip
+    if (skipGhosts) {
+      // Even when skipping ghosts, include if cost map is dirty or missing
+      // (needed for initial computation)
+      if (emp._costMapDirty) return true;
+      if (!(emp.costMapFlat instanceof Float32Array) || emp.costMapFlat.length === 0) return true;
+      return false;
+    }
+
+    // Include ghost if ghost cities are enabled (they participate in trade)
+    // Trade routes affect power even when trade view is not active
+    if (ghostCitiesEnabled) return true;
+
+    return false;
+  });
+
+  // Kick off one worker job per empire
+  const jobs = empiresToProcess.map(emp =>
+    computeCostMapOffload(emp, grid).then((msg) => {
+      // Accept any of the shapes we might get back:
+      // - { dist, parentIdx }     // Float32 (new)
+      // - { dist64, parentIdx }   // Float64 (older)
+      // - { costMap, parentMap }  // legacy 2D arrays (fallback)
+      const { dist, dist64, parentIdx, costMap, parentMap } = msg || {};
+      const flat = dist || dist64;
+
+      if (flat && parentIdx instanceof Int32Array) {
+        // Prefer compact typed arrays
+        // Normalize to Float32 once (saves RAM if worker ever sends Float64)
+        emp.costMapFlat = (flat instanceof Float64Array) ? new Float32Array(flat) : flat;
+        emp.parentIdx   = parentIdx;
+
+        // Free legacy structures so downstream always prefers the flat buffers
+        emp.costMap   = null;
+        emp.parentMap = null;
+      } else {
+        // Legacy path unchanged
+        emp.costMap     = costMap || null;
+        emp.parentMap   = parentMap || null;
+        emp.costMapFlat = null;
+        emp.parentIdx   = null;
+      }
+    })
   );
 
-  // 3) Wait for all
+  // Wait for all
   await Promise.all(jobs);
 },
+
+_allEmpires: [],  // tracks every empire ever added (for reset)
 
 addEmpire(name, color) {
   // If no color provided, pick the next palette color (with 0x80 alpha)
@@ -216,25 +133,50 @@ addEmpire(name, color) {
   }
   const e = new Empire(this.nextId++, name, chosen);
   this.empires.push(e);
+  this._allEmpires.push(e);
   return e;
 },
 
   removeEmpire(id) {
     this.empires = this.empires.filter(e => e.id !== id);
+  },
+
+  resetAll() {
+    const grid = window.grid;
+    const cols = grid ? grid.cols : 0;
+
+    // Restore all empires ever added
+    this.empires = this._allEmpires.slice();
+
+    for (const e of this.empires) {
+      e._dead = false;
+      e.territory = new Set();
+      e._costMapDirty = true;
+      e._borderPath = null;
+      e._borderVersion = -1;
+      e.costMapFlat = null;
+      e.parentIdx = null;
+      e.costMap = [];
+      e.parentMap = [];
+
+      // Seed territory with just the capital cell (size 1)
+      if (e.capital && grid) {
+        e.territory.add(e.capital.y * cols + e.capital.x);
+      }
+    }
+
+    // Rebuild all UI panels
+    const container = document.getElementById('empire-panels');
+    if (container) container.innerHTML = '';
+    for (const e of this.empires) {
+      if (typeof window.createEmpirePanel === 'function') {
+        window.createEmpirePanel(e);
+      }
+    }
+
+    if (typeof window.drawCurrent === 'function') window.drawCurrent();
   }
 };
-
-
-function makeHostileSetFor(empire, allEmpires) {
-  const set = new Set();
-  for (const other of allEmpires) {
-    if (other === empire || !other.territory) continue;
-    for (const idx of other.territory) set.add(idx);
-  }
-  return set;
-}
-
-window.makeHostileSetFor = makeHostileSetFor;
 
 
 /**
@@ -371,7 +313,6 @@ nameSpan.addEventListener('click', (e) => { stopToggle(e); startNameEdit(); });
   colorInput.addEventListener('input', () => {
     emp.color = colorInput.value + '80';
     summary.style.background = emp.color;
-    //window.simulateAndDraw();
     window.drawCurrent();
   });
 
@@ -431,6 +372,9 @@ function applyFromSlider(v) {
   num.value    = val.toFixed(1);         // box shows that same capped value (until user edits)
   window.drawCurrent?.();
 
+  emp._costMapDirty = true;
+  window.invalidateTradeRoutes?.();
+
   // Live recompute only if a heatmap is active
   window.requestRecomputeFromSliders?.();
 }
@@ -443,6 +387,9 @@ function applyFromNumber(v) {
   slider.value = String(Math.min(10, val));         // slider parks at top if val > 10
   num.value    = val.toFixed(1);                    // box shows full value (e.g., 25.0)
   window.drawCurrent?.();
+
+  emp._costMapDirty = true;
+  window.invalidateTradeRoutes?.();
 
   // Live recompute only if a heatmap is active
   window.requestRecomputeFromSliders?.();
@@ -495,7 +442,10 @@ function applySwitchFromSlider(v) {
   emp.travelSpeeds.SWITCH = val;
   slider.value = String(val);
   num.value    = val.toFixed(1);
-  //window.simulateAndDraw?.();
+
+emp._costMapDirty = true;
+window.invalidateTradeRoutes?.();
+
   window.drawCurrent?.();
 }
 
@@ -506,7 +456,10 @@ function applySwitchFromNumber(v) {
   emp.travelSpeeds.SWITCH = val;
   slider.value = String(Math.min(10, val));         // slider parks at top if val > 10
   num.value    = val.toFixed(1);
-  //window.simulateAndDraw?.();
+
+emp._costMapDirty = true;
+window.invalidateTradeRoutes?.();
+
   window.drawCurrent?.();
 }
 
@@ -548,18 +501,26 @@ if (emp._valueDisplay) {
   // — Heatmap Toggle —
   const heatBtn = panel.querySelector('.heatmap-btn');
   let heatOn = false;
-  heatBtn.addEventListener('click', () => {
+  heatBtn.addEventListener('click', async () => {
     heatOn = !heatOn;
 
-  if (heatOn && typeof window.recomputeCostMapsOnly === 'function') {
-    // Ensure we have cost maps, but don't move borders
-    window.recomputeCostMapsOnly();
-  }
+    window.currentHeatEmpire = heatOn ? emp : null;
+    window._heatOverlayDirty = true;
+    heatBtn.textContent = heatOn ? 'Hide Heatmap' : 'Show Heatmap';
 
-  window.currentHeatEmpire = heatOn ? emp : null;
-  heatBtn.textContent      = heatOn ? 'Hide Heatmap' : 'Show Heatmap';
-  window.drawCurrent();
-});
+    if (heatOn && typeof window.recomputeCostMapsOnly === 'function') {
+      // Ensure we have cost maps, then redraw
+      await window.recomputeCostMapsOnly();
+      window._heatOverlayDirty = true;
+    }
+
+    // Use requestDraw to trigger full render loop (includes heatmap overlay)
+    if (typeof window.requestDraw === 'function') {
+      window.requestDraw();
+    } else {
+      window._drawDirty = true;
+    }
+  });
 
   // — Route-Finding Toggle —
   const routeBtn = panel.querySelector('.route-btn');
@@ -570,10 +531,17 @@ if (emp._valueDisplay) {
       window.pendingRouteEmpire   = emp;
       routeBtn.textContent         = 'Cancel Route';
     } else {
+      window.currentMode           = null;
+      window.pendingRouteEmpire   = null;
       window.currentRouteEmpire    = null;
       window.currentRouteTarget    = null;
-      window.drawCurrent();
       routeBtn.textContent         = 'Find Route';
+      // Trigger full redraw
+      if (typeof window.requestDraw === 'function') {
+        window.requestDraw();
+      } else {
+        window._drawDirty = true;
+      }
     }
     routeOn = !routeOn;
   });
@@ -583,92 +551,58 @@ if (emp._valueDisplay) {
   remBtn.addEventListener('click', () => {
     EmpireManager.removeEmpire(emp.id);
     container.removeChild(panel);
-    //window.simulateAndDraw();
     window.drawCurrent();
   });
 }
 
 // -------------------------------------------------
 
+// Open empire panel: switch to Empires tab and scroll to the panel
+window.openEmpirePanel = function(empireId) {
+  // 1. Switch to the Empires tab
+  const tabBtn = document.getElementById('tab-empires');
+  if (tabBtn) {
+    tabBtn.click();
+  }
 
+  // 2. Find and scroll to the empire panel (with delay for tab switch)
+  setTimeout(() => {
+    const panel = document.getElementById(`empire-panel-${empireId}`);
+    if (!panel) return;
 
+    // Open the details if collapsed
+    panel.open = true;
+
+    // Get the sidebar container for scrolling
+    const sidebar = document.getElementById('controls');
+    if (sidebar) {
+      // Calculate position relative to sidebar
+      const panelRect = panel.getBoundingClientRect();
+      const sidebarRect = sidebar.getBoundingClientRect();
+      const scrollTarget = sidebar.scrollTop + (panelRect.top - sidebarRect.top) - 100;
+
+      sidebar.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+    }
+
+    // Briefly highlight the panel
+    panel.style.transition = 'box-shadow 0.3s ease, outline 0.3s ease';
+    panel.style.boxShadow = '0 0 0 3px var(--accent), 0 0 20px rgba(96,165,250,0.4)';
+    panel.style.outline = '2px solid var(--accent)';
+    setTimeout(() => {
+      panel.style.boxShadow = '';
+      panel.style.outline = '';
+    }, 2000);
+  }, 150);
+};
 
 
 function initEmpireUI() {
-  const controls = document.getElementById('controls');
-  const section  = document.createElement('div');
-  section.id     = 'empire-section';
-  controls.append(section);
-
-  const panels = document.createElement('div');
-  panels.id = 'empire-panels';
-  section.append(panels);
-
-const addBtn = document.createElement('button');
-  addBtn.id      = 'add-empire-btn';
-  addBtn.textContent = 'Add Empire';
-  section.append(addBtn);
-
-  addBtn.addEventListener('click', () => {
-    // 1) create new empire data
-    const emp = EmpireManager.addEmpire();
-    // 2) build its full panel UI
-    createEmpirePanel(emp);
-    // 3) switch into capital‐placement mode
-    window.currentMode   = 'placeCapital';
-    window.currentEmpire = emp;
-    // alert(`Click on the map to place the capital for '${emp.name}'`);
-  });
-
-  let placingEmpire = null;
   window.pendingRouteEmpire = null;
 
-  // Canvas click: handle route‑finding or capital‑placement
-  const canvas = document.getElementById('mapCanvas');
-  canvas.addEventListener('click', e => {
-    const rect   = canvas.getBoundingClientRect();
-    const scaleX = canvas.width  / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const cx     = (e.clientX - rect.left) * scaleX;
-    const cy     = (e.clientY - rect.top ) * scaleY;
-    const cellW = canvas.width  / grid.cols;
-const cellH = canvas.height / grid.rows;
-const x     = Math.floor((e.clientX - rect.left) * (canvas.width/rect.width)  / cellW);
-const y     = Math.floor((e.clientY - rect.top ) * (canvas.height/rect.height) / cellH);
-
-    // Route‑finding mode?
-    if (window.currentMode === 'findRoute' && window.pendingRouteEmpire) {
-
-
-    window.currentRouteEmpire = window.pendingRouteEmpire;
-   window.currentRouteTarget = { x, y };
-   window.pendingRouteEmpire = null;
-   window.currentMode = null;
-
-      return;
-    }
-
-    // Capital-placement mode?
-   if (window.currentMode === 'placeCapital' && window.currentEmpire) {
-  const emp = window.currentEmpire;
-  emp.capital = { x, y };
-
-  // Immediately claim the capital cell so it shows up right away
-emp.territory.clear();                // (optional: clear previous claims for this empire)
-emp.territory.add(y * grid.cols + x);
-
-
-  // ← use the element reference stored on the empire
-  emp._capitalDisplay.textContent = `Capital: (${x},${y})`;
-
-  window.currentEmpire = null;
-  window.currentMode   = null;
-  //window.simulateAndDraw();
-  window.drawCurrent();
-  return;
-}
-  });
-
+  const resetBtn = document.getElementById('reset-empires-btn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => EmpireManager.resetAll());
+  }
 }
 
 EmpireManager.createEmpirePanel = createEmpirePanel;

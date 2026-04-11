@@ -1,28 +1,37 @@
 // js/renderer.js
 
-function viridis(t) {
-  // Clamp t to [0, 1]
-  t = Math.min(1, Math.max(0, t));
-
-  // Viridis color map (256 values), reduced to 16 steps to keep size small
+// Pre-computed viridis color lookup table (256 entries)
+const _viridisLUT = (function() {
   const viridisColors = [
     [68, 1, 84], [71, 44, 122], [59, 81, 139], [44, 113, 142],
     [33, 144, 141], [39, 173, 129], [92, 200, 99], [170, 220, 50],
     [253, 231, 37]
   ];
+  const LUT_SIZE = 256;
+  const lut = new Array(LUT_SIZE);
 
-  const i = t * (viridisColors.length - 1);
-  const i0 = Math.floor(i);
-  const i1 = Math.min(i0 + 1, viridisColors.length - 1);
-  const f = i - i0;
+  for (let j = 0; j < LUT_SIZE; j++) {
+    const t = j / (LUT_SIZE - 1);
+    const i = t * (viridisColors.length - 1);
+    const i0 = Math.floor(i);
+    const i1 = Math.min(i0 + 1, viridisColors.length - 1);
+    const f = i - i0;
 
-  const [r0, g0, b0] = viridisColors[i0];
-  const [r1, g1, b1] = viridisColors[i1];
-  const r = Math.round(r0 + (r1 - r0) * f);
-  const g = Math.round(g0 + (g1 - g0) * f);
-  const b = Math.round(b0 + (b1 - b0) * f);
+    const [r0, g0, b0] = viridisColors[i0];
+    const [r1, g1, b1] = viridisColors[i1];
+    const r = Math.round(r0 + (r1 - r0) * f);
+    const g = Math.round(g0 + (g1 - g0) * f);
+    const b = Math.round(b0 + (b1 - b0) * f);
 
-  return `rgb(${r},${g},${b})`;
+    lut[j] = `rgb(${r},${g},${b})`;
+  }
+  return lut;
+})();
+
+function viridis(t) {
+  // Fast lookup using pre-computed table
+  const idx = Math.max(0, Math.min(255, Math.round(t * 255)));
+  return _viridisLUT[idx];
 }
 
 
@@ -40,6 +49,241 @@ function lerpColor(a, b, t) {
   return '#' + ((1 << 24) + (rr << 16) + (rg << 8) + rb)
                 .toString(16).slice(1);
 }
+
+
+// Cached raster for WATER/OCEAN shading
+let waterShadeCanvas = null;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EDGE CACHE - Precomputed cell boundaries for fast lookup
+// ═══════════════════════════════════════════════════════════════════════════
+const _edgeCache = {
+  canvasW: 0,
+  canvasH: 0,
+  cols: 0,
+  rows: 0,
+  xEdge: null,  // Int32Array
+  yEdge: null   // Int32Array
+};
+
+/**
+ * Get cached edge arrays for cell boundaries.
+ * Recomputes only when dimensions change.
+ * @returns {{ xEdge: Int32Array, yEdge: Int32Array }}
+ */
+function getEdgeArrays(canvasWidth, canvasHeight, cols, rows) {
+  const c = _edgeCache;
+
+  // Check if cache is valid
+  if (c.xEdge && c.yEdge &&
+      c.canvasW === canvasWidth && c.canvasH === canvasHeight &&
+      c.cols === cols && c.rows === rows) {
+    return { xEdge: c.xEdge, yEdge: c.yEdge };
+  }
+
+  // Recompute edges
+  const xEdge = new Int32Array(cols + 1);
+  const yEdge = new Int32Array(rows + 1);
+
+  for (let i = 0; i <= cols; i++) {
+    xEdge[i] = Math.round((i * canvasWidth) / cols);
+  }
+  for (let j = 0; j <= rows; j++) {
+    yEdge[j] = Math.round((j * canvasHeight) / rows);
+  }
+
+  // Update cache
+  c.canvasW = canvasWidth;
+  c.canvasH = canvasHeight;
+  c.cols = cols;
+  c.rows = rows;
+  c.xEdge = xEdge;
+  c.yEdge = yEdge;
+
+  return { xEdge, yEdge };
+}
+
+// Expose for use in main.js
+
+// ═══════════════════════════════════════════════════════════════════════════
+// OWNER ID CACHE - For heatmap border rendering
+// ═══════════════════════════════════════════════════════════════════════════
+const _ownerCache = {
+  version: -1,
+  ownerId: null
+};
+
+function getCachedOwnerId(N) {
+  const ver = window._ownerVersion || 0;
+  if (_ownerCache.ownerId && _ownerCache.ownerId.length === N && _ownerCache.version === ver) {
+    return _ownerCache.ownerId;
+  }
+
+  // Rebuild
+  const ownerId = new Int32Array(N);
+  for (const e of EmpireManager.empires) {
+    if (!e.territory) continue;
+    for (const idx of e.territory) ownerId[idx] = e.id;
+  }
+
+  _ownerCache.ownerId = ownerId;
+  _ownerCache.version = ver;
+  return ownerId;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+
+function isWetTerrain(t) {
+  return t === 'WATER' || t === 'OCEAN';
+}
+
+/**
+ * Build a raster (canvas) of the wet shading at the desired pixel size.
+ * Wet = WATER + OCEAN. Same gradient, WATER will get a light overlay later.
+ */
+function computeWaterShadingCanvas(grid, targetW, targetH) {
+  const H = grid.rows, W = grid.cols;
+  const baseColor = '#2d7efc';   // shallow (near land)
+  const deepColor = '#154ca3';   // deep (far from land)
+
+  const N = W * H;
+  const idx = (x, y) => y * W + x;
+
+  // Use -1 as "unvisited". This guarantees each cell enqueued at most once.
+  const dist = new Int16Array(N);
+  dist.fill(-1);
+
+  const qx = new Int32Array(N);
+  const qy = new Int32Array(N);
+  let qh = 0, qt = 0;
+
+  // Seed BFS with all NON-wet cells at distance 0
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      if (!isWetTerrain(grid.cells[y][x].terrain)) {
+  dist[idx(x, y)] = 0;
+  qx[qt] = x; qy[qt] = y; qt++;
+}
+    }
+  }
+
+// 8-neighbor with integer weights (orth=2, diag=3) for rounder gradients
+const dirs = [
+  [ 1,  0, 2], [-1,  0, 2], [ 0,  1, 2], [ 0, -1, 2],
+  [ 1,  1, 3], [ 1, -1, 3], [-1,  1, 3], [-1, -1, 3]
+];
+
+// Weighted multi-source expansion (Dial’s algorithm with 4 buckets).
+// Prevents re-enqueue explosions while supporting weighted diagonals.
+const MAXD = 300; // 100 * 3, max possible distance in our weight units
+
+const buckets = [[], [], [], []];
+let cur = 0;
+
+// Seed bucket 0 with all non-wet cells that we set to dist=0 earlier.
+for (let y = 0; y < H; y++) {
+  for (let x = 0; x < W; x++) {
+    if (dist[idx(x, y)] === 0) buckets[0].push(idx(x, y));
+  }
+}
+
+const popNext = () => {
+  while (cur <= MAXD) {
+    const b = buckets[cur & 3];
+    if (b.length) return b.pop();
+    cur++;
+  }
+  return -1;
+};
+
+for (;;) {
+  const i = popNext();
+  if (i < 0) break;
+
+  // stale entry check
+  if (dist[i] !== cur) continue;
+
+  const x = i % W;
+  const y = (i / W) | 0;
+
+  for (const [dx, dy, w] of dirs) {
+    const nx = x + dx, ny = y + dy;
+    if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+
+    const row = grid.cells[ny];
+    if (!row) continue;
+    const cell = row[nx];
+    if (!cell) continue;
+    if (!isWetTerrain(cell.terrain)) continue;
+
+    const ni = idx(nx, ny);
+    const nd = cur + w;
+    if (nd > MAXD) continue;
+
+    const prev = dist[ni];
+    if (prev !== -1 && prev <= nd) continue; // no improvement
+
+    dist[ni] = nd;
+    buckets[nd & 3].push(ni);
+  }
+}
+
+  // Find max distance over wet cells (clamped)
+  let actualMax = 0;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      if (isWetTerrain(grid.cells[y][x].terrain)) {
+        const d = dist[idx(x, y)];
+if (d >= 0) actualMax = Math.max(actualMax, d);
+      }
+    }
+  }
+  const maxDist = Math.min(actualMax, MAXD) || 1;
+
+  // Rasterize into a canvas
+  const c = document.createElement('canvas');
+  c.width  = Math.max(1, Math.round(targetW));
+  c.height = Math.max(1, Math.round(targetH));
+  const ctx = c.getContext('2d', { willReadFrequently: false });
+  ctx.imageSmoothingEnabled = false;
+
+  // Integer pixel edges so every cell lines up perfectly
+  const xEdge = new Int32Array(W + 1);
+  const yEdge = new Int32Array(H + 1);
+  for (let i = 0; i <= W; i++) xEdge[i] = Math.round((i * c.width)  / W);
+  for (let j = 0; j <= H; j++) yEdge[j] = Math.round((j * c.height) / H);
+
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      if (!isWetTerrain(grid.cells[y][x].terrain)) continue;
+
+      let t = dist[idx(x, y)] / maxDist;
+      t = Math.min(1, Math.max(0, Math.pow(t, 0.6))); // same bias as before
+
+      const col = lerpColor(baseColor, deepColor, t);
+
+      const x0 = xEdge[x], x1 = xEdge[x + 1];
+      const y0 = yEdge[y], y1 = yEdge[y + 1];
+      const w = x1 - x0, h = y1 - y0;
+      if (w > 0 && h > 0) {
+        ctx.fillStyle = col;
+        ctx.fillRect(x0, y0, w, h);
+      }
+    }
+  }
+
+  return c;
+}
+
+function precomputeWaterShading(grid, pixelW, pixelH) {
+  waterShadeCanvas = computeWaterShadingCanvas(
+    grid,
+    pixelW ?? (window.canvas?.width  ?? grid.cols),
+    pixelH ?? (window.canvas?.height ?? grid.rows)
+  );
+}
+window.precomputeWaterShading = precomputeWaterShading;
+
 
 
 // ───────────────── Mountain depth tint (precomputed) ────────────────
@@ -104,8 +348,7 @@ function mountainTintColor(baseHex, x, y, cols){
 
 
 // ===== Value View support =====
-window.RenderMode = { TERRAIN: 'terrain', VALUE: 'value' };
-window.renderMode = window.RenderMode.TERRAIN; // default
+window.renderMode = 'terrain'; // default
 
 /**
  * Draws the land-value layer using viridis colors (0..61 -> 0..1).
@@ -123,23 +366,23 @@ function drawValueGrid(ctx, grid, cellSize, showGrid = false, drawGlyphs = true)
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
  // Fill water background to avoid seam artifacts in value view too
-ctx.fillStyle = '#2d7efc';
+ctx.fillStyle = '#1E5AA8';
 ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   if (waterShadeCanvas) {
   ctx.drawImage(waterShadeCanvas, 0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
-  const Wpx = cols * cellSize, Hpx = rows * cellSize;
+  // Use cached edge arrays for cell boundaries
+  const { xEdge, yEdge } = getEdgeArrays(ctx.canvas.width, ctx.canvas.height, cols, rows);
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       const v  = grid.valueLayer?.[y]?.[x] ?? 0;
       const t  = Math.max(0, Math.min(1, v / 61));
-      const x0 = Math.round(x * cellSize);
-      const y0 = Math.round(y * cellSize);
-      const w  = Math.round((x + 1) * cellSize) - x0;
-      const h  = Math.round((y + 1) * cellSize) - y0;
+      const x0 = xEdge[x], x1 = xEdge[x + 1];
+      const y0 = yEdge[y], y1 = yEdge[y + 1];
+      const w  = x1 - x0, h = y1 - y0;
 
       ctx.fillStyle = viridis(t);
       ctx.fillRect(x0, y0, w, h);
@@ -160,12 +403,12 @@ ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.strokeStyle = '#aaa';
     ctx.beginPath();
     for (let i = 0; i <= cols; i++) {
-      const px = i * cellSize + 0.5;
-      ctx.moveTo(px, 0);  ctx.lineTo(px, Hpx);
+      const px = xEdge[i] + 0.5;
+      ctx.moveTo(px, 0);  ctx.lineTo(px, ctx.canvas.height);
     }
     for (let j = 0; j <= rows; j++) {
-      const py = j * cellSize + 0.5;
-      ctx.moveTo(0, py);  ctx.lineTo(Wpx, py);
+      const py = yEdge[j] + 0.5;
+      ctx.moveTo(0, py);  ctx.lineTo(ctx.canvas.width, py);
     }
     ctx.stroke();
   }
@@ -173,12 +416,6 @@ ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
 // expose for main.js
 window.drawValueGrid = drawValueGrid;
-
-
-
-// Cached raster for water shading (same look, less memory)
-let waterShadeCanvas = null;
-
 
 // Draw crisp, readable labels (white fill with black outline), size-adaptive
 function drawOutlinedLabel(ctx, text, x, y, fontPx, align = 'left') {
@@ -202,121 +439,6 @@ function drawOutlinedLabel(ctx, text, x, y, fontPx, align = 'left') {
 window.drawOutlinedLabel = drawOutlinedLabel;
 
 
-
-
-/**
- * Build a raster (canvas) of the water shading at the desired pixel size.
- * Visuals are identical to the old array-of-strings method.
- */
-function computeWaterShadingCanvas(grid, targetW, targetH) {
-  const H = grid.rows, W = grid.cols;
-  const baseColor  = '#2d7efc';
-  const lightColor = '#154ca3';
-
-  // 1) Distance grid + queue of land cells
-  const dist  = Array.from({ length: H }, () => Array(W).fill(Infinity));
-  const queue = [];
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      if (grid.cells[y][x].terrain !== 'WATER') {
-        dist[y][x] = 0;
-        queue.push([y, x]);
-      }
-    }
-  }
-
-  // 2) Multi-source BFS (8-neighbor, identical to your previous version)
-  const dirs = [[ 1,  0], [-1,  0], [ 0,  1], [ 0, -1],
-                [ 1,  1], [ 1, -1], [-1,  1], [-1, -1]];
-  let head = 0;
-  while (head < queue.length) {
-    const [y, x] = queue[head++];
-    for (const [dy, dx] of dirs) {
-      const ny = y + dy, nx = x + dx;
-      const step = (dy && dx) ? Math.SQRT2 : 1;
-      if (
-        ny >= 0 && ny < H && nx >= 0 && nx < W &&
-        grid.cells[ny][nx].terrain === 'WATER' &&
-        dist[ny][nx] > dist[y][x] + step
-      ) {
-        const nd = dist[y][x] + step;
-        // early-exit at the visual clamp (matches the old suggestion)
-        if (nd > 100) continue;
-        dist[ny][nx] = nd;
-        queue.push([ny, nx]);
-      }
-    }
-  }
-
-  // 3) Find actual max (over WATER only), then clamp
-  let actualMax = 0;
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      if (grid.cells[y][x].terrain === 'WATER') {
-        actualMax = Math.max(actualMax, dist[y][x]);
-      }
-    }
-  }
-  const clampMax = 100;
-  const maxDist = Math.min(actualMax, clampMax) || 1;
-
-  // 4) Rasterize into a canvas
-  const c = document.createElement('canvas');
-  c.width  = Math.max(1, Math.round(targetW));
-  c.height = Math.max(1, Math.round(targetH));
-  const ctx = c.getContext('2d', { willReadFrequently: false });
-  ctx.imageSmoothingEnabled = false;
-
-    // NEW: integer pixel edges so every cell lines up perfectly
-  const xEdge = new Int32Array(W + 1);
-  const yEdge = new Int32Array(H + 1);
-  for (let i = 0; i <= W; i++) xEdge[i] = Math.round((i * c.width)  / W);
-  for (let j = 0; j <= H; j++) yEdge[j] = Math.round((j * c.height) / H);
-
-  const cellW = c.width  / W;
-  const cellH = c.height / H;
-
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      if (grid.cells[y][x].terrain !== 'WATER') continue;
-
-      // normalized [0..1], biased a touch like before
-      let t = dist[y][x] / maxDist;
-      t = Math.min(1, Math.max(0, Math.pow(t, 0.6)));
-
-      const col = lerpColor(baseColor, lightColor, t);
-
-      const x0 = xEdge[x],     x1 = xEdge[x + 1];
-      const y0 = yEdge[y],     y1 = yEdge[y + 1];
-      const w  = x1 - x0,      h  = y1 - y0;
-
-      if (w > 0 && h > 0) {
-        ctx.fillStyle = col;
-        ctx.fillRect(x0, y0, w, h);
-      }
-    }
-  }
-
-  return c;
-}
-
-/**
- * Precompute water blob shading for the current grid.
- * Call this once whenever grid.cells changes (randomize, import, resize).
- */
-function precomputeWaterShading(grid, pixelW, pixelH) {
-  // Build at the requested size; callers will pass canvas.width/height.
-  waterShadeCanvas = computeWaterShadingCanvas(
-    grid,
-    pixelW ?? (window.canvas?.width  ?? grid.cols),
-    pixelH ?? (window.canvas?.height ?? grid.rows)
-  );
-}
-window.precomputeWaterShading = precomputeWaterShading;
-
-// Optional: manual memory release hook
-window.freeWaterShading = function () { waterShadeCanvas = null; };
-
 /**
  * Draw the grid; grid lines off by default.
  * Applies on‑demand water shading from the cached map.
@@ -333,14 +455,11 @@ ctx.fillStyle = '#2d7efc';   // same baseColor used in water shading
 ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
 
-    // Snap to the exact same integer edges used by the water raster
+    // Use cached edge arrays for cell boundaries
   const cols = grid.cols, rows = grid.rows;
-  const xEdge = new Int32Array(cols + 1);
-  const yEdge = new Int32Array(rows + 1);
-  for (let i = 0; i <= cols; i++) xEdge[i] = Math.round((i * ctx.canvas.width)  / cols);
-  for (let j = 0; j <= rows; j++) yEdge[j] = Math.round((j * ctx.canvas.height) / rows);
+  const { xEdge, yEdge } = getEdgeArrays(ctx.canvas.width, ctx.canvas.height, cols, rows);
 
-  // Draw cached water shading first (scaled to the target surface)
+// Draw cached wet shading first (scaled to the target surface)
 if (waterShadeCanvas) {
   ctx.drawImage(waterShadeCanvas, 0, 0, ctx.canvas.width, ctx.canvas.height);
 }
@@ -348,39 +467,42 @@ if (waterShadeCanvas) {
   const VARIANT_BLEND = 0.1;  // subtle mix for other terrains
 
   for (let y = 0; y < grid.rows; y++) {
+    const y0 = yEdge[y], y1 = yEdge[y + 1];
+    const h = y1 - y0;
+    if (h <= 0) continue;
+
+    const rowCells = grid.cells[y];
+    const varRow = window.variantGrid?.[y];
+
     for (let x = 0; x < grid.cols; x++) {
-      const cell = grid.cells[y][x];
-      let color;
+      const cell = rowCells[x];
+      const x0 = xEdge[x], x1 = xEdge[x + 1];
+      const w = x1 - x0;
+      if (w <= 0) continue;
 
-if (cell.terrain === 'WATER') {
-  if (waterShadeCanvas) {
-    // Already drawn from the cached bitmap
-    continue;
-  } else {
-    // Fallback if cache not built yet
-    color = TERRAIN.WATER.color;
-  }
-} else {
-  // all other terrains: base color blended with its variant
-  const base = TERRAIN[cell.terrain].color;
-  const variants = TERRAIN_VARIANTS[cell.terrain] || [ base ];
-  const idx = window.variantGrid?.[y]?.[x] ?? 0;
-  const varCol = variants[idx % variants.length];
-  color = lerpColor(base, varCol, VARIANT_BLEND);
-        // Extra tint for mountains: deeper inside looks “higher”
-if (cell.terrain === 'MOUNTAIN' && MOUNTAIN_DEPTH) {
-  color = mountainTintColor(color, x, y, grid.cols);
-}
+      // Wet terrains: let the cached shading show through.
+      // WATER gets an extra light overlay to distinguish it from OCEAN.
+      if ((cell.terrain === 'WATER' || cell.terrain === 'OCEAN') && waterShadeCanvas) {
+        if (cell.terrain === 'WATER') {
+          ctx.fillStyle = 'rgba(255,255,255,0.10)';
+          ctx.fillRect(x0, y0, w, h);
+        }
+        continue;
       }
 
-      const x0 = xEdge[x],     x1 = xEdge[x + 1];
-      const y0 = yEdge[y],     y1 = yEdge[y + 1];
-      const w  = x1 - x0,      h  = y1 - y0;
+      // Otherwise, normal terrain rendering
+      const base = (TERRAIN[cell.terrain] && TERRAIN[cell.terrain].color) ? TERRAIN[cell.terrain].color : '#000000';
+      const variants = TERRAIN_VARIANTS[cell.terrain] || [ base ];
+      const idx = varRow?.[x] ?? 0;
+      const varCol = variants[idx % variants.length];
+      let color = lerpColor(base, varCol, VARIANT_BLEND);
 
-      if (w > 0 && h > 0) {
-        ctx.fillStyle = color;
-        ctx.fillRect(x0, y0, w, h);
+      if (cell.terrain === 'MOUNTAIN' && MOUNTAIN_DEPTH) {
+        color = mountainTintColor(color, x, y, grid.cols);
       }
+
+      ctx.fillStyle = color;
+      ctx.fillRect(x0, y0, w, h);
     }
   }
 
@@ -400,59 +522,47 @@ if (cell.terrain === 'MOUNTAIN' && MOUNTAIN_DEPTH) {
   }
 }
 
-// --- Value layer rendering (0..61 mapped to a color scale) ---
-function valueColor(t) {
-  // t ∈ [0,1] => simple purple→green→yellow ramp
-  t = Math.max(0, Math.min(1, t));
-  const h = 270 - 210 * t;   // 270 (purple) → 60 (yellow)
-  const s = 95;
-  const l = 40 + 15 * t;
-  return `hsl(${h} ${s}% ${l}%)`;
-}
+/**
+ * Draws a semi-transparent cost heatmap overlay for one empire.
+ * Caches the result to an offscreen canvas; only rebuilds when
+ * ownership, cost maps, or canvas size change.
+ */
+// Heatmap cache state
+let _heatCacheEmpId = -1;
+let _heatCacheOwnerVer = -1;
+let _heatCacheW = 0;
+let _heatCacheH = 0;
 
-/**
- * Draws a semi‑transparent cost heatmap overlay for one empire,
- * but *excludes* any cells that another empire controls—even for
- * computing the color scale.
- */
-/**
- * Draws a semi-transparent cost heatmap overlay for one empire,
- * with hostile (other empires) cells in black. Min/max come from
- * neutral + own cells only.
- */
 function drawHeatmap(emp) {
   if (!emp) return;
 
   const canvas = document.getElementById('mapCanvas');
-  const ctx    = canvas.getContext('2d');
+  const heatLayer = window._heatLayer;
+  const heatCtx = window._heatCtx;
+  if (!heatLayer || !heatCtx) return;
 
-  const rows = window.grid.rows, cols = window.grid.cols, N = rows * cols;
-
-  // --- snap to integer pixel edges to avoid seams ---
-  const xEdge = new Int32Array(cols + 1);
-  const yEdge = new Int32Array(rows + 1);
-  for (let i = 0; i <= cols; i++) xEdge[i] = Math.round((i * canvas.width)  / cols);
-  for (let j = 0; j <= rows; j++) yEdge[j] = Math.round((j * canvas.height) / rows);
-
-  // Precompute per-cell integer rects
-  const cellRect = (x, y) => {
-    const x0 = xEdge[x],   x1 = xEdge[x + 1];
-    const y0 = yEdge[y],   y1 = yEdge[y + 1];
-    return [x0, y0, x1 - x0, y1 - y0];
-  };
-
-  // Optional: doesn’t affect shapes, but harmless to keep off
-  if ('imageSmoothingEnabled' in ctx) ctx.imageSmoothingEnabled = false;
-
-  // Owner lookup
-  const ownerId = new Int32Array(N);
-  for (const e of EmpireManager.empires) {
-    if (!e.territory) continue;
-    for (const idx of e.territory) ownerId[idx] = e.id;
+  // Ensure heat layer matches canvas size
+  if (heatLayer.width !== canvas.width || heatLayer.height !== canvas.height) {
+    heatLayer.width = canvas.width;
+    heatLayer.height = canvas.height;
+    window._heatOverlayDirty = true;
   }
 
-// Cost accessor (flat or 2D)
-  //const N = rows * cols;
+  const ownerVer = window._ownerVersion || 0;
+
+  // Check if cache is still valid
+  const dirty = window._heatOverlayDirty ||
+    _heatCacheEmpId !== emp.id ||
+    _heatCacheOwnerVer !== ownerVer ||
+    _heatCacheW !== canvas.width ||
+    _heatCacheH !== canvas.height;
+
+  if (!dirty) return; // cached layer is still valid
+
+  // --- Rebuild the heatmap onto the offscreen canvas ---
+  const rows = window.grid.rows, cols = window.grid.cols, N = rows * cols;
+  const { xEdge, yEdge } = getEdgeArrays(canvas.width, canvas.height, cols, rows);
+  const ownerId = getCachedOwnerId(N);
 
   const flat =
     (emp.costMapFlat instanceof Float32Array && emp.costMapFlat.length === N)
@@ -465,32 +575,24 @@ function drawHeatmap(emp) {
     Array.isArray(emp.costMap[0]) &&
     emp.costMap[0].length === cols;
 
-  // If there is no usable cost map yet, don't try to draw a heatmap
   if (!flat && !has2D) {
     console.warn('drawHeatmap: no cost map for empire', emp.name);
     return;
   }
 
-  const getCost = (x, y) => {
-    if (flat) {
-      return flat[y * cols + x];
+  const getCost = flat
+    ? (x, y) => flat[y * cols + x]
+    : (x, y) => { const row = emp.costMap[y]; return row ? row[x] : Infinity; };
+
+  // Collect reachable cells for ranking
+  const vals = [];
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const c = getCost(x, y);
+      if (isFinite(c)) vals.push([c, y * cols + x]);
     }
-    const row = emp.costMap[y];
-    return row ? row[x] : Infinity;
-  };
-
-// Collect reachable cells for ranking; optionally include enemy territory
-const vals = [];
-for (let y = 0; y < rows; y++) {
-  for (let x = 0; x < cols; x++) {
-    const idx = y * cols + x;
-
-    const c = getCost(x, y);
-    if (isFinite(c)) vals.push([c, idx]);
   }
-}
 
-  
   if (vals.length === 0) return;
 
   // Rank (percentile): best (lowest cost) = 1.0, worst = 0.0
@@ -507,33 +609,36 @@ for (let y = 0; y < rows; y++) {
   window.__heatRank = { empId: emp.id, rank };
   window.currentHeatEmpire = emp;
 
-// Draw overlay: use viridis for ranked cells; hostile cells are left
-// unfilled (terrain shows through) when includeEnemy is false.
-ctx.save();
-ctx.globalAlpha = 1; // solid overlay where we draw it
-for (let y = 0; y < rows; y++) {
-  for (let x = 0; x < cols; x++) {
-    const idx = y * cols + x;
-    const [rx, ry, rw, rh] = cellRect(x, y);
+  // Draw onto offscreen heat layer
+  heatCtx.clearRect(0, 0, heatLayer.width, heatLayer.height);
+  heatCtx.imageSmoothingEnabled = false;
 
-    const t = rank[idx];
-    if (t < 0) continue; // unreachable / not in ranking
+  for (let y = 0; y < rows; y++) {
+    const y0 = yEdge[y], y1 = yEdge[y + 1];
+    const rh = y1 - y0;
+    if (rh <= 0) continue;
 
-    if (rw > 0 && rh > 0) {
-      ctx.fillStyle = viridis(t);
-      ctx.fillRect(rx, ry, rw, rh);
+    for (let x = 0; x < cols; x++) {
+      const idx = y * cols + x;
+      const t = rank[idx];
+      if (t < 0) continue;
+
+      const x0 = xEdge[x], x1 = xEdge[x + 1];
+      const rw = x1 - x0;
+      if (rw > 0) {
+        heatCtx.fillStyle = viridis(t);
+        heatCtx.fillRect(x0, y0, rw, rh);
+      }
     }
   }
-}
 
-
-  // --- Empire borders in black ---
+  // Empire borders in black
   const borderWidth =
     Math.max(1, Math.min(canvas.width / cols, canvas.height / rows) * 0.08);
 
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth   = borderWidth;
-  ctx.beginPath();
+  heatCtx.strokeStyle = '#000';
+  heatCtx.lineWidth   = borderWidth;
+  heatCtx.beginPath();
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
@@ -541,33 +646,33 @@ for (let y = 0; y < rows; y++) {
       const id  = ownerId[idx];
 
       if (x < cols - 1) {
-        const idxR = idx + 1;
-        const idR  = ownerId[idxR];
+        const idR = ownerId[idx + 1];
         if (id !== idR) {
           const xBorder = xEdge[x + 1] + 0.5;
-          const y0 = yEdge[y];
-          const y1 = yEdge[y + 1];
-          ctx.moveTo(xBorder, y0);
-          ctx.lineTo(xBorder, y1);
+          heatCtx.moveTo(xBorder, yEdge[y]);
+          heatCtx.lineTo(xBorder, yEdge[y + 1]);
         }
       }
 
       if (y < rows - 1) {
-        const idxD = (y + 1) * cols + x;
-        const idD  = ownerId[idxD];
+        const idD = ownerId[(y + 1) * cols + x];
         if (id !== idD) {
           const yBorder = yEdge[y + 1] + 0.5;
-          const x0 = xEdge[x];
-          const x1 = xEdge[x + 1];
-          ctx.moveTo(x0, yBorder);
-          ctx.lineTo(x1, yBorder);
+          heatCtx.moveTo(xEdge[x], yBorder);
+          heatCtx.lineTo(xEdge[x + 1], yBorder);
         }
       }
     }
   }
 
-  ctx.stroke();
-  ctx.restore();
+  heatCtx.stroke();
+
+  // Update cache keys
+  _heatCacheEmpId = emp.id;
+  _heatCacheOwnerVer = ownerVer;
+  _heatCacheW = canvas.width;
+  _heatCacheH = canvas.height;
+  window._heatOverlayDirty = false;
 }
 
 
@@ -732,3 +837,4 @@ const lx = end.px + r + 6; // a small gap to the right of the dot
 window.drawGrid    = drawGrid;
 window.drawHeatmap = drawHeatmap;
 window.drawRoute   = drawRoute;
+window.computeMountainDepth = computeMountainDepth;

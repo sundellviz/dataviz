@@ -1,0 +1,1946 @@
+[
+  {
+    "name": "Vatican City",
+    "size": 50,
+    "capital": {
+      "x": 384,
+      "y": 96
+    }
+  },
+  {
+    "name": "San Marino",
+    "size": 50,
+    "capital": {
+      "x": 384,
+      "y": 92
+    }
+  },
+  {
+    "name": "Vaduz",
+    "size": 50,
+    "capital": {
+      "x": 379,
+      "y": 85
+    }
+  },
+  {
+    "name": "Lobamba",
+    "size": 50,
+    "capital": {
+      "x": 422,
+      "y": 232
+    }
+  },
+  {
+    "name": "Luxembourg",
+    "size": 50,
+    "capital": {
+      "x": 372,
+      "y": 80
+    }
+  },
+  {
+    "name": "Palikir",
+    "size": 50,
+    "capital": {
+      "x": 676,
+      "y": 166
+    }
+  },
+  {
+    "name": "Majuro",
+    "size": 50,
+    "capital": {
+      "x": 702,
+      "y": 165
+    }
+  },
+  {
+    "name": "Funafuti",
+    "size": 50,
+    "capital": {
+      "x": 718,
+      "y": 197
+    }
+  },
+  {
+    "name": "Melekeok",
+    "size": 50,
+    "capital": {
+      "x": 629,
+      "y": 165
+    }
+  },
+  {
+    "name": "Bir Lehlou",
+    "size": 50,
+    "capital": {
+      "x": 340,
+      "y": 127
+    }
+  },
+  {
+    "name": "Monaco",
+    "size": 50,
+    "capital": {
+      "x": 374,
+      "y": 92
+    }
+  },
+  {
+    "name": "Tarawa",
+    "size": 50,
+    "capital": {
+      "x": 706,
+      "y": 177
+    }
+  },
+  {
+    "name": "Moroni",
+    "size": 50,
+    "capital": {
+      "x": 446,
+      "y": 203
+    }
+  },
+  {
+    "name": "Andorra",
+    "size": 50,
+    "capital": {
+      "x": 363,
+      "y": 94
+    }
+  },
+  {
+    "name": "Port-of-Spain",
+    "size": 50,
+    "capital": {
+      "x": 236,
+      "y": 158
+    }
+  },
+  {
+    "name": "Kigali",
+    "size": 50,
+    "capital": {
+      "x": 420,
+      "y": 183
+    }
+  },
+  {
+    "name": "Mbabane",
+    "size": 50,
+    "capital": {
+      "x": 422,
+      "y": 232
+    }
+  },
+  {
+    "name": "Juba",
+    "size": 50,
+    "capital": {
+      "x": 423,
+      "y": 170
+    }
+  },
+  {
+    "name": "The Hague",
+    "size": 50,
+    "capital": {
+      "x": 368,
+      "y": 75
+    }
+  },
+  {
+    "name": "Ljubljana",
+    "size": 50,
+    "capital": {
+      "x": 389,
+      "y": 87
+    }
+  },
+  {
+    "name": "Bratislava",
+    "size": 50,
+    "capital": {
+      "x": 394,
+      "y": 83
+    }
+  },
+  {
+    "name": "Doha",
+    "size": 50,
+    "capital": {
+      "x": 463,
+      "y": 129
+    }
+  },
+  {
+    "name": "Podgorica",
+    "size": 50,
+    "capital": {
+      "x": 398,
+      "y": 95
+    }
+  },
+  {
+    "name": "Sri Jayawardenepura Kotte",
+    "size": 50,
+    "capital": {
+      "x": 519,
+      "y": 166
+    }
+  },
+  {
+    "name": "Baguio",
+    "size": 50,
+    "capital": {
+      "x": 601,
+      "y": 147
+    }
+  },
+  {
+    "name": "Dodoma",
+    "size": 50,
+    "capital": {
+      "x": 431,
+      "y": 192
+    }
+  },
+  {
+    "name": "Bern",
+    "size": 50,
+    "capital": {
+      "x": 374,
+      "y": 86
+    }
+  },
+  {
+    "name": "Laayoune",
+    "size": 50,
+    "capital": {
+      "x": 333,
+      "y": 125
+    }
+  },
+  {
+    "name": "Pristina",
+    "size": 50,
+    "capital": {
+      "x": 402,
+      "y": 94
+    }
+  },
+  {
+    "name": "Roseau",
+    "size": 50,
+    "capital": {
+      "x": 237,
+      "y": 149
+    }
+  },
+  {
+    "name": "Djibouti",
+    "size": 50,
+    "capital": {
+      "x": 446,
+      "y": 156
+    }
+  },
+  {
+    "name": "Putrajaya",
+    "size": 50,
+    "capital": {
+      "x": 563,
+      "y": 174
+    }
+  },
+  {
+    "name": "Kyoto",
+    "size": 50,
+    "capital": {
+      "x": 631,
+      "y": 109
+    }
+  },
+  {
+    "name": "Banjul",
+    "size": 50,
+    "capital": {
+      "x": 326,
+      "y": 153
+    }
+  },
+  {
+    "name": "Skopje",
+    "size": 50,
+    "capital": {
+      "x": 402,
+      "y": 95
+    }
+  },
+  {
+    "name": "Bridgetown",
+    "size": 50,
+    "capital": {
+      "x": 240,
+      "y": 153
+    }
+  },
+  {
+    "name": "Porto-Novo",
+    "size": 50,
+    "capital": {
+      "x": 365,
+      "y": 167
+    }
+  },
+  {
+    "name": "Bujumbura",
+    "size": 50,
+    "capital": {
+      "x": 418,
+      "y": 186
+    }
+  },
+  {
+    "name": "Kingstown",
+    "size": 50,
+    "capital": {
+      "x": 237,
+      "y": 153
+    }
+  },
+  {
+    "name": "Castries",
+    "size": 50,
+    "capital": {
+      "x": 238,
+      "y": 151
+    }
+  },
+  {
+    "name": "Basseterre",
+    "size": 50,
+    "capital": {
+      "x": 234,
+      "y": 145
+    }
+  },
+  {
+    "name": "Port Louis",
+    "size": 50,
+    "capital": {
+      "x": 474,
+      "y": 220
+    }
+  },
+  {
+    "name": "Saint George's",
+    "size": 50,
+    "capital": {
+      "x": 236,
+      "y": 155
+    }
+  },
+  {
+    "name": "Manama",
+    "size": 50,
+    "capital": {
+      "x": 461,
+      "y": 127
+    }
+  },
+  {
+    "name": "Saint John's",
+    "size": 50,
+    "capital": {
+      "x": 236,
+      "y": 145
+    }
+  },
+  {
+    "name": "Montevideo",
+    "size": 50,
+    "capital": {
+      "x": 247,
+      "y": 249
+    }
+  },
+  {
+    "name": "Lomé",
+    "size": 50,
+    "capital": {
+      "x": 362,
+      "y": 167
+    }
+  },
+  {
+    "name": "Tunis",
+    "size": 50,
+    "capital": {
+      "x": 380,
+      "y": 106
+    }
+  },
+  {
+    "name": "Abu Dhabi",
+    "size": 50,
+    "capital": {
+      "x": 468,
+      "y": 131
+    }
+  },
+  {
+    "name": "Ashgabat",
+    "size": 50,
+    "capital": {
+      "x": 476,
+      "y": 104
+    }
+  },
+  {
+    "name": "Lusaka",
+    "size": 50,
+    "capital": {
+      "x": 416,
+      "y": 210
+    }
+  },
+  {
+    "name": "Harare",
+    "size": 50,
+    "capital": {
+      "x": 422,
+      "y": 215
+    }
+  },
+  {
+    "name": "Dili",
+    "size": 50,
+    "capital": {
+      "x": 611,
+      "y": 197
+    }
+  },
+  {
+    "name": "Port Vila",
+    "size": 50,
+    "capital": {
+      "x": 696,
+      "y": 215
+    }
+  },
+  {
+    "name": "Tegucigalpa",
+    "size": 50,
+    "capital": {
+      "x": 185,
+      "y": 151
+    }
+  },
+  {
+    "name": "Georgetown",
+    "size": 50,
+    "capital": {
+      "x": 243,
+      "y": 166
+    }
+  },
+  {
+    "name": "Reykjavík",
+    "size": 50,
+    "capital": {
+      "x": 316,
+      "y": 51
+    }
+  },
+  {
+    "name": "Port-au-Prince",
+    "size": 50,
+    "capital": {
+      "x": 215,
+      "y": 142
+    }
+  },
+  {
+    "name": "Kampala",
+    "size": 50,
+    "capital": {
+      "x": 425,
+      "y": 179
+    }
+  },
+  {
+    "name": "Paramaribo",
+    "size": 50,
+    "capital": {
+      "x": 249,
+      "y": 168
+    }
+  },
+  {
+    "name": "Niamey",
+    "size": 50,
+    "capital": {
+      "x": 364,
+      "y": 152
+    }
+  },
+  {
+    "name": "Dushanbe",
+    "size": 50,
+    "capital": {
+      "x": 497,
+      "y": 102
+    }
+  },
+  {
+    "name": "Asunción",
+    "size": 50,
+    "capital": {
+      "x": 244,
+      "y": 230
+    }
+  },
+  {
+    "name": "Managua",
+    "size": 50,
+    "capital": {
+      "x": 187,
+      "y": 155
+    }
+  },
+  {
+    "name": "Freetown",
+    "size": 50,
+    "capital": {
+      "x": 333,
+      "y": 163
+    }
+  },
+  {
+    "name": "Islamabad",
+    "size": 50,
+    "capital": {
+      "x": 506,
+      "y": 112
+    }
+  },
+  {
+    "name": "Kathmandu",
+    "size": 50,
+    "capital": {
+      "x": 530,
+      "y": 124
+    }
+  },
+  {
+    "name": "Bloemfontein",
+    "size": 50,
+    "capital": {
+      "x": 412,
+      "y": 238
+    }
+  },
+  {
+    "name": "Pretoria",
+    "size": 50,
+    "capital": {
+      "x": 416,
+      "y": 231
+    }
+  },
+  {
+    "name": "Port Moresby",
+    "size": 50,
+    "capital": {
+      "x": 654,
+      "y": 198
+    }
+  },
+  {
+    "name": "Honiara",
+    "size": 50,
+    "capital": {
+      "x": 679,
+      "y": 198
+    }
+  },
+  {
+    "name": "Panama City",
+    "size": 50,
+    "capital": {
+      "x": 200,
+      "y": 162
+    }
+  },
+  {
+    "name": "Rabat",
+    "size": 50,
+    "capital": {
+      "x": 346,
+      "y": 111
+    }
+  },
+  {
+    "name": "Chișinău",
+    "size": 50,
+    "capital": {
+      "x": 417,
+      "y": 85
+    }
+  },
+  {
+    "name": "Maputo",
+    "size": 50,
+    "capital": {
+      "x": 425,
+      "y": 231
+    }
+  },
+  {
+    "name": "Mogadishu",
+    "size": 50,
+    "capital": {
+      "x": 450,
+      "y": 175
+    }
+  },
+  {
+    "name": "Muscat",
+    "size": 50,
+    "capital": {
+      "x": 476,
+      "y": 132
+    }
+  },
+  {
+    "name": "Colombo",
+    "size": 50,
+    "capital": {
+      "x": 519,
+      "y": 166
+    }
+  },
+  {
+    "name": "Ulaanbaatar",
+    "size": 50,
+    "capital": {
+      "x": 573,
+      "y": 84
+    }
+  },
+  {
+    "name": "Windhoek",
+    "size": 50,
+    "capital": {
+      "x": 394,
+      "y": 225
+    }
+  },
+  {
+    "name": "Abuja",
+    "size": 50,
+    "capital": {
+      "x": 374,
+      "y": 161
+    }
+  },
+  {
+    "name": "Bissau",
+    "size": 50,
+    "capital": {
+      "x": 328,
+      "y": 156
+    }
+  },
+  {
+    "name": "Amman",
+    "size": 50,
+    "capital": {
+      "x": 431,
+      "y": 116
+    }
+  },
+  {
+    "name": "Vilnius",
+    "size": 50,
+    "capital": {
+      "x": 410,
+      "y": 70
+    }
+  },
+  {
+    "name": "Riga",
+    "size": 50,
+    "capital": {
+      "x": 408,
+      "y": 66
+    }
+  },
+  {
+    "name": "Bishkek",
+    "size": 50,
+    "capital": {
+      "x": 509,
+      "y": 94
+    }
+  },
+  {
+    "name": "Maseru",
+    "size": 50,
+    "capital": {
+      "x": 414,
+      "y": 238
+    }
+  },
+  {
+    "name": "Antananarivo",
+    "size": 50,
+    "capital": {
+      "x": 455,
+      "y": 217
+    }
+  },
+  {
+    "name": "Quito",
+    "size": 50,
+    "capital": {
+      "x": 202,
+      "y": 180
+    }
+  },
+  {
+    "name": "San José",
+    "size": 50,
+    "capital": {
+      "x": 191,
+      "y": 160
+    }
+  },
+  {
+    "name": "San Salvador",
+    "size": 50,
+    "capital": {
+      "x": 181,
+      "y": 152
+    }
+  },
+  {
+    "name": "Kingston",
+    "size": 50,
+    "capital": {
+      "x": 206,
+      "y": 144
+    }
+  },
+  {
+    "name": "N'Djamena",
+    "size": 50,
+    "capital": {
+      "x": 390,
+      "y": 155
+    }
+  },
+  {
+    "name": "Malabo",
+    "size": 50,
+    "capital": {
+      "x": 377,
+      "y": 172
+    }
+  },
+  {
+    "name": "Asmara",
+    "size": 50,
+    "capital": {
+      "x": 437,
+      "y": 149
+    }
+  },
+  {
+    "name": "Zagreb",
+    "size": 50,
+    "capital": {
+      "x": 391,
+      "y": 88
+    }
+  },
+  {
+    "name": "Tallinn",
+    "size": 50,
+    "capital": {
+      "x": 409,
+      "y": 61
+    }
+  },
+  {
+    "name": "Lilongwe",
+    "size": 50,
+    "capital": {
+      "x": 427,
+      "y": 207
+    }
+  },
+  {
+    "name": "Guatemala City",
+    "size": 50,
+    "capital": {
+      "x": 178,
+      "y": 150
+    }
+  },
+  {
+    "name": "Libreville",
+    "size": 50,
+    "capital": {
+      "x": 378,
+      "y": 179
+    }
+  },
+  {
+    "name": "Suva",
+    "size": 50,
+    "capital": {
+      "x": 716,
+      "y": 216
+    }
+  },
+  {
+    "name": "Valparaíso",
+    "size": 50,
+    "capital": {
+      "x": 216,
+      "y": 246
+    }
+  },
+  {
+    "name": "Nouakchott",
+    "size": 50,
+    "capital": {
+      "x": 328,
+      "y": 143
+    }
+  },
+  {
+    "name": "Bamako",
+    "size": 50,
+    "capital": {
+      "x": 343,
+      "y": 154
+    }
+  },
+  {
+    "name": "Beirut",
+    "size": 50,
+    "capital": {
+      "x": 431,
+      "y": 112
+    }
+  },
+  {
+    "name": "Tbilisi",
+    "size": 50,
+    "capital": {
+      "x": 449,
+      "y": 96
+    }
+  },
+  {
+    "name": "Nur-Sultan",
+    "size": 50,
+    "capital": {
+      "x": 502,
+      "y": 77
+    }
+  },
+  {
+    "name": "Vientiane",
+    "size": 50,
+    "capital": {
+      "x": 565,
+      "y": 144
+    }
+  },
+  {
+    "name": "Brazzaville",
+    "size": 50,
+    "capital": {
+      "x": 390,
+      "y": 188
+    }
+  },
+  {
+    "name": "Conakry",
+    "size": 50,
+    "capital": {
+      "x": 332,
+      "y": 160
+    }
+  },
+  {
+    "name": "Yamoussoukro",
+    "size": 50,
+    "capital": {
+      "x": 349,
+      "y": 166
+    }
+  },
+  {
+    "name": "Ottawa",
+    "size": 50,
+    "capital": {
+      "x": 208,
+      "y": 89
+    }
+  },
+  {
+    "name": "Belgrade",
+    "size": 50,
+    "capital": {
+      "x": 400,
+      "y": 90
+    }
+  },
+  {
+    "name": "Bandar Seri Begawan",
+    "size": 50,
+    "capital": {
+      "x": 589,
+      "y": 170
+    }
+  },
+  {
+    "name": "Sucre",
+    "size": 50,
+    "capital": {
+      "x": 229,
+      "y": 218
+    }
+  },
+  {
+    "name": "Belmopan",
+    "size": 50,
+    "capital": {
+      "x": 182,
+      "y": 145
+    }
+  },
+  {
+    "name": "Bangui",
+    "size": 50,
+    "capital": {
+      "x": 397,
+      "y": 171
+    }
+  },
+  {
+    "name": "Yaoundé",
+    "size": 50,
+    "capital": {
+      "x": 383,
+      "y": 172
+    }
+  },
+  {
+    "name": "Tirana",
+    "size": 50,
+    "capital": {
+      "x": 399,
+      "y": 97
+    }
+  },
+  {
+    "name": "Yerevan",
+    "size": 50,
+    "capital": {
+      "x": 449,
+      "y": 99
+    }
+  },
+  {
+    "name": "Baku",
+    "size": 50,
+    "capital": {
+      "x": 459,
+      "y": 99
+    }
+  },
+  {
+    "name": "Phnom Penh",
+    "size": 50,
+    "capital": {
+      "x": 569,
+      "y": 156
+    }
+  },
+  {
+    "name": "La Paz",
+    "size": 50,
+    "capital": {
+      "x": 223,
+      "y": 212
+    }
+  },
+  {
+    "name": "Cotonou",
+    "size": 50,
+    "capital": {
+      "x": 364,
+      "y": 167
+    }
+  },
+  {
+    "name": "Sofia",
+    "size": 50,
+    "capital": {
+      "x": 406,
+      "y": 94
+    }
+  },
+  {
+    "name": "Minsk",
+    "size": 50,
+    "capital": {
+      "x": 415,
+      "y": 72
+    }
+  },
+  {
+    "name": "Thimphu",
+    "size": 50,
+    "capital": {
+      "x": 539,
+      "y": 125
+    }
+  },
+  {
+    "name": "Gaborone",
+    "size": 50,
+    "capital": {
+      "x": 411,
+      "y": 229
+    }
+  },
+  {
+    "name": "Canberra",
+    "size": 50,
+    "capital": {
+      "x": 658,
+      "y": 250
+    }
+  },
+  {
+    "name": "Ouagadougou",
+    "size": 50,
+    "capital": {
+      "x": 356,
+      "y": 155
+    }
+  },
+  {
+    "name": "Sarajevo",
+    "size": 50,
+    "capital": {
+      "x": 396,
+      "y": 92
+    }
+  },
+  {
+    "name": "Naypyidaw",
+    "size": 50,
+    "capital": {
+      "x": 552,
+      "y": 140
+    }
+  },
+  {
+    "name": "Nuku'alofa",
+    "size": 50,
+    "capital": {
+      "x": 9,
+      "y": 222
+    }
+  },
+  {
+    "name": "Hargeisa",
+    "size": 50,
+    "capital": {
+      "x": 448,
+      "y": 160
+    }
+  },
+  {
+    "name": "Victoria",
+    "size": 50,
+    "capital": {
+      "x": 470,
+      "y": 189
+    }
+  },
+  {
+    "name": "São Tomé",
+    "size": 50,
+    "capital": {
+      "x": 373,
+      "y": 179
+    }
+  },
+  {
+    "name": "Apia",
+    "size": 50,
+    "capital": {
+      "x": 16,
+      "y": 207
+    }
+  },
+  {
+    "name": "Valletta",
+    "size": 50,
+    "capital": {
+      "x": 389,
+      "y": 108
+    }
+  },
+  {
+    "name": "Malé",
+    "size": 50,
+    "capital": {
+      "x": 507,
+      "y": 171
+    }
+  },
+  {
+    "name": "Jerusalem",
+    "size": 50,
+    "capital": {
+      "x": 430,
+      "y": 116
+    }
+  },
+  {
+    "name": "Praia",
+    "size": 50,
+    "capital": {
+      "x": 312,
+      "y": 150
+    }
+  },
+  {
+    "name": "Nassau",
+    "size": 50,
+    "capital": {
+      "x": 205,
+      "y": 129
+    }
+  },
+  {
+    "name": "Nicosia",
+    "size": 50,
+    "capital": {
+      "x": 426,
+      "y": 109
+    }
+  },
+  {
+    "name": "Wellington",
+    "size": 50,
+    "capital": {
+      "x": 709,
+      "y": 262
+    }
+  },
+  {
+    "name": "Hanoi",
+    "size": 50,
+    "capital": {
+      "x": 571,
+      "y": 137
+    }
+  },
+  {
+    "name": "Ankara",
+    "size": 50,
+    "capital": {
+      "x": 425,
+      "y": 100
+    }
+  },
+  {
+    "name": "Budapest",
+    "size": 50,
+    "capital": {
+      "x": 398,
+      "y": 84
+    }
+  },
+  {
+    "name": "Sanaa",
+    "size": 50,
+    "capital": {
+      "x": 448,
+      "y": 149
+    }
+  },
+  {
+    "name": "Bucharest",
+    "size": 50,
+    "capital": {
+      "x": 412,
+      "y": 91
+    }
+  },
+  {
+    "name": "Damascus",
+    "size": 50,
+    "capital": {
+      "x": 432,
+      "y": 112
+    }
+  },
+  {
+    "name": "Lisbon",
+    "size": 50,
+    "capital": {
+      "x": 341,
+      "y": 102
+    }
+  },
+  {
+    "name": "Khartoum",
+    "size": 50,
+    "capital": {
+      "x": 425,
+      "y": 148
+    }
+  },
+  {
+    "name": "Oslo",
+    "size": 50,
+    "capital": {
+      "x": 381,
+      "y": 60
+    }
+  },
+  {
+    "name": "Warsaw",
+    "size": 50,
+    "capital": {
+      "x": 402,
+      "y": 75
+    }
+  },
+  {
+    "name": "Pyongyang",
+    "size": 50,
+    "capital": {
+      "x": 611,
+      "y": 101
+    }
+  },
+  {
+    "name": "Dar es Salaam",
+    "size": 50,
+    "capital": {
+      "x": 438,
+      "y": 193
+    }
+  },
+  {
+    "name": "Dublin",
+    "size": 50,
+    "capital": {
+      "x": 347,
+      "y": 73
+    }
+  },
+  {
+    "name": "Monrovia",
+    "size": 50,
+    "capital": {
+      "x": 338,
+      "y": 167
+    }
+  },
+  {
+    "name": "Kuala Lumpur",
+    "size": 50,
+    "capital": {
+      "x": 563,
+      "y": 173
+    }
+  },
+  {
+    "name": "Havana",
+    "size": 50,
+    "capital": {
+      "x": 195,
+      "y": 133
+    }
+  },
+  {
+    "name": "Prague",
+    "size": 50,
+    "capital": {
+      "x": 388,
+      "y": 79
+    }
+  },
+  {
+    "name": "Kuwait City",
+    "size": 50,
+    "capital": {
+      "x": 455,
+      "y": 121
+    }
+  },
+  {
+    "name": "Santo Domingo",
+    "size": 50,
+    "capital": {
+      "x": 220,
+      "y": 143
+    }
+  },
+  {
+    "name": "Accra",
+    "size": 50,
+    "capital": {
+      "x": 359,
+      "y": 168
+    }
+  },
+  {
+    "name": "Tripoli",
+    "size": 50,
+    "capital": {
+      "x": 386,
+      "y": 114
+    }
+  },
+  {
+    "name": "Tel Aviv",
+    "size": 50,
+    "capital": {
+      "x": 429,
+      "y": 115
+    }
+  },
+  {
+    "name": "Helsinki",
+    "size": 50,
+    "capital": {
+      "x": 409,
+      "y": 59
+    }
+  },
+  {
+    "name": "København",
+    "size": 50,
+    "capital": {
+      "x": 385,
+      "y": 68
+    }
+  },
+  {
+    "name": "Abidjan",
+    "size": 50,
+    "capital": {
+      "x": 351,
+      "y": 169
+    }
+  },
+  {
+    "name": "Brasília",
+    "size": 50,
+    "capital": {
+      "x": 264,
+      "y": 211
+    }
+  },
+  {
+    "name": "Brussels",
+    "size": 50,
+    "capital": {
+      "x": 368,
+      "y": 78
+    }
+  },
+  {
+    "name": "Dhaka",
+    "size": 50,
+    "capital": {
+      "x": 540,
+      "y": 132
+    }
+  },
+  {
+    "name": "Luanda",
+    "size": 50,
+    "capital": {
+      "x": 386,
+      "y": 197
+    }
+  },
+  {
+    "name": "Algiers",
+    "size": 50,
+    "capital": {
+      "x": 366,
+      "y": 106
+    }
+  },
+  {
+    "name": "Yangon",
+    "size": 50,
+    "capital": {
+      "x": 552,
+      "y": 146
+    }
+  },
+  {
+    "name": "San Francisco",
+    "size": 50,
+    "capital": {
+      "x": 115,
+      "y": 104
+    }
+  },
+  {
+    "name": "Denver",
+    "size": 50,
+    "capital": {
+      "x": 150,
+      "y": 100
+    }
+  },
+  {
+    "name": "Houston",
+    "size": 50,
+    "capital": {
+      "x": 169,
+      "y": 120
+    }
+  },
+  {
+    "name": "Miami",
+    "size": 50,
+    "capital": {
+      "x": 199,
+      "y": 128
+    }
+  },
+  {
+    "name": "Atlanta",
+    "size": 50,
+    "capital": {
+      "x": 191,
+      "y": 112
+    }
+  },
+  {
+    "name": "Chicago",
+    "size": 50,
+    "capital": {
+      "x": 184,
+      "y": 96
+    }
+  },
+  {
+    "name": "Caracas",
+    "size": 50,
+    "capital": {
+      "x": 226,
+      "y": 158
+    }
+  },
+  {
+    "name": "Kyiv",
+    "size": 50,
+    "capital": {
+      "x": 421,
+      "y": 79
+    }
+  },
+  {
+    "name": "Dubai",
+    "size": 50,
+    "capital": {
+      "x": 470,
+      "y": 129
+    }
+  },
+  {
+    "name": "Tashkent",
+    "size": 50,
+    "capital": {
+      "x": 498,
+      "y": 97
+    }
+  },
+  {
+    "name": "Madrid",
+    "size": 50,
+    "capital": {
+      "x": 352,
+      "y": 99
+    }
+  },
+  {
+    "name": "Geneva",
+    "size": 50,
+    "capital": {
+      "x": 372,
+      "y": 87
+    }
+  },
+  {
+    "name": "Stockholm",
+    "size": 50,
+    "capital": {
+      "x": 396,
+      "y": 61
+    }
+  },
+  {
+    "name": "Bangkok",
+    "size": 50,
+    "capital": {
+      "x": 561,
+      "y": 152
+    }
+  },
+  {
+    "name": "Lima",
+    "size": 50,
+    "capital": {
+      "x": 205,
+      "y": 204
+    }
+  },
+  {
+    "name": "Dakar",
+    "size": 50,
+    "capital": {
+      "x": 325,
+      "y": 150
+    }
+  },
+  {
+    "name": "Johannesburg",
+    "size": 50,
+    "capital": {
+      "x": 416,
+      "y": 232
+    }
+  },
+  {
+    "name": "Amsterdam",
+    "size": 50,
+    "capital": {
+      "x": 369,
+      "y": 75
+    }
+  },
+  {
+    "name": "Casablanca",
+    "size": 50,
+    "capital": {
+      "x": 344,
+      "y": 112
+    }
+  },
+  {
+    "name": "Seoul",
+    "size": 50,
+    "capital": {
+      "x": 613,
+      "y": 104
+    }
+  },
+  {
+    "name": "Manila",
+    "size": 50,
+    "capital": {
+      "x": 601,
+      "y": 150
+    }
+  },
+  {
+    "name": "Monterrey",
+    "size": 50,
+    "capital": {
+      "x": 159,
+      "y": 128
+    }
+  },
+  {
+    "name": "Berlin",
+    "size": 50,
+    "capital": {
+      "x": 386,
+      "y": 74
+    }
+  },
+  {
+    "name": "Ürümqi",
+    "size": 50,
+    "capital": {
+      "x": 535,
+      "y": 92
+    }
+  },
+  {
+    "name": "Chengdu",
+    "size": 50,
+    "capital": {
+      "x": 568,
+      "y": 118
+    }
+  },
+  {
+    "name": "Ōsaka",
+    "size": 50,
+    "capital": {
+      "x": 631,
+      "y": 110
+    }
+  },
+  {
+    "name": "Kinshasa",
+    "size": 50,
+    "capital": {
+      "x": 390,
+      "y": 188
+    }
+  },
+  {
+    "name": "New Delhi",
+    "size": 50,
+    "capital": {
+      "x": 514,
+      "y": 122
+    }
+  },
+  {
+    "name": "Bengaluru",
+    "size": 50,
+    "capital": {
+      "x": 515,
+      "y": 154
+    }
+  },
+  {
+    "name": "Athens",
+    "size": 50,
+    "capital": {
+      "x": 407,
+      "y": 104
+    }
+  },
+  {
+    "name": "Baghdad",
+    "size": 50,
+    "capital": {
+      "x": 448,
+      "y": 113
+    }
+  },
+  {
+    "name": "Addis Ababa",
+    "size": 50,
+    "capital": {
+      "x": 437,
+      "y": 161
+    }
+  },
+  {
+    "name": "Tehran",
+    "size": 50,
+    "capital": {
+      "x": 462,
+      "y": 108
+    }
+  },
+  {
+    "name": "Vancouver",
+    "size": 50,
+    "capital": {
+      "x": 113,
+      "y": 81
+    }
+  },
+  {
+    "name": "Toronto",
+    "size": 50,
+    "capital": {
+      "x": 201,
+      "y": 92
+    }
+  },
+  {
+    "name": "Buenos Aires",
+    "size": 50,
+    "capital": {
+      "x": 243,
+      "y": 249
+    }
+  },
+  {
+    "name": "Kabul",
+    "size": 50,
+    "capital": {
+      "x": 498,
+      "y": 110
+    }
+  },
+  {
+    "name": "Vienna",
+    "size": 50,
+    "capital": {
+      "x": 392,
+      "y": 83
+    }
+  },
+  {
+    "name": "Melbourne",
+    "size": 50,
+    "capital": {
+      "x": 649,
+      "y": 255
+    }
+  },
+  {
+    "name": "Taipei",
+    "size": 50,
+    "capital": {
+      "x": 603,
+      "y": 129
+    }
+  },
+  {
+    "name": "Auckland",
+    "size": 50,
+    "capital": {
+      "x": 709,
+      "y": 253
+    }
+  },
+  {
+    "name": "Los Angeles",
+    "size": 50,
+    "capital": {
+      "x": 123,
+      "y": 111
+    }
+  },
+  {
+    "name": "Washington,  D.C.",
+    "size": 50,
+    "capital": {
+      "x": 205,
+      "y": 102
+    }
+  },
+  {
+    "name": "New York",
+    "size": 50,
+    "capital": {
+      "x": 212,
+      "y": 98
+    }
+  },
+  {
+    "name": "London",
+    "size": 50,
+    "capital": {
+      "x": 359,
+      "y": 76
+    }
+  },
+  {
+    "name": "Istanbul",
+    "size": 50,
+    "capital": {
+      "x": 417,
+      "y": 97
+    }
+  },
+  {
+    "name": "Riyadh",
+    "size": 50,
+    "capital": {
+      "x": 453,
+      "y": 130
+    }
+  },
+  {
+    "name": "Cape Town",
+    "size": 50,
+    "capital": {
+      "x": 396,
+      "y": 247
+    }
+  },
+  {
+    "name": "Moscow",
+    "size": 50,
+    "capital": {
+      "x": 435,
+      "y": 68
+    }
+  },
+  {
+    "name": "Mexico City",
+    "size": 50,
+    "capital": {
+      "x": 161,
+      "y": 141
+    }
+  },
+  {
+    "name": "Lagos",
+    "size": 50,
+    "capital": {
+      "x": 366,
+      "y": 167
+    }
+  },
+  {
+    "name": "Rome",
+    "size": 50,
+    "capital": {
+      "x": 384,
+      "y": 96
+    }
+  },
+  {
+    "name": "Beijing",
+    "size": 50,
+    "capital": {
+      "x": 592,
+      "y": 100
+    }
+  },
+  {
+    "name": "Nairobi",
+    "size": 50,
+    "capital": {
+      "x": 433,
+      "y": 182
+    }
+  },
+  {
+    "name": "Jakarta",
+    "size": 50,
+    "capital": {
+      "x": 573,
+      "y": 192
+    }
+  },
+  {
+    "name": "Bogota",
+    "size": 50,
+    "capital": {
+      "x": 211,
+      "y": 170
+    }
+  },
+  {
+    "name": "Cairo",
+    "size": 50,
+    "capital": {
+      "x": 422,
+      "y": 119
+    }
+  },
+  {
+    "name": "Shanghai",
+    "size": 50,
+    "capital": {
+      "x": 602,
+      "y": 117
+    }
+  },
+  {
+    "name": "Tokyo",
+    "size": 50,
+    "capital": {
+      "x": 639,
+      "y": 108
+    }
+  },
+  {
+    "name": "Mumbai",
+    "size": 50,
+    "capital": {
+      "x": 505,
+      "y": 141
+    }
+  },
+  {
+    "name": "Paris",
+    "size": 50,
+    "capital": {
+      "x": 364,
+      "y": 82
+    }
+  },
+  {
+    "name": "Santiago",
+    "size": 50,
+    "capital": {
+      "x": 218,
+      "y": 246
+    }
+  },
+  {
+    "name": "Kolkata",
+    "size": 50,
+    "capital": {
+      "x": 536,
+      "y": 134
+    }
+  },
+  {
+    "name": "Rio de Janeiro",
+    "size": 50,
+    "capital": {
+      "x": 273,
+      "y": 225
+    }
+  },
+  {
+    "name": "São Paulo",
+    "size": 50,
+    "capital": {
+      "x": 266,
+      "y": 227
+    }
+  },
+  {
+    "name": "Sydney",
+    "size": 50,
+    "capital": {
+      "x": 662,
+      "y": 247
+    }
+  },
+  {
+    "name": "Singapore",
+    "size": 50,
+    "capital": {
+      "x": 567,
+      "y": 177
+    }
+  },
+  {
+    "name": "Hong Kong",
+    "size": 50,
+    "capital": {
+      "x": 588,
+      "y": 135
+    }
+  }
+]

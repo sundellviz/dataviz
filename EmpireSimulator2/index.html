@@ -1,16 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-041J5K02FS"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-041J5K02FS');
-</script>
-  
   <meta charset="UTF-8" />
   <title>Empire Simulator</title>
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
@@ -62,29 +52,33 @@
       overflow-y: auto;
     }
     .sidebar-header {
-      margin-bottom: 16px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
     }
     .app-title {
-      margin: 0 0 4px 0;
-      font-size: 18px;
-      letter-spacing: .4px;
+      margin: 0 0 2px 0;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -.2px;
       color: var(--heading);
     }
     .app-subtle {
-      margin: 0;
-      font-size: 12px;
+      margin: 0 0 4px 0;
+      font-size: 13px;
       color: var(--muted);
     }
-    .white-link { color: var(--text); text-decoration: none; }
-    .white-link:hover { color: var(--accent); }
+    .white-link { color: var(--accent); text-decoration: none; transition: color .15s; }
+    .white-link:hover { color: #93c5fd; }
 
-.red-link { color: red; text-decoration: none; }
-    .red-link:hover { color: darkred; }
+    .red-link { color: #ef4444; text-decoration: none; transition: color .15s; }
+    .red-link:hover { color: #f87171; }
 
-        .app-text {
+    .app-text {
       margin: 0;
       font-size: 12px;
       color: var(--muted);
+      line-height: 1.5;
     }
 
     /* Section cards */
@@ -97,11 +91,14 @@
       margin-bottom: 14px;
     }
     .section-title {
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: .12em;
-      color: var(--muted);
-      margin-bottom: 8px;
+      letter-spacing: .1em;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
     }
 
     /* Controls layout */
@@ -117,10 +114,20 @@
     .stack { display: grid; gap: 8px; }
     .row { display: flex; gap: 8px; }
     .checkbox {
-      display: flex; align-items: center; gap: 8px;
-      padding: 6px 8px; border-radius: 6px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; border-radius: 8px;
       background: var(--panel-2);
       border: 1px solid var(--input-border);
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .checkbox:hover {
+      background: rgba(96,165,250,.08);
+      border-color: rgba(96,165,250,.3);
+    }
+    .checkbox input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--accent);
     }
 
     /* Stacked control: label + value on first row, slider full-width below */
@@ -136,7 +143,6 @@
 
 
     /* Inputs & buttons */
-    input[type="range"],
     select,
     input[type="file"] {
       width: 100%;
@@ -144,52 +150,115 @@
       color: var(--text);
       border: 1px solid var(--input-border);
       border-radius: 8px;
-      padding: 6px;
+      padding: 8px 10px;
       outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    select:hover, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(96,165,250,.15);
+    }
+
+    /* Range slider styling */
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,.3);
+      transition: transform .1s, box-shadow .1s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 2px 8px rgba(96,165,250,.4);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: var(--accent);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
     }
     button {
       width: 100%;
-      padding: 10px 12px;
+      padding: 10px 14px;
       background: var(--btn);
       color: white;
       border: 0;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
+      font-size: 13px;
       letter-spacing: .2px;
-      transition: background .15s ease, transform .02s ease;
+      transition: background .15s ease, transform .05s ease, box-shadow .15s ease;
     }
-    button:hover { background: var(--btn-hover); }
+    button:hover {
+      background: var(--btn-hover);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, .25);
+    }
     button:active { background: var(--btn-active); transform: translateY(1px); }
+
     .btn-secondary {
-      background: #334155;       /* slate-700 */
+      background: #334155;
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: #3d4d63;
+      box-shadow: none;
     }
 
     .btn-green {
-      background: #10b320;       /* rose-600 */
+      background: #059669;
+    }
+    .btn-green:hover {
+      background: #10b981;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, .25);
     }
 
     .btn-danger {
-      background: #e11d48;       /* rose-600 */
+      background: #dc2626;
+    }
+    .btn-danger:hover {
+      background: #ef4444;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, .25);
     }
 
     hr {
       border: 0;
-      border-top: 2px solid var(--border);
-      margin: 10px 0;
-      opacity: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 14px 0;
     }
 
-    /* Collapsibles (keep your existing IDs) */
+    /* Collapsibles */
     .collapsible-header {
       cursor: pointer;
-      padding: 8px 10px;
-      background: #143255;
+      padding: 10px 12px;
+      background: rgba(96,165,250,.08);
       color: var(--text);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(96,165,250,.2);
       border-radius: 8px;
-      font-weight: 700;
+      font-weight: 600;
+      font-size: 13px;
       user-select: none;
+      transition: all .15s ease;
+    }
+    .collapsible-header:hover {
+      background: rgba(96,165,250,.12);
+      border-color: rgba(96,165,250,.35);
     }
     .collapsible-content {
       background: var(--panel-2);
@@ -199,7 +268,7 @@
       transition: max-height .25s ease, opacity .25s ease, padding .25s ease;
       max-height: 1000px;
       opacity: 1;
-      padding: 10px;
+      padding: 12px;
       margin-top: 8px;
     }
     .collapsible-content.hidden {
@@ -403,66 +472,65 @@ details.section > summary .help-icon {
 /* ── Compact, polished tab list ───────────────────────────────── */
 #panel-tabs{
   position: sticky; top: 0; z-index: 5;
-  display: grid; grid-template-columns: 1fr; gap: 8px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
   background: linear-gradient(180deg, #0e1726 0%, #0c1523 100%);
-  padding-bottom: 8px; margin-bottom: 10px;
+  padding: 8px 0 12px 0; margin-bottom: 8px;
   border-bottom: 1px solid var(--border);
-}
-@media (min-width: 1100px){
-  /* optional: two columns on wider sidebars */
-  #panel-tabs{ grid-template-columns: 1fr 1fr; }
 }
 
 #panel-tabs .tab-btn{
   display: flex; align-items: center; gap: 8px;
-  min-height: 36px; padding: 6px 10px;
-  border-radius: 12px;
+  min-height: 38px; padding: 8px 12px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--text);
-  font-weight: 600; font-size: 14px; line-height: 1;
+  font-weight: 500; font-size: 13px; line-height: 1;
   cursor: pointer;
-  transition: background .2s ease, border-color .2s ease, transform .04s ease;
+  transition: all .15s ease;
 }
-#panel-tabs .tab-btn .ico{ opacity: .9; }
+#panel-tabs .tab-btn .ico{ opacity: .7; transition: opacity .15s; }
+#panel-tabs .tab-btn:hover .ico{ opacity: 1; }
 #panel-tabs .tab-btn .lbl{ flex: 1 1 auto; text-align: left; }
 #panel-tabs .tab-btn .badge{
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 20px; height: 20px; padding: 0 6px;
-  border-radius: 999px; font-size: 12px; font-weight: 700;
-  background: rgba(255,255,255,.12); color: #fff;
+  border-radius: 999px; font-size: 11px; font-weight: 700;
+  background: var(--accent); color: #fff;
 }
 
-#panel-tabs .tab-btn:hover{ filter: brightness(1.06); }
+#panel-tabs .tab-btn:hover{
+  background: rgba(96,165,250,.1);
+  border-color: rgba(96,165,250,.3);
+}
 #panel-tabs .tab-btn:active{ transform: translateY(1px); }
 #panel-tabs .tab-btn.active{
-  background: linear-gradient(180deg, var(--btn) 0%, #3762ff 100%);
-  border-color: var(--btn);
+  background: var(--btn);
+  border-color: var(--accent);
   color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, .3);
 }
+#panel-tabs .tab-btn.active .ico{ opacity: 1; }
 #panel-tabs .tab-btn:focus-visible{
-  outline: 2px solid var(--btn); outline-offset: 2px;
+  outline: 2px solid var(--accent); outline-offset: 2px;
 }
 
-/* Special styling for the Simulation / Run Simulation tab */
+/* Special styling for the Run Simulation button */
 #panel-tabs .tab-btn--run {
-  /* base (inactive) look: subtle dark red tint */
-  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
-  border-color: #7f1d1d;
-}
-
-#panel-tabs .tab-btn--run .lbl {
-  /* slightly warmer label color */
-  color: #ffffff;
-}
-
-/* Active state: bright red gradient */
-#panel-tabs .tab-btn--run.active {
-  background: linear-gradient(180deg, #ef4444 100%, #b91c1c 100%);
-  border-color: #f97373;
+  grid-column: 1 / -1;
+  justify-content: center;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  border-color: #991b1b;
   color: #fff;
+  font-weight: 600;
+  min-height: 44px;
 }
-
+#panel-tabs .tab-btn--run:hover {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-color: #ef4444;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, .35);
+}
 #panel-tabs .tab-btn--run:focus-visible {
   outline-color: #ef4444;
 }
@@ -475,8 +543,12 @@ details.section.is-hidden{ display: none; }
 
 /* Pedagogical hint under the tabs */
 .panel-hint{
-  margin: 2px 2px 12px 2px;
-  font-size: 13px; line-height: 1.35;
+  margin: 0 0 14px 0;
+  padding: 10px 12px;
+  font-size: 12px; line-height: 1.45;
+  background: rgba(96,165,250,.06);
+  border: 1px solid rgba(96,165,250,.15);
+  border-radius: 8px;
   color: var(--muted, #9aa5b1);
 }
 
@@ -503,17 +575,110 @@ details.section.is-hidden{ display: none; }
   filter: drop-shadow(0 0 3px rgba(99,102,241,.35));
 }
 
+.trade-route-lists { display:flex; gap:12px; margin-top:8px; }
+.trade-route-list { flex:1; min-width: 120px; }
+.route-list { list-style:none; margin:0; padding:0; max-height:220px; overflow:auto; }
+.route-list li { padding:6px 8px; border-radius:8px; cursor:default; }
+.route-list li:hover { background: rgba(255,255,255,0.06); }
+
+/* Table styling */
+#trade-leaderboard-table,
+#leaderboard-table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+}
+#trade-leaderboard-table th,
+#leaderboard-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 6px;
+}
+#trade-leaderboard-table td,
+#leaderboard-table td {
+  padding: 8px 6px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+#trade-leaderboard-table tbody tr:hover,
+#leaderboard-table tbody tr:hover {
+  background: rgba(96,165,250,.06);
+}
+
+.route-pill {
+  display:inline-block;
+  font-size:11px;
+  padding:2px 6px;
+  border-radius:999px;
+  margin-right:8px;
+  opacity:0.9;
+}
+.route-pill.out { background: rgba(40,140,255,0.25); border: 1px solid rgba(40,140,255,0.4); }
+.route-pill.in  { background: rgba(255,150,40,0.25); border: 1px solid rgba(255,150,40,0.4); }
+
+.trade-route-popup {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  max-width: 320px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+
+/* Performance Monitor Overlay */
+#perf-monitor {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  color: #00ff88;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  display: none;
+  min-width: 180px;
+}
+#perf-monitor.visible { display: block; }
+#perf-monitor .perf-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0;
+}
+#perf-monitor .perf-label { color: #88aacc; }
+#perf-monitor .perf-value { color: #00ff88; font-weight: bold; text-align: right; }
+#perf-monitor .perf-value.warn { color: #ffcc00; }
+#perf-monitor .perf-value.bad { color: #ff4444; }
+#perf-monitor .perf-title {
+  color: #ffffff;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+
   </style>
 </head>
 <body>
   <aside id="controls">
     <div class="sidebar-header">
-      <h1 class="app-title">Empire Simulator 2.2</h1>
-      <h1 class="app-title"><a href="https://www.youtube.com/sundellviz" class="white-link">youtube.com/sundellviz</a></h1>
-      <p class="app-text">
-      Explainer videos: <a class="red-link" href="https://www.youtube.com/watch?v=rMRoecHgHws", target="new">1</a> | <a class="red-link" href="https://www.youtube.com/watch?v=CuEmceEwcwg", target="new">2</a> | <a class="red-link" href="https://www.youtube.com/watch?v=ynwbumC5Xq0", target="new">3</a> <br>
-      Choose a map in the Terrain tab and place capitals in the Empires tab. Empires build territory by taking the grid cells that are easiest to reach. Run simulation to see empires grow. 
-    </p>
+      <h1 class="app-title">Empire Simulator 2.3</h1>
+      <p class="app-subtle"><a href="https://www.youtube.com/sundellviz" class="white-link">youtube.com/sundellviz</a></p>
+      <p class="app-text" style="margin-top:8px;">
+        Explainer videos: <a class="red-link" href="https://www.youtube.com/watch?v=rMRoecHgHws" target="_blank">1</a> · <a class="red-link" href="https://www.youtube.com/watch?v=CuEmceEwcwg" target="_blank">2</a> · <a class="red-link" href="https://www.youtube.com/watch?v=ynwbumC5Xq0" target="_blank">3</a>
+      </p>
     </div>
 
 
@@ -533,6 +698,19 @@ details.section.is-hidden{ display: none; }
     <span class="lbl">Empires</span>
     <span class="badge" id="badge-empires" hidden>0</span>
   </button>
+
+
+<button class="tab-btn" id="tab-trade" data-tab="sec-trade" role="tab" aria-controls="sec-trade">
+  <span class="ico" aria-hidden="true">
+    <!-- simple “trade arrows” icon -->
+    <svg viewBox="0 0 24 24" width="16" height="16">
+      <path fill="currentColor" d="M7 7h11l-2-2 1.4-1.4L22.8 9l-5.4 5.4L16 13l2-2H7V7zm10 10H6l2 2-1.4 1.4L1.2 15l5.4-5.4L8 11l-2 2h11v4z"/>
+    </svg>
+  </span>
+  <span class="lbl">Trade</span>
+</button>
+
+
 
   <button class="tab-btn" id="tab-value" data-tab="sec-value" role="tab" aria-controls="sec-value">
     <span class="ico" aria-hidden="true">
@@ -580,70 +758,126 @@ details.section.is-hidden{ display: none; }
 
 <!-- Short, pedagogical hint that changes with the active tab -->
 <p id="panel-hint" class="panel-hint" aria-live="polite"></p>
-    <!-- 4) EMPIRES -->
+    <!-- EMPIRES -->
 <details class="section section--empires" id="sec-empires" open>
   <summary class="help-wrap">
     <span>Empires</span>
     <span class="help-icon" data-help="empires">?</span>
   </summary>
-  <div class="section-body">
-
-    <div class="row" style="gap:8px; margin-bottom:8px;">
-      <button id="collapse-all-empires-btn" class="btn-secondary">Collapse Empire Panels</button>
+  <div class="section-body stack">
+    <div class="row" style="gap:8px;">
+      <button id="collapse-all-empires-btn" class="btn-secondary">Collapse All</button>
       <button id="add-empire-btn" class="btn-green">Add Empire</button>
     </div>
 
     <hr>
-    <div class="stack">
-      
-        <div class="stack">
-  <!-- hidden file input, same id as before -->
-  <input type="file" id="import-empires-input" accept=".json" style="display:none;">
 
-<div class="section-title">Load / Export empires <span class="help-icon" data-help="empiresload">?</span></div>
+    <!-- Load / Export -->
+    <input type="file" id="import-empires-input" accept=".json" style="display:none;">
+    <div class="section-title">Load / Export <span class="help-icon" data-help="empiresload">?</span></div>
 
-<div class="control">
-  <label for="cities-menu" style="grid-column: 1 / -1; color: var(--muted);">
-    Pre-generated city sets
-  </label>
-  <select id="cities-menu" style="grid-column: 1 / -1;">
-    <option value="">— choose a set —</option>
-    <option value="cities/cities_world.json">World</option>
-    <option value="cities/cities_africa.json">Africa</option>
-    <option value="cities/cities_eastasia.json">East Asia</option>
-    <option value="cities/cities_europe.json">Europe</option>
-    <option value="cities/cities_northamerica.json">North America</option>
-    <option value="cities/cities_oceania.json">Oceania</option>
-    <option value="cities/cities_southamerica.json">South America</option>
-  </select>
-</div>
+    <select id="cities-menu" style="margin-bottom:8px;">
+      <option value="">— pre-generated city sets —</option>
+      <option value="cities/cities_world.json">World</option>
+      <option value="cities/cities_africa.json">Africa</option>
+      <option value="cities/cities_eastasia.json">East Asia</option>
+      <option value="cities/cities_europe.json">Europe</option>
+      <option value="cities/cities_northamerica.json">North America</option>
+      <option value="cities/cities_oceania.json">Oceania</option>
+      <option value="cities/cities_southamerica.json">South America</option>
+    </select>
 
-  <div class="row" style="gap:8px; flex-wrap:wrap;">
-    <button id="import-empires-btn" class="btn-secondary">Import Empires .json</button>
-    <button id="export-empires-btn" class="btn-secondary">Export Empires .json</button>
-  </div>
+    <div class="row" style="gap:8px;">
+      <button id="import-empires-btn" class="btn-secondary">Import .json</button>
+      <button id="export-empires-btn" class="btn-secondary">Export .json</button>
+    </div>
+    <button id="export-ownership-btn" class="btn-secondary">Export Ownership Grid</button>
+    <button id="reset-empires-btn" class="btn-secondary">Reset All Empires</button>
 
+    <hr>
 
-  <button id="export-ownership-btn" class="btn-secondary">Export Ownership Grid .txt</button>
-
-</div>
-
-<hr>
-
-
-      <div class="row" style="gap:8px; align-items:center; margin-bottom:8px;">
-  <label for="random-empires-count">Add random empires:</label>
-  <input id="random-empires-count" type="number" min="1" max="40" value="5" style="width:64px;">
-  <button id="add-random-empires-btn">Add</button>
-</div>
-
-      </div>
-
+    <!-- Random empires -->
+    <div class="section-title">Generate Random</div>
+    <div class="row" style="gap:8px; align-items:center;">
+      <input id="random-empires-count" type="number" min="1" max="40" value="5" style="width:64px;">
+      <button id="add-random-empires-btn" style="flex:1;">Add Random Empires</button>
     </div>
 
-    <div id="empire-panels" style="margin-top:10px;"></div>
+    <!-- Empire panels container -->
+    <div id="empire-panels" style="margin-top:14px;"></div>
   </div>
 </details>
+
+
+<details class="section section--trade" id="sec-trade" open>
+  <summary class="help-wrap">
+    <span>Trade</span>
+  </summary>
+  
+<div class="section-body stack">
+  <p class="app-text" style="margin:0;">
+    Each city has a number of incoming slots, and chooses connections with cities that can reach it the cheapest. Water trade discount means water routes are advantaged.
+  </p>
+
+  <div class="row" style="gap:8px; align-items:center;">
+    <button id="trade-recompute-btn" class="btn-secondary">Recompute routes</button>
+  </div>
+
+  <div class="row" style="gap:10px; align-items:center;">
+    <span class="app-text" style="min-width:120px;">Incoming slots</span>
+    <input id="trade-incoming-slots" type="range" min="0" max="20" step="1" value="2" style="flex:1;">
+    <span id="trade-incoming-slots-val" class="app-text" style="width:32px; text-align:right;">2</span>
+  </div>
+
+<!--Water discount-->
+<div class="row" style="gap:10px; align-items:center;">
+  <span class="app-text" style="min-width:120px;">Water trade discount</span>
+  <input id="trade-water-discount" type="range" min="0.01" max="1" step="0.01" value="1" style="flex:1;">
+  <span id="trade-water-discount-val" class="app-text" style="width:48px; text-align:right;">1.00</span>
+</div>
+
+  <p class="app-text" id="trade-stats" style="margin:0;"></p>
+
+  <div class="trade-selection">
+  <div class="muted">Trade view: click a capital on the map to inspect its routes.</div>
+  <div id="trade-selected-city" class="trade-selected-city">No capital selected</div>
+
+  <div class="trade-route-lists">
+    <div class="trade-route-list">
+      <h4>Outgoing</h4>
+      <ul id="trade-outgoing-list" class="route-list"></ul>
+    </div>
+
+    <div class="trade-route-list">
+      <h4>Incoming</h4>
+      <ul id="trade-incoming-list" class="route-list"></ul>
+    </div>
+  </div>
+</div>
+
+<div id="trade-route-popup" class="trade-route-popup" style="display:none;"></div>
+
+  <div class="stack" style="gap:6px;">
+    <div class="app-text" style="margin-top:6px;">Outgoing routes leaderboard</div>
+    <div style="max-height:220px; overflow:auto; border:1px solid rgba(255,255,255,0.15); border-radius:10px;">
+      <table id="trade-leaderboard-table" style="width:100%; border-collapse:collapse;">
+  <thead>
+    <tr>
+      <th style="text-align:left; padding:4px 6px; width:30px;">#</th>
+      <th data-sort="name" style="text-align:left; padding:4px 6px; cursor:pointer; user-select:none;">City</th>
+      <th data-sort="conn" style="text-align:right; padding:4px 6px; width:90px; cursor:pointer; user-select:none;">Connections</th>
+      <th data-sort="pass" style="text-align:right; padding:4px 6px; width:90px; cursor:pointer; user-select:none;">Pass-through</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+    </div>
+  </div>
+</div>
+</details>
+
+
+
 
 <!-- 3) TERRAIN (load, export, overlay, painting) -->
 <details class="section section--terrain" id="sec-terrain" open>
@@ -748,6 +982,7 @@ details.section.is-hidden{ display: none; }
             <option value="PLAIN">Plain</option>
             <option value="DESERT">Desert</option>
             <option value="WATER">Water</option>
+            <option value="OCEAN">Ocean</option>
             <option value="MOUNTAIN">Mountain</option>
             <option value="FOREST">Forest</option>
             <option value="SHRUB">Shrub</option>
@@ -763,11 +998,11 @@ details.section.is-hidden{ display: none; }
         </div>
       </div>
 
-      <div id="randomize-header" class="collapsible-header" style="margin-top:10px;">Randomize terrain ▶</div>
+      <div id="randomize-header" class="collapsible-header" style="margin-top:10px;">New empty grid ▶</div>
       <div id="randomize-controls" class="collapsible-content hidden">
         <div id="sliders"></div>
         <div class="row" style="margin-top:8px;">
-          <button id="randomize-btn">Randomize Terrain</button>
+          <button id="randomize-btn">Create empty grid</button>
         </div>
 
         <hr>
@@ -793,96 +1028,75 @@ details.section.is-hidden{ display: none; }
     <span class="help-icon" data-help="value">?</span>
   </summary>
 
-
+  <div class="section-body stack">
     <!-- Pre-generated VALUE maps -->
-<div class="control">
-  <label for="value-menu" style="grid-column: 1 / -1; color: var(--muted);">Pre-generated value maps</label>
-  <select id="value-menu" style="grid-column: 1 / -1;">
-    <option value="">— choose a map —</option>
-    <option value="landvalue/landvalue_world.txt">World</option>
-    <option value="landvalue/landvalue_africa.txt">Africa</option>
-    <option value="landvalue/landvalue_eastasia.txt">East Asia</option>
-    <option value="landvalue/landvalue_europe.txt">Europe</option>
-    <option value="landvalue/landvalue_northamerica.txt">North America</option>
-    <option value="landvalue/landvalue_oceania.txt">Oceania</option>
-    <option value="landvalue/landvalue_southamerica.txt">South America</option>
-    <option value="landvalue/landvalue_australia_hires.txt">Australia (hi res)</option>
-    <option value="landvalue/landvalue_british_hires.txt">British Isles (hi res)</option>
-    <option value="landvalue/landvalue_caribbean_hires.txt">Caribbean (hi res)</option>
-    <option value="landvalue/landvalue_centraleurope_hires.txt">Central Europe (hi res)</option>
-    <option value="landvalue/landvalue_germany_hires.txt">Germany (hi res)</option>
-    <option value="landvalue/landvalue_greece_hires.txt">Greece (hi res)</option>
-    <option value="landvalue/landvalue_japan_hires.txt">Korea and Japan (hi res)</option>
-    <option value="landvalue/landvalue_india_hires.txt">India (hi res)</option>
-    <option value="landvalue/landvalue_middleeast_hires.txt">Middle East</option>
-    <option value="landvalue/landvalue_scandinavia_hires.txt">Scandinavia (hi res)</option>
-    <option value="landvalue/landvalue_southeastasia_hires.txt">South-East Asia (hi res)</option>
-    <option value="landvalue/landvalue_westmed_hires.txt">Western Mediterranean (hi res)</option>
-    <option value="landvalue/landvalue_westus_hires.txt">Western US (hi res)</option>
-    <option value="landvalue/landvalue_eastus_hires.txt">Eastern US (hi res)</option>
-  </select>
-</div>
+    <div class="section-title">Load Value Map</div>
+    <select id="value-menu" style="margin-bottom:8px;">
+      <option value="">— choose a map —</option>
+      <option value="landvalue/landvalue_world.txt">World</option>
+      <option value="landvalue/landvalue_africa.txt">Africa</option>
+      <option value="landvalue/landvalue_eastasia.txt">East Asia</option>
+      <option value="landvalue/landvalue_europe.txt">Europe</option>
+      <option value="landvalue/landvalue_northamerica.txt">North America</option>
+      <option value="landvalue/landvalue_oceania.txt">Oceania</option>
+      <option value="landvalue/landvalue_southamerica.txt">South America</option>
+      <option value="landvalue/landvalue_australia_hires.txt">Australia (hi res)</option>
+      <option value="landvalue/landvalue_british_hires.txt">British Isles (hi res)</option>
+      <option value="landvalue/landvalue_caribbean_hires.txt">Caribbean (hi res)</option>
+      <option value="landvalue/landvalue_centraleurope_hires.txt">Central Europe (hi res)</option>
+      <option value="landvalue/landvalue_germany_hires.txt">Germany (hi res)</option>
+      <option value="landvalue/landvalue_greece_hires.txt">Greece (hi res)</option>
+      <option value="landvalue/landvalue_japan_hires.txt">Korea and Japan (hi res)</option>
+      <option value="landvalue/landvalue_india_hires.txt">India (hi res)</option>
+      <option value="landvalue/landvalue_middleeast_hires.txt">Middle East</option>
+      <option value="landvalue/landvalue_scandinavia_hires.txt">Scandinavia (hi res)</option>
+      <option value="landvalue/landvalue_southeastasia_hires.txt">South-East Asia (hi res)</option>
+      <option value="landvalue/landvalue_westmed_hires.txt">Western Mediterranean (hi res)</option>
+      <option value="landvalue/landvalue_westus_hires.txt">Western US (hi res)</option>
+      <option value="landvalue/landvalue_eastus_hires.txt">Eastern US (hi res)</option>
+    </select>
 
-    <div class="section-body stack" style="gap:8px; flex-wrap:wrap;">
+    <div class="row" style="gap:8px;">
       <input id="import-value-file" type="file" accept=".txt" style="display:none;">
-      <button id="import-value-btn" class="btn-secondary">Import Value .txt</button>
-      <button id="export-value-btn" class="btn-secondary">Export Value .txt</button>
+      <button id="import-value-btn" class="btn-secondary">Import .txt</button>
+      <button id="export-value-btn" class="btn-secondary">Export .txt</button>
     </div>
-  </div>
-
-  <div class="section-body stack" id="value-layer-controls">
-    <div class="row" style="gap:8px; flex-wrap:wrap;">
-      <button id="view-terrain-btn" class="btn-secondary">View: Terrain</button>
-      <button id="view-value-btn">View: Value</button>
-      <button id="start-value-paint-btn" class="btn-secondary">Start Value Painting</button>
-    </div>
-
-    <div id="value-paint-controls" class="row" style="gap:8px; align-items:center; display:none;">
-      <div class="controls">
-      <label for="paint-value">Value</label>
-      <input id="paint-value" type="number" min="0" max="61" step="1" value="10" style="width:80px;">
-      <span id="paint-value-char" style="opacity:0.7;">(a)</span>
-</div>
-            <div class="controls">
-    <label for="value-brush-size">Brush Size (value)</label>
-    <input id="value-brush-size" type="range" min="1" max="25" step="1" value="1" />
-    <div class="value"><span id="value-brush-size-display">1</span></div>
-  </div>
-    </div>
-
-
 
     <hr>
-    <div class="stack" id="terrain-value-stack">
-      <div style="font-weight:600; color:var(--muted)">Value by Terrain <span class="help-icon" data-help="valuesliders">?</span></div>
-      <div id="terrain-value-sliders" class="column" style="gap:6px;"></div>
-      <div class="row" style="gap:8px; align-items:center;">
-        <button id="reset-terrain-values" class="btn-secondary">Reset all to 1</button>
-        <small style="opacity:.7">Range: 0–61 → (0–9, a–z, A–Z)</small>
+
+    <!-- View Controls -->
+    <div class="section-title">View & Paint</div>
+    <div id="value-layer-controls" class="stack" style="gap:10px;">
+      <div class="row" style="gap:8px;">
+        <button id="view-terrain-btn" class="btn-secondary">Terrain</button>
+        <button id="view-value-btn">Value</button>
+        <button id="start-value-paint-btn" class="btn-secondary">Paint</button>
+      </div>
+
+      <div id="value-paint-controls" class="stack" style="gap:8px; display:none;">
+        <div class="control">
+          <label for="paint-value">Paint Value</label>
+          <input id="paint-value" type="number" min="0" max="61" step="1" value="10" style="width:70px;">
+          <span id="paint-value-char" class="value">(a)</span>
+        </div>
+        <div class="control">
+          <label for="value-brush-size">Brush Size</label>
+          <input id="value-brush-size" type="range" min="1" max="25" step="1" value="1" />
+          <div class="value"><span id="value-brush-size-display">1</span></div>
+        </div>
       </div>
     </div>
 
+    <hr>
 
-
-
-</details>
-
-<!-- 6) OPTIMIZATION -->
-<details class="section section--optimization" id="sec-optimization" closed>
-  <summary class="help-wrap">
-    <span>Empire simulation</span>
-    <span class="help-icon" data-help="optimization">?</span>
-  </summary>
-  
-
-
-
-
+    <!-- Terrain Value Sliders -->
+    <div class="section-title">Value by Terrain <span class="help-icon" data-help="valuesliders">?</span></div>
+    <div id="terrain-value-stack" class="stack" style="gap:8px;">
+      <div id="terrain-value-sliders" style="display:grid; gap:6px;"></div>
+      <div class="row" style="gap:8px; align-items:center;">
+        <button id="reset-terrain-values" class="btn-secondary">Reset all to 1</button>
+        <small style="opacity:.7">Range: 0–61</small>
       </div>
-
-
-
-
     </div>
   </div>
 </details>
@@ -895,62 +1109,97 @@ details.section.is-hidden{ display: none; }
   </summary>
 
   <div class="section-body stack">
-    <div class="row" style="gap:8px; margin-bottom:8px;">
-      <div class="control" style="flex:1; margin:0;">
-        <label for="auto-grow-speed">Grow amount:</label>
-        <input id="auto-grow-speed" type="range" min="1" max="1000" step="1" value="50" />
-        <div class="value"><span id="auto-grow-speed-val">5</span></div>
+    <!-- Simulation Speed -->
+    <div class="section-title">Simulation</div>
+    <div class="control stacked">
+      <label for="auto-grow-speed">Grow amount per step</label>
+      <div class="value"><span id="auto-grow-speed-val">5</span></div>
+      <input id="auto-grow-speed" type="range" min="1" max="1000" step="1" value="50" />
+    </div>
+
+    <hr>
+
+    <!-- Empire Behavior -->
+    <div class="section-title">Empire Behavior <span class="help-icon" data-help="optimizationdetail">?</span></div>
+    <div id="optimization-controls" class="stack" style="gap:10px;">
+      <div class="control stacked">
+        <label for="growth-threshold">Growth threshold</label>
+        <div class="value"><span id="growth-threshold-val">10</span></div>
+        <input id="growth-threshold" type="range" min="1" max="61" step="1" value="10" />
+      </div>
+
+      <div class="control stacked">
+        <label for="discrimination-threshold">Discrimination δ</label>
+        <div class="value"><span id="discrimination-threshold-val">1</span></div>
+        <input id="discrimination-threshold" type="range" min="0" max="61" step="1" value="1">
+      </div>
+
+      <div class="control stacked">
+        <label for="contest-weight">Travel cost (0) vs Power (1)</label>
+        <div class="value"><span id="contest-weight-val">0.50</span></div>
+        <input id="contest-weight" type="range" min="0" max="1" step="0.01" value="0.50">
+      </div>
+
+      <div class="control stacked">
+        <label for="base-cost-offset">Base cost offset</label>
+        <div class="value"><span id="base-cost-offset-val">0</span></div>
+        <input id="base-cost-offset" type="range" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div class="control stacked">
+        <label for="trade-weight">Agriculture (0) vs Trade (1)</label>
+        <div class="value"><span id="trade-weight-val">0.50</span></div>
+        <input id="trade-weight" type="range" min="0" max="1" step="0.01" value="0.50">
       </div>
     </div>
 
     <hr>
 
-
-    <div class="stack" id="optimization-controls" style="margin-top:8px;">
-      <div style="font-weight:600; color: var(--muted);">Empire simulation <span class="help-icon" data-help="optimizationdetail">?</span></div>
-
-            <label for="growth-threshold">
-      Growth threshold
-    </label>
-    <input id="growth-threshold" type="range" min="1" max="61" step="1" value="10" />
-    <div class="value"><span id="growth-threshold-val">10</span></div>
-
-    <!-- Discrimination (δ): only bid on cells with value >= δ -->
-<label>Discrimination δ
-  <input id="discrimination-threshold" type="range" min="0" max="61" step="1" value="1">
-  <span id="discrimination-threshold-val">1</span>
-</label>
-
-<!-- Power weight μ in 0..0.3 (feel-good range); μ=0 disables power -->
-<label>Power weight μ
-  <input id="power-weight" type="range" min="0" max="5" step="0.01" value="0.15">
-  <span id="power-weight-val">0.15</span>
-</label>
-
-</div>
-
-<hr>
-
-  <div class="section-body stack">
-    <div style="font-weight:600; color:var(--muted);">Global travel costs</div>
+    <!-- Global Travel Costs -->
+    <div class="section-title">Global Travel Costs</div>
     <div id="global-speed-sliders"></div>
-    <small style="opacity:.75">Lower = faster. Applies to all empires and is the default for new empires.</small>
-  </div>
+    <small style="opacity:.7; display:block; margin-top:6px;">Lower = faster. Default for all empires.</small>
 
-        <div class="section-title" id="penalty-controls" style="margin-bottom:8px; margin-top:8px">
-      <div style="font-weight:600; color: var(--muted);">Hostile Territory Penalty <span class="help-icon" data-help="hostile">?</span></div>
+    <div class="row" style="gap:8px; align-items:center; margin-top:8px;">
+      <button id="adapt-terrain-btn" class="btn-secondary" style="flex:1;">Adapt Costs to Terrain</button>
+    </div>
+    <div class="control stacked" style="margin-top:4px;">
+      <label for="adapt-terrain-radius">Adaptation radius</label>
+      <div class="value"><span id="adapt-terrain-radius-val">10</span></div>
+      <input id="adapt-terrain-radius" type="range" min="3" max="50" step="1" value="10" />
+    </div>
 
-          <div class="row" >
+    <hr>
+
+    <!-- Display Options -->
+    <div class="section-title">Display</div>
+    <div class="stack" style="gap:8px;">
+      <label class="checkbox">
+        <input type="checkbox" id="ghost-cities-checkbox" checked />
+        <span>Ghost Cities (eliminated empires stay as trade nodes)</span>
+      </label>
+      <label class="checkbox">
+        <input type="checkbox" id="hide-dead-names-checkbox" checked />
+        <span>Hide Eliminated City Names</span>
+      </label>
+      <label class="checkbox">
         <input type="checkbox" id="info-mode-checkbox" />
         <span>Info Mode</span>
-      </div>
-                <div class="row" >
+      </label>
+      <label class="checkbox">
         <input type="checkbox" id="hide-names-checkbox" />
         <span>Hide Empire Names</span>
+      </label>
+      <label class="checkbox">
+        <input type="checkbox" id="magnifier-checkbox" />
+        <span>Magnifying Glass</span>
+      </label>
+      <label class="checkbox">
+        <input type="checkbox" id="perf-monitor-checkbox" />
+        <span>Show Performance Monitor</span>
+      </label>
     </div>
-
-    </div>
-
+  </div>
 </details>
 
 
@@ -963,22 +1212,23 @@ details.section.is-hidden{ display: none; }
     <span class="help-icon" data-help="leaderboard">?</span>
   </summary>
 
-  <div class="section-body stack" style="margin-top:8px; gap:8px;">
-    <table id="leaderboard-table" style="width:100%; border-collapse:collapse;">
-      <thead>
-        <tr>
-          <th style="text-align:left; padding:4px 6px;">#</th>
-          <th style="text-align:left; padding:4px 6px;">Empire</th>
-          <th style="text-align:right; padding:4px 6px;">Cells</th>
-          <th style="text-align:right; padding:4px 6px;">Power</th>
-        </tr>
-      </thead>
-      <tbody><!-- rows are filled by JS --></tbody>
-    </table>
-
-    <div class="row" style="gap:8px;">
-      <button id="export-leaderboard-btn" class="btn-secondary">Export Leaderboard .csv</button>
+  <div class="section-body stack">
+    <div style="max-height:400px; overflow:auto; border-radius:8px;">
+      <table id="leaderboard-table" style="font-size:12px;">
+        <thead>
+          <tr>
+            <th style="text-align:left; width:24px;">#</th>
+            <th data-sort="name" style="text-align:left; cursor:pointer; user-select:none;">Empire</th>
+            <th data-sort="cells" style="text-align:right; width:48px; cursor:pointer; user-select:none;">Cells</th>
+            <th data-sort="agri" style="text-align:right; width:48px; cursor:pointer; user-select:none;">Agri</th>
+            <th data-sort="trade" style="text-align:right; width:48px; cursor:pointer; user-select:none;">Trade</th>
+            <th data-sort="power" style="text-align:right; width:48px; cursor:pointer; user-select:none;">Power</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
+    <button id="export-leaderboard-btn" class="btn-secondary">Export .csv</button>
   </div>
 </details>
 
@@ -990,15 +1240,36 @@ details.section.is-hidden{ display: none; }
   </div>
 </main>
 
+<!-- Performance Monitor Overlay -->
+<div id="perf-monitor">
+  <div class="perf-title">Performance</div>
+  <div class="perf-row"><span class="perf-label">Steps/sec:</span><span class="perf-value" id="perf-sps">--</span></div>
+  <div class="perf-row"><span class="perf-label">Sim step:</span><span class="perf-value" id="perf-sim">-- ms</span></div>
+  <div class="perf-row"><span class="perf-label">Render:</span><span class="perf-value" id="perf-render">-- ms</span></div>
+  <div class="perf-row"><span class="perf-label">Cost maps:</span><span class="perf-value" id="perf-costmap">-- ms</span></div>
+</div>
+
   <script src="js/grid.js"></script>
   <script src="js/renderer.js"></script>
   <script src="js/empires.js"></script>
+  <script src="js/trade.js?v=1"></script>
+  <script src="js/state.js"></script>
+  <script src="js/pathfinding.js"></script>
+  <script src="js/performance.js"></script>
+  <script src="js/canvas-setup.js"></script>
+  <script src="js/painting.js"></script>
+  <script src="js/rendering-main.js"></script>
+  <script src="js/import-export.js"></script>
+  <script src="js/simulation.js"></script>
+  <script src="js/auction.js"></script>
+  <script src="js/magnifier.js"></script>
+  <script src="js/ui-controls.js"></script>
   <script src="js/main.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const tabButtons = Array.from(document.querySelectorAll('#panel-tabs [data-tab]'));
-  const sectionIds = ['sec-empires','sec-terrain','sec-value','sec-optimization','sec-settings','sec-leaderboard'];
+  const sectionIds = ['sec-empires', 'sec-trade', 'sec-terrain','sec-value','sec-settings','sec-leaderboard'];
   const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
   const hintEl = document.getElementById('panel-hint');
 
@@ -1010,10 +1281,11 @@ document.getElementById('tab-leaderboard')?.addEventListener('click', () => wind
   // Short pedagogical hints per tab
   const HINTS = {
     'sec-empires':       'Add empires or load from file, adjust their travel costs.',
-    'sec-terrain':       'Load or paint terrain.',
-    'sec-value':         'Load land value map, adjust global values or paint value. Empires favor high-value cells.',
-    'sec-optimization':  'Let empires optimize placement, sliders or both to maximize land value.',
-    'sec-settings':      'Global empire settings, canvas, grid lines, info mode.'
+    'sec-trade':         'View and configure trade routes between empires.',
+    'sec-terrain':       'Load or paint terrain maps.',
+    'sec-value':         'Configure land values. Empires favor high-value cells.',
+    'sec-settings':      'Simulation parameters, travel costs, and display options.',
+    'sec-leaderboard':   'View empire rankings by territory and power.'
   };
 
   function setAria(btn, selected){
@@ -1037,6 +1309,9 @@ document.getElementById('tab-leaderboard')?.addEventListener('click', () => wind
 
       // If we just opened Leaderboard, (re)build it now
   if (id === 'sec-leaderboard') { window.renderLeaderboard?.(); }
+
+  if (id === 'sec-trade') window.activateTradeView?.();
+else window.deactivateTradeView?.();
 
     // Remember
     try { localStorage.setItem('activePanel', id); } catch {}
