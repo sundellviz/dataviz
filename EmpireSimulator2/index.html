@@ -2,6 +2,12 @@
 <html lang="en">
 <head>
 
+    <script>
+    if (window.self !== window.top) {
+      window.top.location.href = window.self.location.href;
+    }
+  </script>
+
   <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self' sundellviz.github.io">
 
 <!-- Google tag (gtag.js) -->
