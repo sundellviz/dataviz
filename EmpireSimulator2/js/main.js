@@ -66,6 +66,13 @@
     if (typeof window.initCitiesMenu === 'function') window.initCitiesMenu();
     if (typeof window.initImportExportButtons === 'function') window.initImportExportButtons();
 
+    // Auto-load Europe terrain on startup
+    const terrainMenu = document.getElementById('terrain-menu');
+    if (terrainMenu) {
+      terrainMenu.value = 'europe.txt';
+      terrainMenu.dispatchEvent(new Event('change'));
+    }
+
     // Setup tooltip for info mode
     const tooltip = document.createElement('div');
     tooltip.style.position = 'absolute';
